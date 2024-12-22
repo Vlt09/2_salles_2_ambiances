@@ -1,15 +1,46 @@
-cmake_minimum_required(VERSION 3.5.0)
-project(2s2a VERSION 0.1.0 LANGUAGES C CXX)
+cmake_minimum_required(VERSION 3.10)
 cmake_policy(SET CMP0072 NEW)
 
-find_package(OpenGL REQUIRED)
+project(2_SALLES_2_AMBIANCES)
 
-add_executable(2s2a src/main.cpp 
-src/third-party/glad/include/glad/glad.h 
-src/third-party/glad/src/glad.c
-src/include/App.hpp
-src/App.cpp
-)
+# Set the folder where the executables are created
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 
-target_link_libraries(2s2a glfw)
+# Include glimac
+add_subdirectory(glimac)
 
+#file(GLOB TP_DIRECTORIES "TP*")
+
+message(WARNING "Configuring")
+add_subdirectory(src)
+	# get_filename_component(DIRN ${TP} NAME)
+    # add_custom_target(${DIRN} COMMAND cd ${CMAKE_CURRENT_BINARY_DIR}/${DIRN} COMMAND make
+    #             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${DIRN})
+
+# Create a target for each TP
+# function(setup_tp TP_NUMBER)    
+#     set(TARGET_NAME ${TP_NUMBER}_exe)
+#     add_executable(${TARGET_NAME})
+#     target_compile_features(${TARGET_NAME} PRIVATE cxx_std_11)
+
+#     if (MSVC)
+#         target_compile_options(${TARGET_NAME} PRIVATE /WX /W3)
+#     else()
+#         target_compile_options(${TARGET_NAME} PRIVATE -Werror -W -Wall -Wextra -Wpedantic -pedantic-errors)
+#     endif()
+    
+#     target_include_directories(${TARGET_NAME} PRIVATE ${TP_NUMBER})
+#     file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS ${TP_NUMBER}/*)
+#     target_sources(${TARGET_NAME} PRIVATE ${MY_SOURCES})
+
+#     target_link_libraries(${TARGET_NAME} glimac)
+
+#     include("CMakeUtils/files_and_folders.cmake")
+#     Cool__target_copy_folder(${TARGET_NAME} assets)
+#     Cool__target_copy_folder(${TARGET_NAME} ${TP_NUMBER}/shaders)
+# endfunction(setup_tp)
+
+# setup_tp(TP1)
+# setup_tp(TP2)
+# setup_tp(TP3)
+# setup_tp(TP4)
