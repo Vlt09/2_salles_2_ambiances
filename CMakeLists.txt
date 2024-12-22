@@ -7,6 +7,8 @@ find_package(OpenGL REQUIRED)
 add_executable(2s2a src/main.cpp 
 src/third-party/glad/include/glad/glad.h 
 src/third-party/glad/src/glad.c
+src/include/App.hpp
+src/App.cpp
 )
 
 target_link_libraries(2s2a glfw)
