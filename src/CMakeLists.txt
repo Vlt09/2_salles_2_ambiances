@@ -1,10 +1,10 @@
 file(GLOB HEADER_FILES *.hpp)
 file(GLOB EXT_SRC_FILES [^e][^x]*.cpp)
-file(GLOB EXE_SRC_FILES ex[^\#]*.cpp)
+file(GLOB SRC_FILES *.cpp)
 #file(GLOB_RECURSE SHADER_FILES *.glsl)
-list(REMOVE_ITEM EXT_SRC_FILES ${EXE_SRC_FILES})
+list(REMOVE_ITEM EXT_SRC_FILES ${SRC_FILES})
 
-foreach(EXE_SRC_FILE ${EXE_SRC_FILES})
+foreach(EXE_SRC_FILE ${SRC_FILES})
 	get_filename_component(FILE ${EXE_SRC_FILE} NAME_WE)
 	get_filename_component(DIR ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 
