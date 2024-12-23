@@ -1,7 +1,7 @@
 #define GLFW_INCLUDE_NONE
+#include "include/Sphere.hpp"
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
-#include <glimac/Sphere.hpp>
 #include <glimac/glm.hpp>
 #include <glimac/Program.hpp>
 #include <glimac/FilePath.hpp>
@@ -82,13 +82,13 @@ int main(int argc, char *argv[])
     glfwSetCursorPosCallback(window, &cursor_position_callback);
     glfwSetWindowSizeCallback(window, &size_callback);
 
-    glimac::Sphere sphere(1, 32, 16);
+    Sphere sphere(1, 32, 16);
 
     GLuint vbo;
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     auto vertices = sphere.getDataPointer();
-    glBufferData(GL_ARRAY_BUFFER, sphere.getVertexCount() * sizeof(glimac::ShapeVertex), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sphere.getVertexCount() * sizeof(glimac::Geometry::Vertex), vertices, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     GLuint vao;
@@ -100,9 +100,9 @@ int main(int argc, char *argv[])
     const GLuint VERTEX_ATTR_TEX = 3;
     glEnableVertexAttribArray(VERTEX_ATTR_POSITION);
     glEnableVertexAttribArray(VERTEX_ATTR_NORMAL);
-    glVertexAttribPointer(VERTEX_ATTR_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(glimac::ShapeVertex), offsetof(glimac::ShapeVertex, position));
-    glVertexAttribPointer(VERTEX_ATTR_NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(glimac::ShapeVertex), (GLvoid *)offsetof(glimac::ShapeVertex, normal));
-    glVertexAttribPointer(VERTEX_ATTR_TEX, 3, GL_FLOAT, GL_FALSE, sizeof(glimac::ShapeVertex), (GLvoid *)offsetof(glimac::ShapeVertex, texCoords));
+    glVertexAttribPointer(VERTEX_ATTR_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(glimac::Geometry::Vertex), offsetof(glimac::Geometry::Vertex, m_Position));
+    glVertexAttribPointer(VERTEX_ATTR_NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(glimac::Geometry::Vertex), (GLvoid *)offsetof(glimac::Geometry::Vertex, m_Normal));
+    glVertexAttribPointer(VERTEX_ATTR_TEX, 3, GL_FLOAT, GL_FALSE, sizeof(glimac::Geometry::Vertex), (GLvoid *)offsetof(glimac::Geometry::Vertex, m_TexCoords));
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 

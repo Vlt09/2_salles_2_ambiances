@@ -2,7 +2,7 @@ file(GLOB HEADER_FILES *.hpp)
 file(GLOB EXT_SRC_FILES [^e][^x]*.cpp)
 file(GLOB SRC_FILES *.cpp)
 #file(GLOB_RECURSE SHADER_FILES *.glsl)
-list(REMOVE_ITEM EXT_SRC_FILES ${SRC_FILES})
+#list(REMOVE_ITEM EXT_SRC_FILES ${SRC_FILES})
 
 foreach(EXE_SRC_FILE ${SRC_FILES})
 	get_filename_component(FILE ${EXE_SRC_FILE} NAME_WE)
