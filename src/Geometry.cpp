@@ -1,13 +1,13 @@
-#include "glimac/Geometry.hpp"
-#include "tiny_obj_loader.h"
+#include "include/Geometry.hpp"
+#include <glimac/src/tiny_obj_loader.h>
 #include <iostream>
 #include <algorithm>
 
-namespace glimac {
-
-void Geometry::generateNormals(unsigned int meshIndex) {
+void Geometry::generateNormals(unsigned int meshIndex)
+{
     auto indexOffset = m_MeshBuffer[meshIndex].m_nIndexOffset;
-    for (auto j = 0u; j < m_MeshBuffer[meshIndex].m_nIndexCount; j += 3) {
+    for (auto j = 0u; j < m_MeshBuffer[meshIndex].m_nIndexCount; j += 3)
+    {
         auto i1 = m_IndexBuffer[indexOffset + j];
         auto i2 = m_IndexBuffer[indexOffset + j + 1];
         auto i3 = m_IndexBuffer[indexOffset + j + 2];
@@ -21,26 +21,29 @@ void Geometry::generateNormals(unsigned int meshIndex) {
     }
 }
 
-bool Geometry::loadOBJ(const FilePath& filepath, const FilePath& mtlBasePath, bool loadTextures) {
+bool Geometry::loadOBJ(const glimac::FilePath &filepath, const glimac::FilePath &mtlBasePath, bool loadTextures)
+{
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> materials;
 
     std::clog << "Load OBJ " << filepath << std::endl;
     std::string objErr = tinyobj::LoadObj(shapes, materials,
-        filepath.c_str(), mtlBasePath.c_str());
+                                          filepath.c_str(), mtlBasePath.c_str());
 
     std::clog << "done." << std::endl;
 
-    if (!objErr.empty()) {
+    if (!objErr.empty())
+    {
         std::cerr << objErr << std::endl;
         return false;
     }
 
     std::clog << "Load materials" << std::endl;
     m_Materials.reserve(m_Materials.size() + materials.size());
-    for(auto& material: materials) {
+    for (auto &material : materials)
+    {
         m_Materials.emplace_back();
-        auto& m = m_Materials.back();
+        auto &m = m_Materials.back();
 
         m.m_Ka = glm::vec3(material.ambient[0], material.ambient[1], material.ambient[2]);
         m.m_Kd = glm::vec3(material.diffuse[0], material.diffuse[1], material.diffuse[2]);
@@ -51,33 +54,38 @@ bool Geometry::loadOBJ(const FilePath& filepath, const FilePath& mtlBasePath, bo
         m.m_RefractionIndex = material.ior;
         m.m_Dissolve = material.dissolve;
 
-        if(loadTextures) {
-            if(!material.ambient_texname.empty()) {
-                //std::replace(material.ambient_texname.begin(), material.ambient_texname.end(), '\\', '/');
-                FilePath texturePath = mtlBasePath + material.ambient_texname;
+        if (loadTextures)
+        {
+            if (!material.ambient_texname.empty())
+            {
+                // std::replace(material.ambient_texname.begin(), material.ambient_texname.end(), '\\', '/');
+                glimac::FilePath texturePath = mtlBasePath + material.ambient_texname;
                 std::clog << "load " << texturePath << std::endl;
-                m.m_pKaMap = ImageManager::loadImage(texturePath);
+                m.m_pKaMap = glimac::ImageManager::loadImage(texturePath);
             }
 
-            if(!material.diffuse_texname.empty()) {
-                //std::replace(material.diffuse_texname.begin(), material.diffuse_texname.end(), '\\', '/');
-                FilePath texturePath = mtlBasePath + material.diffuse_texname;
+            if (!material.diffuse_texname.empty())
+            {
+                // std::replace(material.diffuse_texname.begin(), material.diffuse_texname.end(), '\\', '/');
+                glimac::FilePath texturePath = mtlBasePath + material.diffuse_texname;
                 std::clog << "load " << texturePath << std::endl;
-                m.m_pKdMap = ImageManager::loadImage(texturePath);
+                m.m_pKdMap = glimac::ImageManager::loadImage(texturePath);
             }
 
-            if(!material.specular_texname.empty()) {
-                //std::replace(material.specular_texname.begin(), material.specular_texname.end(), '\\', '/');
-                FilePath texturePath = mtlBasePath + material.specular_texname;
+            if (!material.specular_texname.empty())
+            {
+                // std::replace(material.specular_texname.begin(), material.specular_texname.end(), '\\', '/');
+                glimac::FilePath texturePath = mtlBasePath + material.specular_texname;
                 std::clog << "load " << texturePath << std::endl;
-                m.m_pKsMap = ImageManager::loadImage(texturePath);
+                m.m_pKsMap = glimac::ImageManager::loadImage(texturePath);
             }
 
-            if(!material.normal_texname.empty()) {
-                //std::replace(material.normal_texname.begin(), material.normal_texname.end(), '\\', '/');
-                FilePath texturePath = mtlBasePath + material.normal_texname;
+            if (!material.normal_texname.empty())
+            {
+                // std::replace(material.normal_texname.begin(), material.normal_texname.end(), '\\', '/');
+                glimac::FilePath texturePath = mtlBasePath + material.normal_texname;
                 std::clog << "load " << texturePath << std::endl;
-                m.m_pNormalMap = ImageManager::loadImage(texturePath);
+                m.m_pNormalMap = glimac::ImageManager::loadImage(texturePath);
             }
         }
     }
@@ -88,7 +96,8 @@ bool Geometry::loadOBJ(const FilePath& filepath, const FilePath& mtlBasePath, bo
 
     auto nbVertex = 0u;
     auto nbIndex = 0u;
-    for (const auto& shape: shapes) {
+    for (const auto &shape : shapes)
+    {
         nbVertex += shape.mesh.positions.size();
         nbIndex += shape.mesh.indices.size();
     }
@@ -97,21 +106,23 @@ bool Geometry::loadOBJ(const FilePath& filepath, const FilePath& mtlBasePath, bo
     std::clog << "Number of vertices: " << nbVertex << std::endl;
     std::clog << "Number of triangles: " << (nbIndex) / 3 << std::endl;
 
-    m_BBox = BBox3f(glm::vec3(shapes[0].mesh.positions[0], shapes[0].mesh.positions[1], shapes[0].mesh.positions[2]));
+    m_BBox = glimac::BBox3f(glm::vec3(shapes[0].mesh.positions[0], shapes[0].mesh.positions[1], shapes[0].mesh.positions[2]));
 
     m_VertexBuffer.resize(m_VertexBuffer.size() + nbVertex);
     m_IndexBuffer.resize(m_IndexBuffer.size() + nbIndex);
 
-    auto pVertex = (Vertex*) m_VertexBuffer.data() + globalVertexOffset;
-    auto pIndex = (unsigned int*) m_IndexBuffer.data() + globalIndexOffset;
+    auto pVertex = (Vertex *)m_VertexBuffer.data() + globalVertexOffset;
+    auto pIndex = (unsigned int *)m_IndexBuffer.data() + globalIndexOffset;
 
     m_MeshBuffer.reserve(m_MeshBuffer.size() + shapes.size());
 
     auto vertexOffset = globalVertexOffset;
     auto indexOffset = globalIndexOffset;
-    for (size_t i = 0; i < shapes.size(); i++) {
+    for (size_t i = 0; i < shapes.size(); i++)
+    {
         auto pVertexTmp = pVertex;
-        for (auto j = 0u; j < shapes[i].mesh.positions.size(); j += 3) {
+        for (auto j = 0u; j < shapes[i].mesh.positions.size(); j += 3)
+        {
             pVertexTmp->m_Position.x = shapes[i].mesh.positions[j];
             pVertexTmp->m_Position.y = shapes[i].mesh.positions[j + 1];
             pVertexTmp->m_Position.z = shapes[i].mesh.positions[j + 2];
@@ -121,43 +132,55 @@ bool Geometry::loadOBJ(const FilePath& filepath, const FilePath& mtlBasePath, bo
             ++pVertexTmp;
         }
         pVertexTmp = pVertex;
-        if(shapes[i].mesh.normals.size()) {
-            for (auto j = 0u; j < shapes[i].mesh.normals.size(); j += 3) {
+        if (shapes[i].mesh.normals.size())
+        {
+            for (auto j = 0u; j < shapes[i].mesh.normals.size(); j += 3)
+            {
                 pVertexTmp->m_Normal.x = shapes[i].mesh.normals[j];
                 pVertexTmp->m_Normal.y = shapes[i].mesh.normals[j + 1];
                 pVertexTmp->m_Normal.z = shapes[i].mesh.normals[j + 2];
                 ++pVertexTmp;
             }
-        } else {
+        }
+        else
+        {
             // should create normals from triangles...
         }
         pVertexTmp = pVertex;
-        if(shapes[i].mesh.texcoords.size()) {
-            for (auto j = 0u; j < shapes[i].mesh.texcoords.size(); j += 2) {
+        if (shapes[i].mesh.texcoords.size())
+        {
+            for (auto j = 0u; j < shapes[i].mesh.texcoords.size(); j += 2)
+            {
                 pVertexTmp->m_TexCoords.x = shapes[i].mesh.texcoords[j];
                 pVertexTmp->m_TexCoords.y = shapes[i].mesh.texcoords[j + 1];
                 ++pVertexTmp;
             }
-        } else {
-            for (auto j = 0u; j < shapes[i].mesh.texcoords.size(); j += 2) {
-                pVertexTmp->m_TexCoords.x =  0.f;
-                pVertexTmp->m_TexCoords.x =  0.f;
+        }
+        else
+        {
+            for (auto j = 0u; j < shapes[i].mesh.texcoords.size(); j += 2)
+            {
+                pVertexTmp->m_TexCoords.x = 0.f;
+                pVertexTmp->m_TexCoords.x = 0.f;
                 ++pVertexTmp;
             }
         }
 
-        for (auto j = 0u; j < shapes[i].mesh.indices.size(); ++j) {
+        for (auto j = 0u; j < shapes[i].mesh.indices.size(); ++j)
+        {
             pIndex[j] = vertexOffset + shapes[i].mesh.indices[j];
         }
 
         int materialIndex = -1;
-        if(!shapes[i].mesh.material_ids.empty()) {
+        if (!shapes[i].mesh.material_ids.empty())
+        {
             materialIndex = shapes[i].mesh.material_ids[0];
         }
 
         m_MeshBuffer.emplace_back(shapes[i].name, indexOffset, shapes[i].mesh.indices.size(), materialIndex);
 
-        if(shapes[i].mesh.normals.size() == 0u) {
+        if (shapes[i].mesh.normals.size() == 0u)
+        {
             generateNormals(m_MeshBuffer.size() - 1);
         }
 
@@ -168,6 +191,4 @@ bool Geometry::loadOBJ(const FilePath& filepath, const FilePath& mtlBasePath, bo
     }
 
     return true;
-}
-
 }

@@ -2,14 +2,14 @@
 #include <vector>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <glimac/Geometry.hpp>
+#include "include/Geometry.hpp"
 #include <glimac/common.hpp>
 
-using Vertex = glimac::Geometry::Vertex;
+using Vertex = Geometry::Vertex;
 
 // Représente une sphère discrétisée centrée en (0, 0, 0) (dans son repère local)
 // Son axe vertical est (0, 1, 0) et ses axes transversaux sont (1, 0, 0) et (0, 0, 1)
-class Sphere : public glimac::Geometry
+class Sphere : public Geometry
 {
     // Alloue et construit les données (implantation dans le .cpp)
     void build(GLfloat r, GLsizei discLat, GLsizei discLong)
@@ -89,7 +89,7 @@ public:
     }
 
     // Renvoit le pointeur vers les données
-    const glimac::Geometry::Vertex *getDataPointer() const
+    const Geometry::Vertex *getDataPointer() const
     {
         return &this->m_VertexBuffer[0];
     }

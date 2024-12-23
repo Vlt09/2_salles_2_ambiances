@@ -1,6 +1,6 @@
 #pragma once
 #include <list>
-#include <glimac/Geometry.hpp>
+#include "include/Geometry.hpp"
 
 class Scene
 {

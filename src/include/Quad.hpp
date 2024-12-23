@@ -1,6 +1,6 @@
 #pragma once
 #include <GLFW/glfw3.h>
-#include <glimac/Geometry.hpp>
+#include "include/Geometry.hpp"
 
 class Quad : glimac::Geometry
 {
