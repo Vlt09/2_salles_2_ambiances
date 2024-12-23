@@ -16,9 +16,9 @@ class Renderer
 private:
     Camera camera;
 
-    glimac::Program shaderProgramm;
-    glm::mat4 projectionMatrix;
-    glm::mat4 viewMatrix;
+    glimac::Program _shaderProgramm;
+    glm::mat4 _projectionMatrix;
+    glm::mat4 _viewMatrix;
 
 public:
     Renderer(/* args */);
