@@ -81,11 +81,39 @@ class Sphere : public Geometry
         // par un Index Buffer Object, que nous verrons dans les prochains TDs
     }
 
+    void initMesh()
+    {
+        Geometry::Mesh mesh("sphere", 0, this->m_VertexBuffer.size(), -1);
+        const GLuint VERTEX_ATTR_POSITION = 1;
+        const GLuint VERTEX_ATTR_NORMAL = 2;
+        const GLuint VERTEX_ATTR_TEX = 3;
+
+        glGenBuffers(1, &mesh.vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
+        glBufferData(GL_ARRAY_BUFFER, this->m_VertexBuffer.size() * sizeof(Geometry::Vertex), this->getVertexBuffer(), GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        glGenVertexArrays(1, &mesh.vao);
+        glBindVertexArray(mesh.vao);
+        glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
+        glEnableVertexAttribArray(VERTEX_ATTR_POSITION);
+        glEnableVertexAttribArray(VERTEX_ATTR_NORMAL);
+        glVertexAttribPointer(VERTEX_ATTR_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(Geometry::Vertex), offsetof(Geometry::Vertex, m_Position));
+        glVertexAttribPointer(VERTEX_ATTR_NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(Geometry::Vertex), (GLvoid *)offsetof(Geometry::Vertex, m_Normal));
+        glVertexAttribPointer(VERTEX_ATTR_TEX, 3, GL_FLOAT, GL_FALSE, sizeof(Geometry::Vertex), (GLvoid *)offsetof(Geometry::Vertex, m_TexCoords));
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+
+        this->m_MeshBuffer.emplace_back(std::move(mesh));
+    }
+
 public:
     // Constructeur: alloue le tableau de données et construit les attributs des vertex
     Sphere(GLfloat radius, GLsizei discLat, GLsizei discLong) : m_nVertexCount(0)
     {
         build(radius, discLat, discLong); // Construction (voir le .cpp)
+        initMesh();
+        translateModel(0.f, 0.f, -5.f);
     }
 
     // Renvoit le pointeur vers les données

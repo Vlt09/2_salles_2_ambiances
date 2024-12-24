@@ -1,5 +1,7 @@
 #define GLFW_INCLUDE_NONE
+#include "include/Renderer.hpp"
 #include "include/Sphere.hpp"
+#include "include/Room.h"
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 #include <glimac/glm.hpp>
@@ -82,33 +84,41 @@ int main(int argc, char *argv[])
     glfwSetCursorPosCallback(window, &cursor_position_callback);
     glfwSetWindowSizeCallback(window, &size_callback);
 
+    auto mv_matrix = glm::translate(glm::mat4(1), glm::vec3(0., 0., -5.));
+    glm::mat4 proj_matrix = glm::perspective(glm::radians(70.f), (float)window_width / window_height, 0.1f, 100.f);
+    auto normal_matrix = glm::transpose(glm::inverse(mv_matrix));
+    auto viewMatrix = glm::mat4(1);
+
+    Room::UniformMatrix uniformMatrix;
+
+    uniformMatrix.uMVPMatrix = mvp_loc;
+    uniformMatrix.uMVMatrix = mv_loc;
+    uniformMatrix.uNormalMatrix = normal_loc;
+
+    Renderer renderer(proj_matrix, viewMatrix);
     Sphere sphere(1, 32, 16);
 
-    GLuint vbo;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    auto vertices = sphere.getDataPointer();
-    glBufferData(GL_ARRAY_BUFFER, sphere.getVertexCount() * sizeof(Geometry::Vertex), vertices, GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    // GLuint vbo;
+    // glGenBuffers(1, &vbo);
+    // glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    // auto vertices = sphere.getDataPointer();
+    // glBufferData(GL_ARRAY_BUFFER, sphere.getVertexCount() * sizeof(Geometry::Vertex), vertices, GL_STATIC_DRAW);
+    // glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    const GLuint VERTEX_ATTR_POSITION = 1;
-    const GLuint VERTEX_ATTR_NORMAL = 2;
-    const GLuint VERTEX_ATTR_TEX = 3;
-    glEnableVertexAttribArray(VERTEX_ATTR_POSITION);
-    glEnableVertexAttribArray(VERTEX_ATTR_NORMAL);
-    glVertexAttribPointer(VERTEX_ATTR_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(Geometry::Vertex), offsetof(Geometry::Vertex, m_Position));
-    glVertexAttribPointer(VERTEX_ATTR_NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(Geometry::Vertex), (GLvoid *)offsetof(Geometry::Vertex, m_Normal));
-    glVertexAttribPointer(VERTEX_ATTR_TEX, 3, GL_FLOAT, GL_FALSE, sizeof(Geometry::Vertex), (GLvoid *)offsetof(Geometry::Vertex, m_TexCoords));
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
-    auto mv_matrix = glm::translate(glm::mat4(1), glm::vec3(0., 0., -5.));
-    auto proj_matrix = glm::perspective(glm::radians(70.f), (float)window_width / window_height, 0.1f, 100.f);
-    auto normal_matrix = glm::transpose(glm::inverse(mv_matrix));
+    // GLuint vao;
+    // glGenVertexArrays(1, &vao);
+    // glBindVertexArray(vao);
+    // glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    // const GLuint VERTEX_ATTR_POSITION = 1;
+    // const GLuint VERTEX_ATTR_NORMAL = 2;
+    // const GLuint VERTEX_ATTR_TEX = 3;
+    // glEnableVertexAttribArray(VERTEX_ATTR_POSITION);
+    // glEnableVertexAttribArray(VERTEX_ATTR_NORMAL);
+    // glVertexAttribPointer(VERTEX_ATTR_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(Geometry::Vertex), offsetof(Geometry::Vertex, m_Position));
+    // glVertexAttribPointer(VERTEX_ATTR_NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(Geometry::Vertex), (GLvoid *)offsetof(Geometry::Vertex, m_Normal));
+    // glVertexAttribPointer(VERTEX_ATTR_TEX, 3, GL_FLOAT, GL_FALSE, sizeof(Geometry::Vertex), (GLvoid *)offsetof(Geometry::Vertex, m_TexCoords));
+    // glBindBuffer(GL_ARRAY_BUFFER, 0);
+    // glBindVertexArray(0);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -116,18 +126,20 @@ int main(int argc, char *argv[])
         glClearColor(1.f, 0.5f, 0.5f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glUniformMatrix4fv(mvp_loc, 1, GL_FALSE, glm::value_ptr(proj_matrix * mv_matrix));
-        glUniformMatrix4fv(mv_loc, 1, GL_FALSE, glm::value_ptr(mv_matrix));
-        glUniformMatrix4fv(normal_loc, 1, GL_FALSE, glm::value_ptr(normal_matrix));
+        // glUniformMatrix4fv(mvp_loc, 1, GL_FALSE, glm::value_ptr(proj_matrix * mv_matrix));
+        // glUniformMatrix4fv(mv_loc, 1, GL_FALSE, glm::value_ptr(mv_matrix));
+        // glUniformMatrix4fv(normal_loc, 1, GL_FALSE, glm::value_ptr(normal_matrix));
 
-        glBindVertexArray(vao);
-        glDrawArrays(GL_TRIANGLES, 0, sphere.getVertexCount());
-        GLenum err = glGetError();
-        if (err != GL_NO_ERROR)
-        {
-            std::cerr << "OpenGL error: " << err << std::endl;
-        }
-        glBindVertexArray(0);
+        renderer.render(sphere, uniformMatrix, mv_matrix);
+
+        // glBindVertexArray(sphere.getMeshBuffer()->vao);
+        // glDrawArrays(GL_TRIANGLES, 0, sphere.getVertexCount());
+        // GLenum err = glGetError();
+        // if (err != GL_NO_ERROR)
+        // {
+        //     std::cerr << "OpenGL error: " << err << std::endl;
+        // }
+        // glBindVertexArray(0);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);

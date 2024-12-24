@@ -51,14 +51,15 @@ public:
 
 private:
     std::vector<unsigned int> m_IndexBuffer;
-    std::vector<Mesh> m_MeshBuffer;
     std::vector<Material> m_Materials;
     glimac::BBox3f m_BBox;
 
     void generateNormals(unsigned int meshIndex);
 
 protected:
+    std::vector<Mesh> m_MeshBuffer;
     std::vector<Vertex> m_VertexBuffer;
+    glm::mat4 _modelMatrix = glm::mat4(1);
 
 public:
     const Vertex *getVertexBuffer() const
@@ -97,4 +98,15 @@ public:
     {
         return m_BBox;
     }
+
+    const glm::mat4 &getModelMatrix() const
+    {
+        return _modelMatrix;
+    }
+
+    void translateModel(float sx = 0.f, float sy = 0.f, float sz = 0.f);
+
+    void scaleModel(float sx = 1.f, float sy = 1.f, float sz = 1.f);
+
+    void rotateModel(float angle, glm::vec3 axis);
 };

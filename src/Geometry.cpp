@@ -192,3 +192,18 @@ bool Geometry::loadOBJ(const glimac::FilePath &filepath, const glimac::FilePath 
 
     return true;
 }
+
+void Geometry::translateModel(float sx, float sy, float sz)
+{
+    _modelMatrix = glm::translate(_modelMatrix, glm::vec3(sx, sy, sz));
+}
+
+void Geometry::scaleModel(float sx, float sy, float sz)
+{
+    _modelMatrix = glm::scale(_modelMatrix, glm::vec3(sx, sy, sz));
+}
+
+void Geometry::rotateModel(float angle, glm::vec3 axis)
+{
+    _modelMatrix = glm::rotate(_modelMatrix, angle, axis);
+}

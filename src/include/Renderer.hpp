@@ -13,13 +13,15 @@
 class Renderer
 {
 private:
-    glimac::Program _shaderProgramm;
-    glm::mat4 _projectionMatrix;
+    glimac::Program _shaderProgram;
+    glm::highp_mat4 _projectionMatrix;
     glm::mat4 _viewMatrix;
 
 public:
     Renderer(/* args */);
-    ~Renderer();
+    Renderer(const Renderer &renderer);
+
+    Renderer(glm::highp_mat4 &projMatrix, glm::mat4 &viewMatrix);
 
     /**
      * @brief Renders a 3D object in the scene.
