@@ -20,12 +20,21 @@ void Renderer::render(const Geometry &object, Room::UniformMatrix uniformMatrix,
     glUniformMatrix4fv(uniformMatrix.uMVMatrix, 1, GL_FALSE, glm::value_ptr(mv_matrix));
     glUniformMatrix4fv(uniformMatrix.uNormalMatrix, 1, GL_FALSE, glm::value_ptr(normal_matrix));
 
-    glBindVertexArray(object.getMeshBuffer()->vao);
-    glDrawArrays(GL_TRIANGLES, 0, object.getVertexCount());
-    GLenum err = glGetError();
-    if (err != GL_NO_ERROR)
+    // glBindVertexArray(object.getMeshBuffer()->vao);
+    // glDrawArrays(GL_TRIANGLES, 0, object.getVertexCount());
+    // GLenum err = glGetError();
+    // if (err != GL_NO_ERROR)
+    // {
+    //     std::cerr << "OpenGL error: " << err << std::endl;
+    // }
+    // glBindVertexArray(0);
+    auto meshBuff = object.getMeshBuffer();
+    auto meshCount = object.getMeshCount();
+    for (size_t i = 0; i < meshCount; i++)
     {
-        std::cerr << "OpenGL error: " << err << std::endl;
+        auto currentMesh = meshBuff[i];
+        glBindVertexArray(currentMesh.vao);
+        glDrawArrays(GL_TRIANGLES, 0, currentMesh.m_nIndexCount);
+        glBindVertexArray(0);
     }
-    glBindVertexArray(0);
 }

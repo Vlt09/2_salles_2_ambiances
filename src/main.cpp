@@ -1,6 +1,7 @@
 #define GLFW_INCLUDE_NONE
 #include "include/Renderer.hpp"
 #include "include/Sphere.hpp"
+#include "include/Quad.hpp"
 #include "include/Room.h"
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
@@ -97,7 +98,9 @@ int main(int argc, char *argv[])
 
     Renderer renderer(proj_matrix, viewMatrix);
     Sphere sphere(1, 32, 16);
+    Quad quad(5, 5);
 
+    quad.rotateModel(90.f, glm::vec3(1.f, 0.f, 0.f));
     // GLuint vbo;
     // glGenBuffers(1, &vbo);
     // glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -130,7 +133,7 @@ int main(int argc, char *argv[])
         // glUniformMatrix4fv(mv_loc, 1, GL_FALSE, glm::value_ptr(mv_matrix));
         // glUniformMatrix4fv(normal_loc, 1, GL_FALSE, glm::value_ptr(normal_matrix));
 
-        renderer.render(sphere, uniformMatrix, mv_matrix);
+        renderer.render(quad, uniformMatrix, mv_matrix);
 
         // glBindVertexArray(sphere.getMeshBuffer()->vao);
         // glDrawArrays(GL_TRIANGLES, 0, sphere.getVertexCount());
