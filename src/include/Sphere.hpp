@@ -2,7 +2,7 @@
 #include <vector>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "include/Geometry.hpp"
+#include "Geometry.hpp"
 #include <glimac/common.hpp>
 
 using Vertex = Geometry::Vertex;

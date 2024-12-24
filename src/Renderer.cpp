@@ -1,6 +1,6 @@
 #include "include/Renderer.hpp"
 
-void Renderer::render(const glimac::Geometry &object, Room::UniformMatrix uniformMatrix, const glm::mat4 &modelMatrix = glm::mat4(1))
+void Renderer::render(const Geometry &object, Room::UniformMatrix uniformMatrix, const glm::mat4 &modelMatrix)
 {
     auto mv_matrix = this->_viewMatrix * modelMatrix;
     auto normal_matrix = glm::transpose(glm::inverse(mv_matrix));

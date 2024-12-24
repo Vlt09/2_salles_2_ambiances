@@ -2,7 +2,7 @@
 #include <list>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "include/Geometry.hpp"
+#include "Geometry.hpp"
 #include <glimac/Program.hpp>
 
 class Room
@@ -16,7 +16,7 @@ public:
     };
 
 private:
-    std::list<glimac::Geometry> _objects;
+    std::list<Geometry> _objects;
     glimac::Program _mProgram;
     UniformMatrix uniformMatrix;
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "include/Geometry.hpp"
+#include "Geometry.hpp"
 #include "Scene.hpp"
 #include "Room.h"
 #include <GLFW/glfw3.h>

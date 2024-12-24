@@ -1,11 +1,11 @@
 #pragma once
 #include <list>
-#include "include/Geometry.hpp"
+#include "Geometry.hpp"
 
 class Scene
 {
 private:
-    std::list<glimac::Geometry> _objects;
+    std::list<Geometry> _objects;
 
 public:
     Scene(/* args */);
