@@ -29,7 +29,7 @@ public:
         GLuint vbo, vao;
 
         bool isTransform = false;
-        glm::mat4 _transform;
+        glm::mat4 _transform = glm::mat4(1);
 
         Mesh(std::string name, unsigned int indexOffset, unsigned int indexCount, int materialIndex) : m_sName(move(name)), m_nIndexOffset(indexOffset), m_nIndexCount(indexCount), m_nMaterialIndex(materialIndex)
         {

@@ -56,4 +56,9 @@ public:
     {
         return glm::lookAt(m_Position, m_Position + m_FrontVector, normalize(m_UpVector));
     }
+
+    const glm::vec3 cameraPosition() const
+    {
+        return m_Position;
+    }
 };

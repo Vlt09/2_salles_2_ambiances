@@ -16,7 +16,7 @@ void Renderer::render(const Geometry &object, Room::UniformMatrix uniformMatrix,
     // // auto mv_matrix = modelMatrix;
     // auto normal_matrix = glm::transpose(glm::inverse(mv_matrix));
 
-    // // glUniformMatrix4fv(uniformMatrix.uMVPMatrix, 1, GL_FALSE, glm::value_ptr(this->_projectionMatrix * mv_matrix));
+    // glUniformMatrix4fv(uniformMatrix.uMVPMatrix, 1, GL_FALSE, glm::value_ptr(this->_projectionMatrix * mv_matrix));
     // glUniformMatrix4fv(uniformMatrix.uMVMatrix, 1, GL_FALSE, glm::value_ptr(mv_matrix));
     // glUniformMatrix4fv(uniformMatrix.uNormalMatrix, 1, GL_FALSE, glm::value_ptr(normal_matrix));
 
@@ -28,7 +28,6 @@ void Renderer::render(const Geometry &object, Room::UniformMatrix uniformMatrix,
         if (currentMesh.isTransform)
         {
             auto mv_matrix = this->_viewMatrix * currentMesh._transform;
-            // auto mv_matrix = modelMatrix;
             auto normal_matrix = glm::transpose(glm::inverse(mv_matrix));
 
             glUniformMatrix4fv(uniformMatrix.uMVPMatrix, 1, GL_FALSE, glm::value_ptr(this->_projectionMatrix * mv_matrix));
