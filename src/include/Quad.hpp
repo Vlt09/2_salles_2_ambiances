@@ -5,28 +5,20 @@
 
 class Quad : public Geometry
 {
+
     void build(GLfloat width, GLfloat height)
     {
-        GLfloat halfWidth = width / 2.f;
-        GLfloat halfHeight = height / 2.f;
-
-        // Define the vertices for a quad (two triangles forming a rectangle)
-        Geometry::Vertex vertices[] = {
-            {{-halfWidth, 0.f, -halfHeight}, {0.f, 1.f, 0.f}, {0.f, 0.f}}, // Bottom-left
-            {{halfWidth, 0.f, -halfHeight}, {0.f, 1.f, 0.f}, {1.f, 0.f}},  // Bottom-right
-            {{halfWidth, 0.f, halfHeight}, {0.f, 1.f, 0.f}, {1.f, 1.f}},   // Top-right
-
-            {{-halfWidth, 0.f, -halfHeight}, {0.f, 1.f, 0.f}, {0.f, 0.f}}, // Bottom-left
-            {{halfWidth, 0.f, halfHeight}, {0.f, 1.f, 0.f}, {1.f, 1.f}},   // Top-right
-            {{-halfWidth, 0.f, halfHeight}, {0.f, 1.f, 0.f}, {0.f, 1.f}}   // Top-left
-        };
-
-        m_VertexBuffer.assign(vertices, vertices + 6); // Add all vertices to the vector
+        m_VertexBuffer = QuadVertices(height, width);
     }
 
     void initMesh()
     {
-        Geometry::Mesh mesh("quad", 0, this->m_VertexBuffer.size(), -1);
+        size_t lastMeshIndex = getLastMeshIndex();
+        size_t newIndex = lastMeshIndex + this->m_VertexBuffer.size();
+
+        Geometry::Mesh mesh("quad", lastMeshIndex, newIndex, -1);
+        updateLastMeshIndex(newIndex);
+
         const GLuint VERTEX_ATTR_POSITION = 1;
         const GLuint VERTEX_ATTR_NORMAL = 2;
         const GLuint VERTEX_ATTR_TEX = 3;
@@ -58,6 +50,28 @@ public:
     {
         build(width, height);
         initMesh();
-        translateModel(0.f, 0.f, -5.f);
+        // translateModel(0.f, 0.f, -5.f);
+    }
+
+    /**
+     * @brief Defines vertices for a Quad and return vector that contains it
+     */
+    static std::vector<Geometry::Vertex> QuadVertices(GLfloat height, GLfloat width)
+    {
+        GLfloat halfWidth = width / 2.f;
+        GLfloat halfHeight = height / 2.f;
+
+        // Define the vertices for a quad (two triangles forming a rectangle)
+        std::vector<Geometry::Vertex> vertices = {
+            {{-halfWidth, 0.f, -halfHeight}, {0.f, 1.f, 0.f}, {0.f, 0.f}}, // Bottom-left
+            {{halfWidth, 0.f, -halfHeight}, {0.f, 1.f, 0.f}, {1.f, 0.f}},  // Bottom-right
+            {{halfWidth, 0.f, halfHeight}, {0.f, 1.f, 0.f}, {1.f, 1.f}},   // Top-right
+
+            {{-halfWidth, 0.f, -halfHeight}, {0.f, 1.f, 0.f}, {0.f, 0.f}}, // Bottom-left
+            {{halfWidth, 0.f, halfHeight}, {0.f, 1.f, 0.f}, {1.f, 1.f}},   // Top-right
+            {{-halfWidth, 0.f, halfHeight}, {0.f, 1.f, 0.f}, {0.f, 1.f}}   // Top-left
+        };
+
+        return vertices;
     }
 };

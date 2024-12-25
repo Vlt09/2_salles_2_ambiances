@@ -1,4 +1,5 @@
 #define GLFW_INCLUDE_NONE
+#include "include/Camera.hpp"
 #include "include/Renderer.hpp"
 #include "include/Sphere.hpp"
 #include "include/Quad.hpp"
@@ -13,8 +14,32 @@
 int window_width = 800;
 int window_height = 800;
 
-static void key_callback(GLFWwindow * /*window*/, int /*key*/, int /*scancode*/, int /*action*/, int /*mods*/)
+float last_xpos = 400;
+float last_ypos = 400;
+bool first_mouse = true;
+
+Camera camera{};
+
+static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
+    if (action == GLFW_PRESS)
+    {
+        switch (key)
+        {
+        case GLFW_KEY_W:
+            camera.moveUp(1.);
+            break;
+        case GLFW_KEY_A:
+            camera.moveLeft(1.);
+            break;
+        case GLFW_KEY_S:
+            camera.moveUp(-1.);
+            break;
+        case GLFW_KEY_D:
+            camera.moveLeft(-1.);
+            break;
+        }
+    }
 }
 
 static void mouse_button_callback(GLFWwindow * /*window*/, int /*button*/, int /*action*/, int /*mods*/)
@@ -25,8 +50,20 @@ static void scroll_callback(GLFWwindow * /*window*/, double /*xoffset*/, double 
 {
 }
 
-static void cursor_position_callback(GLFWwindow * /*window*/, double /*xpos*/, double /*ypos*/)
+static void cursor_position_callback(GLFWwindow *window, double xpos, double ypos)
 {
+    if (first_mouse)
+    {
+        last_xpos = xpos;
+        last_ypos = ypos;
+        first_mouse = false;
+    }
+
+    camera.rotateLeft(xpos - last_xpos);
+    camera.rotateUp(last_ypos - ypos);
+
+    last_xpos = xpos;
+    last_ypos = ypos;
 }
 
 static void size_callback(GLFWwindow * /*window*/, int width, int height)
@@ -88,7 +125,7 @@ int main(int argc, char *argv[])
     auto mv_matrix = glm::translate(glm::mat4(1), glm::vec3(0., 0., -5.));
     glm::mat4 proj_matrix = glm::perspective(glm::radians(70.f), (float)window_width / window_height, 0.1f, 100.f);
     auto normal_matrix = glm::transpose(glm::inverse(mv_matrix));
-    auto viewMatrix = glm::mat4(1);
+    auto viewMatrix = camera.getViewMatrix();
 
     Room::UniformMatrix uniformMatrix;
 
@@ -97,35 +134,18 @@ int main(int argc, char *argv[])
     uniformMatrix.uNormalMatrix = normal_loc;
 
     Renderer renderer(proj_matrix, viewMatrix);
+    Room room;
     Sphere sphere(1, 32, 16);
     Quad quad(5, 5);
 
-    quad.rotateModel(90.f, glm::vec3(1.f, 0.f, 0.f));
-    // GLuint vbo;
-    // glGenBuffers(1, &vbo);
-    // glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    // auto vertices = sphere.getDataPointer();
-    // glBufferData(GL_ARRAY_BUFFER, sphere.getVertexCount() * sizeof(Geometry::Vertex), vertices, GL_STATIC_DRAW);
-    // glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    // GLuint vao;
-    // glGenVertexArrays(1, &vao);
-    // glBindVertexArray(vao);
-    // glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    // const GLuint VERTEX_ATTR_POSITION = 1;
-    // const GLuint VERTEX_ATTR_NORMAL = 2;
-    // const GLuint VERTEX_ATTR_TEX = 3;
-    // glEnableVertexAttribArray(VERTEX_ATTR_POSITION);
-    // glEnableVertexAttribArray(VERTEX_ATTR_NORMAL);
-    // glVertexAttribPointer(VERTEX_ATTR_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(Geometry::Vertex), offsetof(Geometry::Vertex, m_Position));
-    // glVertexAttribPointer(VERTEX_ATTR_NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(Geometry::Vertex), (GLvoid *)offsetof(Geometry::Vertex, m_Normal));
-    // glVertexAttribPointer(VERTEX_ATTR_TEX, 3, GL_FLOAT, GL_FALSE, sizeof(Geometry::Vertex), (GLvoid *)offsetof(Geometry::Vertex, m_TexCoords));
-    // glBindBuffer(GL_ARRAY_BUFFER, 0);
-    // glBindVertexArray(0);
+    auto bounds = room.getBounds();
+    // bounds.rotateModel(90.f, glm::vec3(1.f, 0.f, 0.f));
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
+        renderer.setViewMatrix(camera.getViewMatrix());
+
         glClearColor(1.f, 0.5f, 0.5f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -133,7 +153,7 @@ int main(int argc, char *argv[])
         // glUniformMatrix4fv(mv_loc, 1, GL_FALSE, glm::value_ptr(mv_matrix));
         // glUniformMatrix4fv(normal_loc, 1, GL_FALSE, glm::value_ptr(normal_matrix));
 
-        renderer.render(quad, uniformMatrix, mv_matrix);
+        renderer.render(bounds, uniformMatrix, mv_matrix);
 
         // glBindVertexArray(sphere.getMeshBuffer()->vao);
         // glDrawArrays(GL_TRIANGLES, 0, sphere.getVertexCount());

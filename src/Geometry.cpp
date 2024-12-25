@@ -193,6 +193,39 @@ bool Geometry::loadOBJ(const glimac::FilePath &filepath, const glimac::FilePath 
     return true;
 }
 
+Geometry::Mesh Geometry::addFromVertices(std::vector<Geometry::Vertex> &vertices)
+{
+    m_VertexBuffer.insert(m_VertexBuffer.end(), vertices.begin(), vertices.end());
+
+    size_t newIndex = lastMeshIndex + this->m_VertexBuffer.size();
+    Geometry::Mesh mesh("shape", lastMeshIndex, newIndex, -1);
+    updateLastMeshIndex(newIndex);
+
+    const GLuint VERTEX_ATTR_POSITION = 1;
+    const GLuint VERTEX_ATTR_NORMAL = 2;
+    const GLuint VERTEX_ATTR_TEX = 3;
+
+    glGenBuffers(1, &mesh.vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
+    glBufferData(GL_ARRAY_BUFFER, this->m_VertexBuffer.size() * sizeof(Geometry::Vertex), this->getVertexBuffer(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glGenVertexArrays(1, &mesh.vao);
+    glBindVertexArray(mesh.vao);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
+    glEnableVertexAttribArray(VERTEX_ATTR_POSITION);
+    glEnableVertexAttribArray(VERTEX_ATTR_NORMAL);
+    glVertexAttribPointer(VERTEX_ATTR_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(Geometry::Vertex), offsetof(Geometry::Vertex, m_Position));
+    glVertexAttribPointer(VERTEX_ATTR_NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(Geometry::Vertex), (GLvoid *)offsetof(Geometry::Vertex, m_Normal));
+    glVertexAttribPointer(VERTEX_ATTR_TEX, 3, GL_FLOAT, GL_FALSE, sizeof(Geometry::Vertex), (GLvoid *)offsetof(Geometry::Vertex, m_TexCoords));
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    m_MeshBuffer.push_back(std::move(mesh));
+
+    return m_MeshBuffer.back();
+}
+
 void Geometry::translateModel(float sx, float sy, float sz)
 {
     _modelMatrix = glm::translate(_modelMatrix, glm::vec3(sx, sy, sz));

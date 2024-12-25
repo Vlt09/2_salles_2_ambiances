@@ -83,7 +83,11 @@ class Sphere : public Geometry
 
     void initMesh()
     {
-        Geometry::Mesh mesh("sphere", 0, this->m_VertexBuffer.size(), -1);
+        size_t lastMeshIndex = getLastMeshIndex();
+        size_t newIndex = lastMeshIndex + this->m_VertexBuffer.size();
+        Geometry::Mesh mesh("sphere", lastMeshIndex, newIndex, -1);
+        updateLastMeshIndex(newIndex);
+
         const GLuint VERTEX_ATTR_POSITION = 1;
         const GLuint VERTEX_ATTR_NORMAL = 2;
         const GLuint VERTEX_ATTR_TEX = 3;
@@ -113,7 +117,7 @@ public:
     {
         build(radius, discLat, discLong); // Construction (voir le .cpp)
         initMesh();
-        translateModel(0.f, 0.f, -5.f);
+        // translateModel(0.f, 0.f, -5.f);
     }
 
     // Renvoit le pointeur vers les données

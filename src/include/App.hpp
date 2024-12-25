@@ -5,14 +5,14 @@
 class App
 {
 private:
-    Renderer _renderer;
-    Scene _scene;
+    // Renderer _renderer;
+    // Scene _scene;
 
-    float _windowsHeight, _windowsWidth;
+    // float _windowsHeight, _windowsWidth;
 
 public:
-    App(Renderer &renderer, float windowsH, float windowsW);
-    ~App();
+    // App(Renderer &renderer, float windowsH, float windowsW);
+    // ~App();
 
-    void run();
+    // void run();
 };

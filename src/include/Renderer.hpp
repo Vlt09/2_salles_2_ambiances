@@ -42,4 +42,9 @@ public:
     void render(const Geometry &object, Room::UniformMatrix uniformMatrix, const glm::mat4 &modelMatrix = glm::mat4(1));
 
     void renderScene(const Scene &scene);
+
+    void setViewMatrix(glm::mat4 viewMatrix)
+    {
+        _viewMatrix = viewMatrix;
+    }
 };

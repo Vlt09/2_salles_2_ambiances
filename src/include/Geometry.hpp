@@ -28,6 +28,9 @@ public:
 
         GLuint vbo, vao;
 
+        bool isTransform = false;
+        glm::mat4 _transform;
+
         Mesh(std::string name, unsigned int indexOffset, unsigned int indexCount, int materialIndex) : m_sName(move(name)), m_nIndexOffset(indexOffset), m_nIndexCount(indexCount), m_nMaterialIndex(materialIndex)
         {
         }
@@ -53,6 +56,8 @@ private:
     std::vector<unsigned int> m_IndexBuffer;
     std::vector<Material> m_Materials;
     glimac::BBox3f m_BBox;
+
+    size_t lastMeshIndex = 0;
 
     void generateNormals(unsigned int meshIndex);
 
@@ -103,6 +108,23 @@ public:
     {
         return _modelMatrix;
     }
+
+    size_t getLastMeshIndex() const
+    {
+        return lastMeshIndex;
+    }
+
+    void updateLastMeshIndex(size_t index)
+    {
+        lastMeshIndex = index;
+    }
+
+    /**
+     * @brief This function add shape which is represents by array
+     * of vertices in the current Geometry object. In other word,
+     * this function add one Mesh which is a simple shape (quad, sphere etc).
+     */
+    Geometry::Mesh addFromVertices(std::vector<Geometry::Vertex> &vertices);
 
     void translateModel(float sx = 0.f, float sy = 0.f, float sz = 0.f);
 
