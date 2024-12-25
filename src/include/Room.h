@@ -40,9 +40,9 @@ private:
         //_bounds.rotateModel(90.f, glm::vec3(1.f, 0.f, 0.f));
 
         auto vertices2 = Quad::QuadVertices(24, 20);
-        auto leftWallMesh = _bounds.addFromVertices(vertices2);
-        leftWallMesh._transform = glm::translate(leftWallMesh._transform, glm::vec3(0.f, 0.f, -5.f));
-        leftWallMesh._transform = glm::rotate(leftWallMesh._transform, 90.f, glm::vec3(1.f, 0.f, 0.f));
+        auto &leftWallMesh = _bounds.addFromVertices(vertices2);
+        // leftWallMesh._transform = glm::translate(leftWallMesh._transform, glm::vec3(0.f, 0.f, -5.f));
+        // leftWallMesh._transform = glm::rotate(leftWallMesh._transform, 90.f, glm::vec3(1.f, 0.f, 0.f));
         leftWallMesh.isTransform = true;
     }
 };

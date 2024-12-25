@@ -77,8 +77,11 @@ class Sphere : public Geometry
             }
         }
 
-        // Attention ! dans cette implantation on duplique beaucoup de sommets. Une meilleur stratégie est de passer
-        // par un Index Buffer Object, que nous verrons dans les prochains TDs
+        // Init VBO
+        glGenBuffers(1, &this->_vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, this->_vbo);
+        glBufferData(GL_ARRAY_BUFFER, this->m_VertexBuffer.size() * sizeof(Geometry::Vertex), this->getVertexBuffer(), GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
     void initMesh()
@@ -92,14 +95,10 @@ class Sphere : public Geometry
         const GLuint VERTEX_ATTR_NORMAL = 2;
         const GLuint VERTEX_ATTR_TEX = 3;
 
-        glGenBuffers(1, &mesh.vbo);
-        glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
-        glBufferData(GL_ARRAY_BUFFER, this->m_VertexBuffer.size() * sizeof(Geometry::Vertex), this->getVertexBuffer(), GL_STATIC_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-
         glGenVertexArrays(1, &mesh.vao);
         glBindVertexArray(mesh.vao);
-        glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, this->_vbo);
+
         glEnableVertexAttribArray(VERTEX_ATTR_POSITION);
         glEnableVertexAttribArray(VERTEX_ATTR_NORMAL);
         glVertexAttribPointer(VERTEX_ATTR_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(Geometry::Vertex), offsetof(Geometry::Vertex, m_Position));

@@ -65,6 +65,7 @@ protected:
     std::vector<Mesh> m_MeshBuffer;
     std::vector<Vertex> m_VertexBuffer;
     glm::mat4 _modelMatrix = glm::mat4(1);
+    GLuint _vbo;
 
 public:
     const Vertex *getVertexBuffer() const
@@ -124,7 +125,13 @@ public:
      * of vertices in the current Geometry object. In other word,
      * this function add one Mesh which is a simple shape (quad, sphere etc).
      */
-    Geometry::Mesh addFromVertices(std::vector<Geometry::Vertex> &vertices);
+    Geometry::Mesh &addFromVertices(std::vector<Geometry::Vertex> &vertices);
+
+    /**
+     * @brief This function initialize VBO's object and vao of all Meshes in this
+     * object.
+     */
+    void initMeshData();
 
     void translateModel(float sx = 0.f, float sy = 0.f, float sz = 0.f);
 

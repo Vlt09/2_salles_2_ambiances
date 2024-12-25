@@ -12,22 +12,28 @@ Renderer::Renderer(glm::mat4 &projMatrix, glm::mat4 &viewMatrix) : _projectionMa
 
 void Renderer::render(const Geometry &object, Room::UniformMatrix uniformMatrix, const glm::mat4 &modelMatrix)
 {
-    auto mv_matrix = this->_viewMatrix * object.getModelMatrix();
-    // auto mv_matrix = modelMatrix;
-    auto normal_matrix = glm::transpose(glm::inverse(mv_matrix));
+    // auto mv_matrix = this->_viewMatrix * object.getModelMatrix();
+    // // auto mv_matrix = modelMatrix;
+    // auto normal_matrix = glm::transpose(glm::inverse(mv_matrix));
 
-    glUniformMatrix4fv(uniformMatrix.uMVPMatrix, 1, GL_FALSE, glm::value_ptr(this->_projectionMatrix * mv_matrix));
-    glUniformMatrix4fv(uniformMatrix.uMVMatrix, 1, GL_FALSE, glm::value_ptr(mv_matrix));
-    glUniformMatrix4fv(uniformMatrix.uNormalMatrix, 1, GL_FALSE, glm::value_ptr(normal_matrix));
+    // // glUniformMatrix4fv(uniformMatrix.uMVPMatrix, 1, GL_FALSE, glm::value_ptr(this->_projectionMatrix * mv_matrix));
+    // glUniformMatrix4fv(uniformMatrix.uMVMatrix, 1, GL_FALSE, glm::value_ptr(mv_matrix));
+    // glUniformMatrix4fv(uniformMatrix.uNormalMatrix, 1, GL_FALSE, glm::value_ptr(normal_matrix));
 
     auto meshBuff = object.getMeshBuffer();
     auto meshCount = object.getMeshCount();
     for (size_t i = 0; i < meshCount; i++)
     {
-        auto currentMesh = meshBuff[i];
+        auto &currentMesh = meshBuff[i];
         if (currentMesh.isTransform)
         {
-            glUniformMatrix4fv(uniformMatrix.uMVPMatrix, 1, GL_FALSE, glm::value_ptr(this->_projectionMatrix * currentMesh._transform));
+            auto mv_matrix = this->_viewMatrix * currentMesh._transform;
+            // auto mv_matrix = modelMatrix;
+            auto normal_matrix = glm::transpose(glm::inverse(mv_matrix));
+
+            glUniformMatrix4fv(uniformMatrix.uMVPMatrix, 1, GL_FALSE, glm::value_ptr(this->_projectionMatrix * mv_matrix));
+            glUniformMatrix4fv(uniformMatrix.uMVMatrix, 1, GL_FALSE, glm::value_ptr(mv_matrix));
+            glUniformMatrix4fv(uniformMatrix.uNormalMatrix, 1, GL_FALSE, glm::value_ptr(normal_matrix));
         }
 
         glBindVertexArray(currentMesh.vao);
