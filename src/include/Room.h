@@ -14,6 +14,7 @@ public:
         GLint uMVPMatrix;
         GLint uMVMatrix;
         GLint uNormalMatrix;
+        GLint uTexLoc;
     };
 
     const Geometry &getBounds() const

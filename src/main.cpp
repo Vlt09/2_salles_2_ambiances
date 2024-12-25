@@ -106,13 +106,22 @@ int main(int argc, char *argv[])
 
     glimac::FilePath applicationPath(argv[0]);
     glimac::Program program = glimac::loadProgram(applicationPath.dirPath() + "src/shaders/3D.vs.glsl",
-                                                  applicationPath.dirPath() + "src/shaders/normal.fs.glsl");
+                                                  applicationPath.dirPath() + "src/shaders/tex3D.fs.glsl");
 
     program.use();
 
     auto mvp_loc = glGetUniformLocation(program.getGLId(), "uMVPMatrix");
     auto mv_loc = glGetUniformLocation(program.getGLId(), "uMVMatrix");
     auto normal_loc = glGetUniformLocation(program.getGLId(), "uNormalMatrix");
+    auto tex_loc = glGetUniformLocation(program.getGLId(), "uTexture");
+
+    std::cout << "text loc " << tex_loc << std::endl;
+
+    auto mc_tex_ptr = glimac::loadImage("/home/valentin/m2/opengl/2_salles_2_ambiances/src/assets/minecraft_stonewall.png");
+    if (mc_tex_ptr == NULL)
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
 
     glEnable(GL_DEPTH_TEST);
     /* Hook input callbacks */
@@ -122,9 +131,7 @@ int main(int argc, char *argv[])
     glfwSetCursorPosCallback(window, &cursor_position_callback);
     glfwSetWindowSizeCallback(window, &size_callback);
 
-    auto mv_matrix = glm::translate(glm::mat4(1), glm::vec3(0., 0., -5.));
     glm::mat4 proj_matrix = glm::perspective(glm::radians(70.f), (float)window_width / window_height, 0.1f, 100.f);
-    auto normal_matrix = glm::transpose(glm::inverse(mv_matrix));
     auto viewMatrix = camera.getViewMatrix();
 
     Room::UniformMatrix uniformMatrix;
@@ -132,16 +139,27 @@ int main(int argc, char *argv[])
     uniformMatrix.uMVPMatrix = mvp_loc;
     uniformMatrix.uMVMatrix = mv_loc;
     uniformMatrix.uNormalMatrix = normal_loc;
+    uniformMatrix.uTexLoc = tex_loc;
 
     Renderer renderer(proj_matrix, viewMatrix);
     Room room;
     room.constructRoom(camera.cameraPosition());
     Sphere sphere(1, 32, 16);
-    Quad quad(5, 5);
+
+    GLuint mc_tex;
+    glGenTextures(1, &mc_tex);
+    glBindTexture(GL_TEXTURE_2D, mc_tex);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mc_tex_ptr->getWidth(), mc_tex_ptr->getHeight(), 0, GL_RGBA, GL_FLOAT, mc_tex_ptr->getPixels());
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    Quad quad(50, 20);
 
     auto bounds = room.getBounds();
     // bounds.rotateModel(90.f, glm::vec3(1.f, 0.f, 0.f));
-
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -154,7 +172,7 @@ int main(int argc, char *argv[])
         // glUniformMatrix4fv(mv_loc, 1, GL_FALSE, glm::value_ptr(mv_matrix));
         // glUniformMatrix4fv(normal_loc, 1, GL_FALSE, glm::value_ptr(normal_matrix));
 
-        renderer.render(bounds, uniformMatrix, mv_matrix);
+        renderer.render(bounds, uniformMatrix, mc_tex);
 
         // glBindVertexArray(sphere.getMeshBuffer()->vao);
         // glDrawArrays(GL_TRIANGLES, 0, sphere.getVertexCount());

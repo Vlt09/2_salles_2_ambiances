@@ -224,6 +224,8 @@ void Geometry::initMeshData()
         glBindBuffer(GL_ARRAY_BUFFER, this->_vbo);
         glEnableVertexAttribArray(VERTEX_ATTR_POSITION);
         glEnableVertexAttribArray(VERTEX_ATTR_NORMAL);
+        glEnableVertexAttribArray(VERTEX_ATTR_TEX);
+
         glVertexAttribPointer(VERTEX_ATTR_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(Geometry::Vertex), offsetof(Geometry::Vertex, m_Position));
         glVertexAttribPointer(VERTEX_ATTR_NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(Geometry::Vertex), (GLvoid *)offsetof(Geometry::Vertex, m_Normal));
         glVertexAttribPointer(VERTEX_ATTR_TEX, 3, GL_FLOAT, GL_FALSE, sizeof(Geometry::Vertex), (GLvoid *)offsetof(Geometry::Vertex, m_TexCoords));

@@ -39,7 +39,7 @@ public:
      *                    (`glm::mat4(1)`) which doesn't modify the object
      *
      */
-    void render(const Geometry &object, Room::UniformMatrix uniformMatrix, const glm::mat4 &modelMatrix = glm::mat4(1));
+    void render(const Geometry &object, Room::UniformMatrix uniformMatrix, GLuint tex);
 
     void renderScene(const Scene &scene);
 
