@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
 
     Renderer renderer(proj_matrix, viewMatrix);
     Room room;
-    room.constructRoom(camera.cameraPosition());
+    room.constructRoom(camera.cameraPosition(), 1);
     Sphere sphere(1, 32, 16);
 
     Quad quad(50, 20);
