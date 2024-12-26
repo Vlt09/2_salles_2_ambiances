@@ -86,9 +86,11 @@ class Sphere : public Geometry
 
     void initMesh()
     {
+        int idMat = m_Materials.size() == 0 ? -1 : 0;
+
         size_t lastMeshIndex = getLastMeshIndex();
         size_t newIndex = lastMeshIndex + this->m_VertexBuffer.size();
-        Geometry::Mesh mesh("sphere", lastMeshIndex, newIndex, -1);
+        Geometry::Mesh mesh("sphere", lastMeshIndex, newIndex, idMat);
         updateLastMeshIndex(newIndex);
 
         const GLuint VERTEX_ATTR_POSITION = 1;
@@ -117,6 +119,14 @@ public:
     // Constructeur: alloue le tableau de données et construit les attributs des vertex
     Sphere(GLfloat radius, GLsizei discLat, GLsizei discLong) : m_nVertexCount(0)
     {
+        build(radius, discLat, discLong); // Construction (voir le .cpp)
+        initMesh();
+        // translateModel(0.f, 0.f, -5.f);
+    }
+
+    Sphere(GLfloat radius, GLsizei discLat, GLsizei discLong, Geometry::Material material) : m_nVertexCount(0)
+    {
+        m_Materials.push_back(material);
         build(radius, discLat, discLong); // Construction (voir le .cpp)
         initMesh();
         // translateModel(0.f, 0.f, -5.f);

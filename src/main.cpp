@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
 
     glimac::FilePath applicationPath(argv[0]);
     glimac::Program program = glimac::loadProgram(applicationPath.dirPath() + "src/shaders/3D.vs.glsl",
-                                                  applicationPath.dirPath() + "src/shaders/tex3D.fs.glsl");
+                                                  applicationPath.dirPath() + "src/shaders/directionallight.fs.glsl");
 
     program.use();
 
@@ -114,8 +114,11 @@ int main(int argc, char *argv[])
     auto mv_loc = glGetUniformLocation(program.getGLId(), "uMVMatrix");
     auto normal_loc = glGetUniformLocation(program.getGLId(), "uNormalMatrix");
     auto tex_loc = glGetUniformLocation(program.getGLId(), "uTexture");
-
-    std::cout << "text loc " << tex_loc << std::endl;
+    auto uKd = glGetUniformLocation(program.getGLId(), "uKd");
+    auto uKs = glGetUniformLocation(program.getGLId(), "uKs");
+    auto uShininess = glGetUniformLocation(program.getGLId(), "uShininess");
+    auto uLightDir_vs = glGetUniformLocation(program.getGLId(), "uLightDir_vs");
+    auto uLightIntensity = glGetUniformLocation(program.getGLId(), "uLightIntensity");
 
     glEnable(GL_DEPTH_TEST);
     /* Hook input callbacks */
@@ -128,19 +131,39 @@ int main(int argc, char *argv[])
     glm::mat4 proj_matrix = glm::perspective(glm::radians(70.f), (float)window_width / window_height, 0.1f, 100.f);
     auto viewMatrix = camera.getViewMatrix();
 
-    Room::UniformMatrix uniformMatrix;
+    Room::UniformVariable uniformVariable;
 
-    uniformMatrix.uMVPMatrix = mvp_loc;
-    uniformMatrix.uMVMatrix = mv_loc;
-    uniformMatrix.uNormalMatrix = normal_loc;
-    uniformMatrix.uTexLoc = tex_loc;
+    uniformVariable.uMVPMatrix = mvp_loc;
+    uniformVariable.uMVMatrix = mv_loc;
+    uniformVariable.uNormalMatrix = normal_loc;
+    uniformVariable.uTexLoc = tex_loc;
+    uniformVariable.uKd = uKd;
+    uniformVariable.uKs = uKs;
+    uniformVariable.uShininess = uShininess;
+    uniformVariable.uLightDir_vs = uLightDir_vs;
+    uniformVariable.uLightIntensity = uLightIntensity;
 
     Renderer renderer(proj_matrix, viewMatrix);
     Room room;
-    room.constructRoom(camera.cameraPosition(), 1);
-    Sphere sphere(1, 32, 16);
+    room.initProgram(applicationPath.dirPath() + "src/shaders/3D.vs.glsl",
+                     applicationPath.dirPath() + "src/shaders/directionallight.fs.glsl");
 
-    Quad quad(50, 20);
+    room.constructRoom(camera.cameraPosition(), 1);
+    Geometry::Material sunMat;
+    sunMat.m_Ka = glm::vec3(1.0f, 1.0f, 0.0f);
+    sunMat.m_Kd = glm::vec3(1.0f, 1.0f, 0.0f);
+    sunMat.m_Ks = glm::vec3(1.0f, 1.0f, 0.0f);
+    sunMat.m_Tr = glm::vec3(0.0f, 0.0f, 0.0f);
+    sunMat.m_Le = glm::vec3(1.0f, 1.0f, 0.0f);
+    sunMat.m_Shininess = 128.f;
+    sunMat.m_RefractionIndex = 1.f;
+    sunMat.m_Dissolve = 1.0f;
+
+    Sphere sphere(1, 32, 16, sunMat);
+    auto t = camera.cameraPosition();
+    sphere.translateModel(t);
+
+    // Quad quad(50, 20);
 
     auto bounds = room.getBounds();
     // bounds.rotateModel(90.f, glm::vec3(1.f, 0.f, 0.f));
@@ -156,7 +179,8 @@ int main(int argc, char *argv[])
         // glUniformMatrix4fv(mv_loc, 1, GL_FALSE, glm::value_ptr(mv_matrix));
         // glUniformMatrix4fv(normal_loc, 1, GL_FALSE, glm::value_ptr(normal_matrix));
 
-        renderer.render(bounds, uniformMatrix);
+        renderer.render(sphere, uniformVariable);
+        renderer.render(bounds, room.getUniformVariable());
 
         // glBindVertexArray(sphere.getMeshBuffer()->vao);
         // glDrawArrays(GL_TRIANGLES, 0, sphere.getVertexCount());

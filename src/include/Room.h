@@ -9,18 +9,43 @@
 class Room
 {
 public:
-    struct UniformMatrix
+    struct UniformVariable
     {
         GLint uMVPMatrix;
         GLint uMVMatrix;
         GLint uNormalMatrix;
         GLint uTexLoc;
+        GLint uKd;
+        GLint uKs;
+        GLint uShininess;
+        GLint uLightDir_vs;
+        GLint uLightIntensity;
     };
+
+    const Geometry &getBounds() const
+    {
+        return _bounds;
+    }
+
+    Room()
+    {
+    }
+
+    void initProgram(const glimac::FilePath &vsFile, const glimac::FilePath &fsFile);
+
+    void addGroundAndFront(const glm::vec3 &cameraPos);
+
+    void constructRoom(const glm::vec3 &cameraPos, unsigned short order);
+
+    const UniformVariable &getUniformVariable()
+    {
+        return uniformVariable;
+    }
 
 private:
     std::list<Geometry> _objects;
+    UniformVariable uniformVariable;
     glimac::Program _mProgram;
-    UniformMatrix uniformMatrix;
 
     Geometry _bounds;
 
@@ -41,98 +66,5 @@ private:
      *
      * @note The scaling values are defined according to the specifications of the project
      */
-    void addRightAndLeft(const glm::vec3 &cameraPos, unsigned short order)
-    {
-
-        auto vertices = Quad::QuadVertices(1, 1);
-        auto &leftWallMesh = _bounds.addFromVertices(vertices);
-
-        leftWallMesh._transform = glm::translate(leftWallMesh._transform, glm::vec3(cameraPos.x + (10.f * order), cameraPos.y + 2.f, cameraPos.z));
-        leftWallMesh._transform = glm::rotate(leftWallMesh._transform, glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
-        leftWallMesh._transform = glm::scale(leftWallMesh._transform, glm::vec3(20.f, 1.f, 24.f));
-
-        leftWallMesh.isTransform = true;
-
-        auto &halfRightWallMesh1 = _bounds.addFromVertices(vertices);
-
-        halfRightWallMesh1._transform = glm::translate(halfRightWallMesh1._transform, glm::vec3(cameraPos.x - (10.f * order), cameraPos.y, cameraPos.z + 7.f));
-        halfRightWallMesh1._transform = glm::rotate(halfRightWallMesh1._transform, glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
-        halfRightWallMesh1._transform = glm::scale(halfRightWallMesh1._transform, glm::vec3(20.f, 1.f, 10.f));
-
-        halfRightWallMesh1.isTransform = true;
-
-        auto &halfRightWallMesh2 = _bounds.addFromVertices(vertices);
-
-        halfRightWallMesh2._transform = glm::translate(halfRightWallMesh2._transform, glm::vec3(cameraPos.x - (10.f * order), cameraPos.y, cameraPos.z - 7.f));
-        halfRightWallMesh2._transform = glm::rotate(halfRightWallMesh2._transform, glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
-        halfRightWallMesh2._transform = glm::scale(halfRightWallMesh2._transform, glm::vec3(20.f, 1.f, 10.f));
-
-        halfRightWallMesh2.isTransform = true;
-    }
-
-public:
-    const Geometry &getBounds() const
-    {
-        return _bounds;
-    }
-
-    Room()
-    {
-    }
-
-    void addGroundAndFront(const glm::vec3 &cameraPos)
-    {
-        float groundHeight = cameraPos.y - 0.15f;
-        auto vertices = Quad::QuadVertices(1, 1);
-
-        auto &groundMesh = _bounds.addFromVertices(vertices);
-        groundMesh._transform = glm::translate(groundMesh._transform, glm::vec3(cameraPos.x, groundHeight, cameraPos.z));
-        groundMesh._transform = glm::scale(groundMesh._transform, glm::vec3(20.f, 1.f, 24.f));
-        groundMesh.isTransform = true;
-
-        auto &frontWallMesh = _bounds.addFromVertices(vertices);
-
-        frontWallMesh._transform = glm::translate(frontWallMesh._transform, glm::vec3(cameraPos.x, cameraPos.y, cameraPos.z + 12.f));
-        frontWallMesh._transform = glm::rotate(frontWallMesh._transform, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
-        frontWallMesh._transform = glm::scale(frontWallMesh._transform, glm::vec3(20.f, 1.f, 24.f));
-
-        frontWallMesh.isTransform = true;
-
-        auto &backWallMesh = _bounds.addFromVertices(vertices);
-
-        backWallMesh._transform = glm::translate(backWallMesh._transform, glm::vec3(cameraPos.x, cameraPos.y, cameraPos.z - 12.f));
-
-        backWallMesh._transform = glm::rotate(backWallMesh._transform, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
-        backWallMesh._transform = glm::scale(backWallMesh._transform, glm::vec3(20.f, 1.f, 24.f));
-        backWallMesh.isTransform = true;
-    }
-
-    void constructRoom(const glm::vec3 &cameraPos, unsigned short order)
-    {
-        addGroundAndFront(cameraPos);
-        addRightAndLeft(cameraPos, order);
-        _bounds.initMeshData();
-
-        _bounds.initTexture("/home/valentin/m2/opengl/2_salles_2_ambiances/src/assets/minecraft_stonewall.png");
-    }
-
-    void displayVertices(const std::vector<Geometry::Vertex> &vertices)
-    {
-        for (const auto &vertex : vertices)
-        {
-            std::cout << "Vertex:" << std::endl;
-            std::cout << "  Position: ("
-                      << vertex.m_Position.x << ", "
-                      << vertex.m_Position.y << ", "
-                      << vertex.m_Position.z << ")" << std::endl;
-            std::cout << "  Normal: ("
-                      << vertex.m_Normal.x << ", "
-                      << vertex.m_Normal.y << ", "
-                      << vertex.m_Normal.z << ")" << std::endl;
-            std::cout << "  Texture Coordinates: ("
-                      << vertex.m_TexCoords.x << ", "
-                      << vertex.m_TexCoords.y << ")" << std::endl;
-            std::cout << std::endl; // Add an empty line for better readability
-        }
-    }
+    void addRightAndLeft(const glm::vec3 &cameraPos, unsigned short order);
 };

@@ -54,7 +54,6 @@ public:
 
 private:
     std::vector<unsigned int> m_IndexBuffer;
-    std::vector<Material> m_Materials;
     glimac::BBox3f m_BBox;
 
     size_t lastMeshIndex = 0;
@@ -64,6 +63,7 @@ private:
 protected:
     std::vector<Mesh> m_MeshBuffer;
     std::vector<Vertex> m_VertexBuffer;
+    std::vector<Material> m_Materials;
     glm::mat4 _modelMatrix = glm::mat4(1);
     GLuint _vbo, _tex;
 
@@ -110,6 +110,11 @@ public:
         return _modelMatrix;
     }
 
+    const std::vector<Material> &getMaterialList() const
+    {
+        return m_Materials;
+    }
+
     size_t getLastMeshIndex() const
     {
         return lastMeshIndex;
@@ -148,9 +153,9 @@ public:
      */
     void initTexture(const std::string &path);
 
-    void translateModel(float sx = 0.f, float sy = 0.f, float sz = 0.f);
+    void translateModel(glm::vec3 &translate);
 
-    void scaleModel(float sx = 1.f, float sy = 1.f, float sz = 1.f);
+    void scaleModel(glm::vec3 &scale);
 
     void rotateModel(float angle, glm::vec3 axis);
 };

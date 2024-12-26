@@ -255,14 +255,14 @@ void Geometry::initTexture(const std::string &path)
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Geometry::translateModel(float sx, float sy, float sz)
+void Geometry::translateModel(glm::vec3 &translate)
 {
-    _modelMatrix = glm::translate(_modelMatrix, glm::vec3(sx, sy, sz));
+    _modelMatrix = glm::translate(_modelMatrix, translate);
 }
 
-void Geometry::scaleModel(float sx, float sy, float sz)
+void Geometry::scaleModel(glm::vec3 &scale)
 {
-    _modelMatrix = glm::scale(_modelMatrix, glm::vec3(sx, sy, sz));
+    _modelMatrix = glm::scale(_modelMatrix, scale);
 }
 
 void Geometry::rotateModel(float angle, glm::vec3 axis)
