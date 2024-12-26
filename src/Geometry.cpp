@@ -197,9 +197,11 @@ Geometry::Mesh &Geometry::addFromVertices(std::vector<Geometry::Vertex> vertices
 {
     m_VertexBuffer.insert(m_VertexBuffer.end(), vertices.begin(), vertices.end());
 
-    size_t newIndex = lastMeshIndex + (this->m_VertexBuffer.size() - 1);
-    Geometry::Mesh mesh("shape", lastMeshIndex, newIndex, -1);
+    size_t newIndex = lastMeshIndex + vertices.size();
+    Geometry::Mesh mesh("shape", lastMeshIndex, vertices.size(), -1);
+    std::cout << "before update index = " << lastMeshIndex << " new index = " << newIndex << std::endl;
     updateLastMeshIndex(newIndex);
+    std::cout << "after update index = " << lastMeshIndex << std::endl;
     m_MeshBuffer.push_back(std::move(mesh));
 
     return m_MeshBuffer.back();
