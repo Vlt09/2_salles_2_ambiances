@@ -1,7 +1,7 @@
 #pragma once
 #include "Geometry.hpp"
 #include "Scene.hpp"
-#include "Room.h"
+#include "Room.hpp"
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 #include <glimac/glm.hpp>

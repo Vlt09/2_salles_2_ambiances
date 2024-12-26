@@ -1,4 +1,4 @@
-#include "include/Room.h"
+#include "include/Room.hpp"
 
 void Room::initProgram(const glimac::FilePath &vsFile, const glimac::FilePath &fsFile)
 {
