@@ -10,7 +10,7 @@ Renderer::Renderer(glm::mat4 &projMatrix, glm::mat4 &viewMatrix) : _projectionMa
 {
 }
 
-void Renderer::render(const Geometry &object, Room::UniformMatrix uniformMatrix, GLuint tex)
+void Renderer::render(const Geometry &object, Room::UniformMatrix uniformMatrix)
 {
     if (uniformMatrix.uTexLoc == -1)
     {
@@ -23,7 +23,7 @@ void Renderer::render(const Geometry &object, Room::UniformMatrix uniformMatrix,
     // glUniformMatrix4fv(uniformMatrix.uMVPMatrix, 1, GL_FALSE, glm::value_ptr(this->_projectionMatrix * mv_matrix));
     // glUniformMatrix4fv(uniformMatrix.uMVMatrix, 1, GL_FALSE, glm::value_ptr(mv_matrix));
     // glUniformMatrix4fv(uniformMatrix.uNormalMatrix, 1, GL_FALSE, glm::value_ptr(normal_matrix));
-    glBindTexture(GL_TEXTURE_2D, tex); // earth
+    glBindTexture(GL_TEXTURE_2D, object.getTex()); // earth
     glUniform1i(uniformMatrix.uTexLoc, 0);
 
     auto meshBuff = object.getMeshBuffer();

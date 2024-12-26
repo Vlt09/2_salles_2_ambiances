@@ -117,12 +117,6 @@ int main(int argc, char *argv[])
 
     std::cout << "text loc " << tex_loc << std::endl;
 
-    auto mc_tex_ptr = glimac::loadImage("/home/valentin/m2/opengl/2_salles_2_ambiances/src/assets/minecraft_stonewall.png");
-    if (mc_tex_ptr == NULL)
-    {
-        std::cout << "Failed to load texture" << std::endl;
-    }
-
     glEnable(GL_DEPTH_TEST);
     /* Hook input callbacks */
     glfwSetKeyCallback(window, &key_callback);
@@ -146,16 +140,6 @@ int main(int argc, char *argv[])
     room.constructRoom(camera.cameraPosition());
     Sphere sphere(1, 32, 16);
 
-    GLuint mc_tex;
-    glGenTextures(1, &mc_tex);
-    glBindTexture(GL_TEXTURE_2D, mc_tex);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mc_tex_ptr->getWidth(), mc_tex_ptr->getHeight(), 0, GL_RGBA, GL_FLOAT, mc_tex_ptr->getPixels());
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
     Quad quad(50, 20);
 
     auto bounds = room.getBounds();
@@ -172,7 +156,7 @@ int main(int argc, char *argv[])
         // glUniformMatrix4fv(mv_loc, 1, GL_FALSE, glm::value_ptr(mv_matrix));
         // glUniformMatrix4fv(normal_loc, 1, GL_FALSE, glm::value_ptr(normal_matrix));
 
-        renderer.render(bounds, uniformMatrix, mc_tex);
+        renderer.render(bounds, uniformMatrix);
 
         // glBindVertexArray(sphere.getMeshBuffer()->vao);
         // glDrawArrays(GL_TRIANGLES, 0, sphere.getVertexCount());

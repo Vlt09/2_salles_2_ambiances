@@ -65,7 +65,7 @@ protected:
     std::vector<Mesh> m_MeshBuffer;
     std::vector<Vertex> m_VertexBuffer;
     glm::mat4 _modelMatrix = glm::mat4(1);
-    GLuint _vbo;
+    GLuint _vbo, _tex;
 
 public:
     const Vertex *getVertexBuffer() const
@@ -120,18 +120,33 @@ public:
         lastMeshIndex = index;
     }
 
+    GLuint getTex() const
+    {
+        return _tex;
+    }
+
     /**
      * @brief This function add shape which is represents by array
      * of vertices in the current Geometry object. In other word,
      * this function add one Mesh which is a simple shape (quad, sphere etc).
      */
-    Geometry::Mesh &addFromVertices(std::vector<Geometry::Vertex> &vertices);
+    Geometry::Mesh &addFromVertices(std::vector<Geometry::Vertex> vertices);
 
     /**
      * @brief This function initialize VBO's object and vao of all Meshes in this
      * object.
      */
     void initMeshData();
+
+    /**
+     * @brief Initializes a 2D texture from an image file.
+     *
+     * This function loads an image from the specified file path and creates an OpenGL texture.
+     * It binds the texture and sets its parameters for minification and magnification filters.
+     *
+     * @param path A constant reference to a string that specifies the file path of the image to load.
+     */
+    void initTexture(const std::string &path);
 
     void translateModel(float sx = 0.f, float sy = 0.f, float sz = 0.f);
 

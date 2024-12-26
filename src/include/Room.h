@@ -31,53 +31,53 @@ public:
         float groundHeight = cameraPos.y - 0.15f;
 
         auto vertices = Quad::QuadVertices(24, 20);
+
         auto &groundMesh = _bounds.addFromVertices(vertices);
         groundMesh._transform = glm::translate(groundMesh._transform, glm::vec3(cameraPos.x, groundHeight, cameraPos.z));
         groundMesh.isTransform = true;
 
-        auto vertices3 = Quad::QuadVertices(10, 20);
+        auto vertices3 = Quad::QuadVertices(5, 5);
         auto &frontWallMesh = _bounds.addFromVertices(vertices3);
 
-        frontWallMesh._transform = glm::translate(frontWallMesh._transform, glm::vec3(cameraPos.x, cameraPos.y, cameraPos.z + 10.f));
-        frontWallMesh._transform = glm::rotate(frontWallMesh._transform, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
+        // frontWallMesh._transform = glm::translate(frontWallMesh._transform, glm::vec3(cameraPos.x, cameraPos.y, cameraPos.z + 10.f));
+        // frontWallMesh._transform = glm::rotate(frontWallMesh._transform, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
         frontWallMesh.isTransform = true;
 
         auto vertices2 = Quad::QuadVertices(24, 10);
-        auto &backWallMesh = _bounds.addFromVertices(vertices2);
+        auto &backWallMesh = _bounds.addFromVertices(vertices);
 
-        std::cout << "transform matrix = " << backWallMesh._transform << std::endl;
+        // backWallMesh._transform = glm::translate(backWallMesh._transform, glm::vec3(cameraPos.x - 10.f, cameraPos.y /*+ 4.f*/, cameraPos.z));
 
-        backWallMesh._transform = glm::translate(backWallMesh._transform, glm::vec3(cameraPos.x - 10.f, cameraPos.y /*+ 4.f*/, cameraPos.z));
-        backWallMesh._transform = glm::rotate(backWallMesh._transform, glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
-        backWallMesh._transform = glm::rotate(backWallMesh._transform, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
+        backWallMesh._transform = glm::rotate(backWallMesh._transform, glm::radians(90.f), glm::vec3(1.f, 1.f, 1.f));
+        // backWallMesh._transform = glm::rotate(backWallMesh._transform, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
         backWallMesh.isTransform = true;
     }
 
     void addRightAndLeft(const glm::vec3 &cameraPos)
     {
 
-        auto vertices = Quad::QuadVertices(24, 10);
-        auto &leftWallMesh = _bounds.addFromVertices(vertices);
+        // auto vertices = Quad::QuadVertices(24, 10);
+        // auto &leftWallMesh = _bounds.addFromVertices(vertices);
 
-        leftWallMesh._transform = glm::rotate(leftWallMesh._transform, glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
-        leftWallMesh._transform = glm::translate(leftWallMesh._transform, glm::vec3(cameraPos.x, cameraPos.y - 10.f, cameraPos.z));
+        // leftWallMesh._transform = glm::rotate(leftWallMesh._transform, glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
+        // leftWallMesh._transform = glm::translate(leftWallMesh._transform, glm::vec3(cameraPos.x, cameraPos.y - 10.f, cameraPos.z));
 
-        leftWallMesh.isTransform = true;
+        // leftWallMesh.isTransform = true;
 
-        auto vertices2 = Quad::QuadVertices(10, 10);
-        auto vertices3 = Quad::QuadVertices(10, 10);
+        // auto vertices2 = Quad::QuadVertices(10, 10);
+        // auto vertices3 = Quad::QuadVertices(10, 10);
 
-        auto &halfRightWallMesh1 = _bounds.addFromVertices(vertices2);
+        // auto &halfRightWallMesh1 = _bounds.addFromVertices(vertices2);
 
-        halfRightWallMesh1._transform = glm::rotate(halfRightWallMesh1._transform, glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
-        halfRightWallMesh1._transform = glm::translate(halfRightWallMesh1._transform, glm::vec3(cameraPos.x, cameraPos.y + 10.f, cameraPos.z + 7.f));
-        halfRightWallMesh1.isTransform = true;
+        // halfRightWallMesh1._transform = glm::rotate(halfRightWallMesh1._transform, glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
+        // halfRightWallMesh1._transform = glm::translate(halfRightWallMesh1._transform, glm::vec3(cameraPos.x, cameraPos.y + 10.f, cameraPos.z + 7.f));
+        // halfRightWallMesh1.isTransform = true;
 
-        auto &halfRightWallMesh2 = _bounds.addFromVertices(vertices3);
+        // auto &halfRightWallMesh2 = _bounds.addFromVertices(vertices3);
 
-        halfRightWallMesh2._transform = glm::rotate(halfRightWallMesh2._transform, glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
-        halfRightWallMesh2._transform = glm::translate(halfRightWallMesh2._transform, glm::vec3(cameraPos.x, cameraPos.y + 10.f, cameraPos.z - 7.f));
-        halfRightWallMesh2.isTransform = true;
+        // halfRightWallMesh2._transform = glm::rotate(halfRightWallMesh2._transform, glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
+        // halfRightWallMesh2._transform = glm::translate(halfRightWallMesh2._transform, glm::vec3(cameraPos.x, cameraPos.y + 10.f, cameraPos.z - 7.f));
+        // halfRightWallMesh2.isTransform = true;
     }
 
     void constructRoom(const glm::vec3 &cameraPos)
@@ -85,6 +85,28 @@ public:
         addGroundAndFront(cameraPos);
         addRightAndLeft(cameraPos);
         _bounds.initMeshData();
+
+        _bounds.initTexture("/home/valentin/m2/opengl/2_salles_2_ambiances/src/assets/minecraft_stonewall.png");
+    }
+
+    void displayVertices(const std::vector<Geometry::Vertex> &vertices)
+    {
+        for (const auto &vertex : vertices)
+        {
+            std::cout << "Vertex:" << std::endl;
+            std::cout << "  Position: ("
+                      << vertex.m_Position.x << ", "
+                      << vertex.m_Position.y << ", "
+                      << vertex.m_Position.z << ")" << std::endl;
+            std::cout << "  Normal: ("
+                      << vertex.m_Normal.x << ", "
+                      << vertex.m_Normal.y << ", "
+                      << vertex.m_Normal.z << ")" << std::endl;
+            std::cout << "  Texture Coordinates: ("
+                      << vertex.m_TexCoords.x << ", "
+                      << vertex.m_TexCoords.y << ")" << std::endl;
+            std::cout << std::endl; // Add an empty line for better readability
+        }
     }
 
 private:

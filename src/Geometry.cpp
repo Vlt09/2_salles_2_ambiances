@@ -193,11 +193,11 @@ bool Geometry::loadOBJ(const glimac::FilePath &filepath, const glimac::FilePath 
     return true;
 }
 
-Geometry::Mesh &Geometry::addFromVertices(std::vector<Geometry::Vertex> &vertices)
+Geometry::Mesh &Geometry::addFromVertices(std::vector<Geometry::Vertex> vertices)
 {
     m_VertexBuffer.insert(m_VertexBuffer.end(), vertices.begin(), vertices.end());
 
-    size_t newIndex = lastMeshIndex + this->m_VertexBuffer.size();
+    size_t newIndex = lastMeshIndex + (this->m_VertexBuffer.size() - 1);
     Geometry::Mesh mesh("shape", lastMeshIndex, newIndex, -1);
     updateLastMeshIndex(newIndex);
     m_MeshBuffer.push_back(std::move(mesh));
@@ -232,6 +232,25 @@ void Geometry::initMeshData()
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
     }
+}
+
+void Geometry::initTexture(const std::string &path)
+{
+    auto tex_ptr = glimac::loadImage(path);
+    if (tex_ptr == NULL)
+    {
+        std::cout << "Failed to load texture" << std::endl;
+        return;
+    }
+    glGenTextures(1, &_tex);
+    glBindTexture(GL_TEXTURE_2D, _tex);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex_ptr->getWidth(), tex_ptr->getHeight(), 0, GL_RGBA, GL_FLOAT, tex_ptr->getPixels());
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Geometry::translateModel(float sx, float sy, float sz)
