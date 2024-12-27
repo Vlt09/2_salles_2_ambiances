@@ -2,6 +2,7 @@
 #include "Geometry.hpp"
 #include "Scene.hpp"
 #include "Room.hpp"
+#include "FirstRoom.hpp"
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 #include <glimac/glm.hpp>
@@ -43,10 +44,32 @@ public:
 
     void render(const Geometry &object, Geometry::Material material, Room::UniformVariable uniformVariable);
 
+    void render(const Geometry &object, Room::UniformVariable uniformVariable, glm::vec3 shift);
+
+    void renderFirstRoom(FirstRoom &firstRoom);
+
+    template <typename Func>
+    void applyToAllMeshes(const std::vector<Geometry::Mesh> &meshes, Func &&func);
+
+    void setMaterialAndLightingUniforms(const Room::UniformVariable &uniformVariable,
+                                        const glm::vec3 &light_dir_vs,
+                                        const glm::vec3 &light_pos_vs,
+                                        const glm::vec3 &lightIntensity,
+                                        const glm::vec3 &kd,
+                                        const glm::vec3 &ks,
+                                        float shininess);
+
+    void setMatricesToShader(const Room::UniformVariable &uniformVariable,
+                             const glm::mat4 &projectionMatrix,
+                             const glm::mat4 &mvMatrix,
+                             const glm::mat4 &normalMatrix);
+
     void renderScene(const Scene &scene);
 
     void setViewMatrix(glm::mat4 viewMatrix)
     {
         _viewMatrix = viewMatrix;
     }
+
+    void setSpotLightUniform(const Room::UniformVariable &uniformVariable, const glm::vec3 &spotLight, float spotlightCutoff, float spotlightExponent);
 };

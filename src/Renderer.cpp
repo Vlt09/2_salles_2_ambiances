@@ -115,6 +115,62 @@ void Renderer::render(const Geometry &object, Room::UniformVariable uniformVaria
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void Renderer::renderFirstRoom(FirstRoom &firstRoom)
+{
+    auto &box = firstRoom.getBox();
+    auto &uv = firstRoom.getBoxUniformVariable();
+    auto &sun = firstRoom.getSpot();
+    auto &torch = firstRoom.getTorch();
+    auto &glowStoneProg = firstRoom.getGlowStoneProg();
+    auto &spotLight = firstRoom.getSpotLight();
+
+    // glm::vec3 light_dir_world = glm::rotate(glm::mat4(1.f), glimac::getTime(), glm::vec3(0, 1, 0)) * glm::vec4(1, 1, 1, 0);
+    glm::vec3 light_dir_world = glm::normalize(glm::vec3(1.0f, 1.0f, 1.0f));
+
+    setSpotLightUniform(uv, spotLight.position, spotLight.cutoff, spotLight.exponent);
+
+    auto meshProcess = [&](const Geometry::Mesh &mesh)
+    {
+        glBindVertexArray(mesh.vao);
+
+        glm::mat4 mv_matrix = this->_viewMatrix * mesh._transform;
+        glm::mat4 normal_matrix = glm::transpose(glm::inverse(mv_matrix));
+        glm::vec3 light_dir_vs = glm::vec3(this->_viewMatrix * glm::vec4(light_dir_world, 1.0));
+        glm::vec3 light_pos_vs = glm::vec3(this->_viewMatrix * glm::vec4(firstRoom.getLightPos(), 1.0));
+
+        setMatricesToShader(uv, _projectionMatrix, mv_matrix, normal_matrix);
+
+        if (firstRoom.getLightFlag() == 1)
+        {
+            setMaterialAndLightingUniforms(uv, light_dir_vs, glm::vec3(1.f, 1.f, 1.f), firstRoom._boxMaterial.m_Kd, firstRoom._boxMaterial.m_Ks,
+                                           light_pos_vs, firstRoom._spotMaterial.m_Shininess);
+        }
+
+        glDrawArrays(GL_TRIANGLES, mesh.m_nIndexOffset, mesh.m_nIndexCount);
+    };
+
+    box.getProgram().use();
+
+    glBindTexture(GL_TEXTURE_2D, box.getBounds().getTex());
+    glUniform1i(uv.uTexLoc, 0);
+
+    applyToAllMeshes(box.getBounds().getMeshVector(), meshProcess);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    // glBindTexture(GL_TEXTURE_2D, glowStoneProg._glowStone.getTex());
+    // glUniform1i(glowStoneProg._uniformVariable.uTexLoc, 0);
+
+    applyToAllMeshes(sun.getMeshVector(), meshProcess);
+
+    // applyToAllMeshes(torch.getMeshVector(), meshProcess);
+
+    // applyToAllMeshes(glowStoneProg._glowStone.getMeshVector(), meshProcess);
+
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    // sun.animateSphere();
+}
+
 void Renderer::render(const Geometry &object, Geometry::Material material, Room::UniformVariable uniformVariable)
 {
     if (uniformVariable.uTexLoc == -1)
@@ -162,4 +218,48 @@ void Renderer::render(const Geometry &object, Geometry::Material material, Room:
     glBindVertexArray(0);
 
     glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+template <typename Func>
+void Renderer::applyToAllMeshes(const std::vector<Geometry::Mesh> &meshes, Func &&func)
+{
+    for (auto &mesh : meshes)
+    {
+        func(mesh);
+    }
+}
+
+void Renderer::setMatricesToShader(const Room::UniformVariable &uniformVariable,
+                                   const glm::mat4 &projectionMatrix,
+                                   const glm::mat4 &mvMatrix,
+                                   const glm::mat4 &normalMatrix)
+{
+    glUniformMatrix4fv(uniformVariable.uMVPMatrix, 1, GL_FALSE, glm::value_ptr(projectionMatrix * mvMatrix));
+    glUniformMatrix4fv(uniformVariable.uMVMatrix, 1, GL_FALSE, glm::value_ptr(mvMatrix));
+    glUniformMatrix4fv(uniformVariable.uNormalMatrix, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+}
+
+void Renderer::setMaterialAndLightingUniforms(const Room::UniformVariable &uniformVariable,
+                                              const glm::vec3 &light_dir_vs,
+                                              const glm::vec3 &light_pos_vs,
+                                              const glm::vec3 &lightIntensity,
+                                              const glm::vec3 &kd,
+                                              const glm::vec3 &ks,
+                                              float shininess)
+{
+    glUniform3fv(uniformVariable.uLightDir_vs, 1, glm::value_ptr(light_dir_vs));
+    glUniform3fv(uniformVariable.uLightPos_vs, 1, glm::value_ptr(light_pos_vs));
+
+    glUniform3f(uniformVariable.uLightIntensity, lightIntensity.x, lightIntensity.y, lightIntensity.z);
+
+    glUniform3fv(uniformVariable.uKd, 1, glm::value_ptr(kd));
+    glUniform3fv(uniformVariable.uKs, 1, glm::value_ptr(ks));
+    glUniform1f(uniformVariable.uShininess, shininess);
+}
+
+void Renderer::setSpotLightUniform(const Room::UniformVariable &uniformVariable, const glm::vec3 &spotLight, float spotlightCutoff, float spotlightExponent)
+{
+    glUniform3fv(uniformVariable.uSpotLight, 1, glm::value_ptr(spotLight));
+    glUniform1f(uniformVariable.uSpotlightCutoff, spotlightCutoff);
+    glUniform1f(uniformVariable.uSpotlightExponent, spotlightExponent);
 }

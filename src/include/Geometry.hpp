@@ -130,6 +130,11 @@ public:
         return _tex;
     }
 
+    const std::vector<Mesh> &getMeshVector() const
+    {
+        return m_MeshBuffer;
+    }
+
     /**
      * @brief This function add shape which is represents by array
      * of vertices in the current Geometry object. In other word,
@@ -153,9 +158,9 @@ public:
      */
     void initTexture(const std::string &path);
 
-    void translateModel(glm::vec3 &translate);
+    void translateModel(const glm::vec3 &translate);
 
-    void scaleModel(glm::vec3 &scale);
+    void scaleModel(const glm::vec3 &scale);
 
-    void rotateModel(float angle, glm::vec3 axis);
+    void rotateModel(float angle, const glm::vec3 &axis);
 };

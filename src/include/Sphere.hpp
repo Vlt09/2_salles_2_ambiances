@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include "Geometry.hpp"
 #include <glimac/common.hpp>
+#include <glimac/getTime.hpp>
 
 using Vertex = Geometry::Vertex;
 
@@ -116,6 +117,10 @@ class Sphere : public Geometry
     }
 
 public:
+    Sphere()
+    {
+    }
+
     // Constructeur: alloue le tableau de données et construit les attributs des vertex
     Sphere(GLfloat radius, GLsizei discLat, GLsizei discLong) : m_nVertexCount(0)
     {
@@ -132,6 +137,13 @@ public:
         // translateModel(0.f, 0.f, -5.f);
     }
 
+    void initSphere(GLfloat radius, GLsizei discLat, GLsizei discLong, Geometry::Material sphereMat)
+    {
+        m_Materials.push_back(sphereMat);
+        build(radius, discLat, discLong);
+        initMesh();
+    }
+
     // Renvoit le pointeur vers les données
     const Geometry::Vertex *getDataPointer() const
     {
@@ -142,6 +154,19 @@ public:
     GLsizei getVertexCount() const
     {
         return m_nVertexCount;
+    }
+
+    void animateSphere()
+    {
+        auto time = glimac::getTime();
+        float xOffset = sin(time) + cos(time * 2.1f);
+        float yOffset = cos(time) + sin(time * 1.6f);
+
+        xOffset = glm::clamp(xOffset, -10.f, 10.f);
+        yOffset = glm::clamp(yOffset, 3.f, 5.f);
+
+        auto &mTransform = m_MeshBuffer[0];
+        mTransform._transform = glm::translate(mTransform._transform, glm::vec3(xOffset, yOffset, 0.0f));
     }
 
 private:

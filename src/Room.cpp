@@ -3,7 +3,6 @@
 void Room::initProgram(const glimac::FilePath &vsFile, const glimac::FilePath &fsFile)
 {
     _mProgram = glimac::loadProgram(vsFile, fsFile);
-    _mProgram.use();
 
     uniformVariable.uMVPMatrix = glGetUniformLocation(_mProgram.getGLId(), "uMVPMatrix");
     uniformVariable.uMVMatrix = glGetUniformLocation(_mProgram.getGLId(), "uMVMatrix");
@@ -13,7 +12,11 @@ void Room::initProgram(const glimac::FilePath &vsFile, const glimac::FilePath &f
     uniformVariable.uKs = glGetUniformLocation(_mProgram.getGLId(), "uKs");
     uniformVariable.uShininess = glGetUniformLocation(_mProgram.getGLId(), "uShininess");
     uniformVariable.uLightDir_vs = glGetUniformLocation(_mProgram.getGLId(), "uLightDir_vs");
+    uniformVariable.uLightPos_vs = glGetUniformLocation(_mProgram.getGLId(), "uLightPos_vs");
     uniformVariable.uLightIntensity = glGetUniformLocation(_mProgram.getGLId(), "uLightIntensity");
+    uniformVariable.uSpotlightExponent = glGetUniformLocation(_mProgram.getGLId(), "uSpotlightExponent");
+    uniformVariable.uSpotlightCutoff = glGetUniformLocation(_mProgram.getGLId(), "uSpotlightCutoff");
+    uniformVariable.uSpotLight = glGetUniformLocation(_mProgram.getGLId(), "uSpotLight");
 }
 
 void Room::addGroundAndFront(const glm::vec3 &cameraPos)

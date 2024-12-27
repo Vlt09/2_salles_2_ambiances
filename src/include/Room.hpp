@@ -19,7 +19,11 @@ public:
         GLint uKs;
         GLint uShininess;
         GLint uLightDir_vs;
+        GLint uLightPos_vs;
         GLint uLightIntensity;
+        GLint uSpotlightCutoff;
+        GLint uSpotlightExponent;
+        GLint uSpotLight;
     };
 
     const Geometry &getBounds() const
@@ -40,6 +44,11 @@ public:
     const UniformVariable &getUniformVariable()
     {
         return uniformVariable;
+    }
+
+    const glimac::Program &getProgram()
+    {
+        return _mProgram;
     }
 
 private:

@@ -17,7 +17,7 @@ out vec3 fFragColor;
 
 vec3 blinnPhong(vec3 normal, vec3 fragPos_vs) {
     vec3 N = normalize(normal);
-    vec3 L = normalize(uLightDir_vs - vPosition_vs);
+    vec3 L = normalize(uLightPos_vs - vVertexPos);
     vec3 V = normalize(-fragPos_vs);
 
     vec3 H = normalize(L + V);
@@ -37,8 +37,10 @@ vec3 blinnPhong(vec3 normal, vec3 fragPos_vs) {
 
 void main() {
     vec3 tex = texture(uTexture, vVertexTex).xyz;
+    vec3 normalColor = normalize(vVertexNormal);
 
     vec3 lighting = blinnPhong(vVertexNormal, vVertexPos);
 
-    fFragColor = lighting;
+    // fFragColor = lighting + tex;
+    fFragColor = normalColor;
 }

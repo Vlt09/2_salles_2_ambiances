@@ -110,8 +110,7 @@ int main(int argc, char *argv[])
     glimac::Program program = glimac::loadProgram(applicationPath.dirPath() + "src/shaders/3D.vs.glsl",
                                                   applicationPath.dirPath() + "src/shaders/directionallight.fs.glsl");
 
-    program.use();
-
+    // program.use();
     auto mvp_loc = glGetUniformLocation(program.getGLId(), "uMVPMatrix");
     auto mv_loc = glGetUniformLocation(program.getGLId(), "uMVMatrix");
     auto normal_loc = glGetUniformLocation(program.getGLId(), "uNormalMatrix");
@@ -145,19 +144,23 @@ int main(int argc, char *argv[])
     uniformVariable.uLightDir_vs = uLightDir_vs;
     uniformVariable.uLightIntensity = uLightIntensity;
 
+    auto firstRoom_light_posY = camera.cameraPosition().y + 10.f;
+
     Renderer renderer(proj_matrix, viewMatrix);
-    Room room;
+    // Room room;
     FirstRoom fr;
     fr.initFirstRoom(applicationPath.dirPath() + "src/shaders/3D.vs.glsl",
                      applicationPath.dirPath() + "src/shaders/directionallight.fs.glsl",
                      "/home/valentin/m2/opengl/2_salles_2_ambiances/src/assets/MC-Torch/model/obj/Torch.obj",
                      "/home/valentin/m2/opengl/2_salles_2_ambiances/src/assets/MC-Torch/model/material/Diffuse.png",
                      camera.cameraPosition());
+    fr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z));
+    fr.setLightPos(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY + 10.f, camera.cameraPosition().z));
 
-    room.initProgram(applicationPath.dirPath() + "src/shaders/3D.vs.glsl",
-                     applicationPath.dirPath() + "src/shaders/directionallight.fs.glsl");
+    // room.initProgram(applicationPath.dirPath() + "src/shaders/3D.vs.glsl",
+    //  applicationPath.dirPath() + "src/shaders/directionallight.fs.glsl");
 
-    room.constructRoom(camera.cameraPosition(), 1);
+    // room.constructRoom(camera.cameraPosition(), 1);
     Geometry::Material sunMat;
     sunMat.m_Ka = glm::vec3(1.0f, 1.0f, 0.0f);
     sunMat.m_Kd = glm::vec3(1.0f, 1.0f, 0.0f);
@@ -174,7 +177,9 @@ int main(int argc, char *argv[])
 
     // Quad quad(50, 20);
 
-    auto bounds = room.getBounds();
+    // auto bounds = room.getBounds();
+    auto bounds = fr.getBox().getBounds();
+
     // bounds.rotateModel(90.f, glm::vec3(1.f, 0.f, 0.f));
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -182,14 +187,17 @@ int main(int argc, char *argv[])
         renderer.setViewMatrix(camera.getViewMatrix());
 
         glClearColor(1.f, 0.5f, 0.5f, 1.f);
+        // glClearColor(0.f, 0.f, 0.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // glUniformMatrix4fv(mvp_loc, 1, GL_FALSE, glm::value_ptr(proj_matrix * mv_matrix));
         // glUniformMatrix4fv(mv_loc, 1, GL_FALSE, glm::value_ptr(mv_matrix));
         // glUniformMatrix4fv(normal_loc, 1, GL_FALSE, glm::value_ptr(normal_matrix));
 
-        renderer.render(sphere, uniformVariable);
-        renderer.render(bounds, room.getUniformVariable());
+        // renderer.render(sphere, uniformVariable);
+        // renderer.render(bounds, room.getUniformVariable());
+
+        renderer.renderFirstRoom(fr);
 
         // glBindVertexArray(sphere.getMeshBuffer()->vao);
         // glDrawArrays(GL_TRIANGLES, 0, sphere.getVertexCount());

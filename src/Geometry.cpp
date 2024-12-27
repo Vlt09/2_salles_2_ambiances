@@ -255,17 +255,17 @@ void Geometry::initTexture(const std::string &path)
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Geometry::translateModel(glm::vec3 &translate)
+void Geometry::translateModel(const glm::vec3 &translate)
 {
-    _modelMatrix = glm::translate(_modelMatrix, translate);
+    m_MeshBuffer[0]._transform = glm::translate(_modelMatrix, translate);
 }
 
-void Geometry::scaleModel(glm::vec3 &scale)
+void Geometry::scaleModel(const glm::vec3 &scale)
 {
-    _modelMatrix = glm::scale(_modelMatrix, scale);
+    m_MeshBuffer[0]._transform = glm::scale(_modelMatrix, scale);
 }
 
-void Geometry::rotateModel(float angle, glm::vec3 axis)
+void Geometry::rotateModel(float angle, const glm::vec3 &axis)
 {
-    _modelMatrix = glm::rotate(_modelMatrix, angle, axis);
+    m_MeshBuffer[0]._transform = glm::rotate(_modelMatrix, angle, axis);
 }
