@@ -127,6 +127,7 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
     // glm::vec3 light_dir_world = glm::rotate(glm::mat4(1.f), glimac::getTime(), glm::vec3(0, 1, 0)) * glm::vec4(1, 1, 1, 0);
     glm::vec3 light_dir_world = glm::normalize(glm::vec3(1.0f, -1.0f, 1.0f));
 
+    // Le pb c'est que la spot light utilise la même direction que la light world
     setSpotLightUniform(uv, spotLight.position, spotLight.cutoff, spotLight.exponent);
 
     auto meshProcess = [&](const Geometry::Mesh &mesh)
@@ -136,7 +137,7 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
         glm::mat4 mv_matrix = this->_viewMatrix * mesh._transform;
         glm::mat4 normal_matrix = glm::transpose(glm::inverse(mv_matrix));
         glm::vec3 light_dir_vs = glm::vec3(glm::vec4(light_dir_world, 1.0));
-        glm::vec3 light_pos_vs = glm::vec3(this->_viewMatrix * glm::vec4(firstRoom.getLightPos(), 1.0));
+        glm::vec3 light_pos_vs = glm::vec3(glm::vec4(firstRoom.getLightPos(), 1.0));
 
         setMatricesToShader(uv, _projectionMatrix, mv_matrix, normal_matrix);
 

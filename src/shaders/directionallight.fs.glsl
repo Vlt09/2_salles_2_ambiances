@@ -38,7 +38,7 @@ vec3 blinnPhong(vec3 Kd, vec3 N) {
 
 vec3 pointLightblinnPhong(vec3 normal, vec3 fragPos_vs) {
     vec3 N = normalize(normal);
-    vec3 L = normalize(uLightPos_vs - vVertexPos);
+    vec3 L = normalize(vVertexPos - fragPos_vs);
     vec3 V = normalize(-fragPos_vs);
 
     vec3 H = normalize(L + V);
@@ -72,21 +72,6 @@ vec3 spotlightAttenuation(vec3 spotLight, vec3 normal) {
     return vec3(0, 0, 0);
 }
 
-// void main()
-// {
-//     // vec3 tex = texture(uTexture, vVertexTex).xyz;
-//     vec3 normalColor = normalize(vVertexNormal);
-
-//     // vec3 attenuation = spotlightAttenuation(uSpotLight, normalColor);
-//     // vec3 lighting = blinnPhong();
-
-//     // lighting += attenuation;
-
-//     // fFragColor = tex * (lighting);
-//     fFragColor = pointLightblinnPhong(uLightPos_vs, normalColor);
-
-// }
-
 void main()
 {
     vec3 tex = texture(uTexture, vVertexTex).xyz;
@@ -99,9 +84,8 @@ void main()
     vec3 attenuation = spotlightAttenuation(uSpotLight, normalColor);
     
 
-    fFragColor = lighting + attenuation;  // Apply texture after lighting
+    fFragColor = lighting + attenuation; 
 
 
-    // Debugging: Check normals
-    // fFragColor = normalColor * 0.5 + 0.5;  // Uncomment to visualize normals
+    // fFragColor = normalColor * 0.5 + 0.5;
 }
