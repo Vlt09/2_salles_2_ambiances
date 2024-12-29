@@ -10,9 +10,12 @@ uniform mat4 uNormalMatrix;
 
 out vec2 vVertexTex;
 out vec3 vVertexNormal;
+out vec3 vVertexPos;
+
 
 void main() {
     vVertexTex = aVertexTex;
     vVertexNormal = aVertexNormal;
+    vVertexPos = aVertexPosition;
     gl_Position = uMVPMatrix * vec4(aVertexPosition, 1);
 };

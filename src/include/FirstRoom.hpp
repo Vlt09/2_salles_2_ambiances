@@ -11,23 +11,22 @@ class FirstRoom
         Room::UniformVariable _uniformVariable;
         glimac::Program _program;
 
-        GlowStoneProg() : _glowStone(3)
-        {
-            _program = glimac::loadProgram("/home/valentin/m2/opengl/2_salles_2_ambiances/src/shaders/3D.vs.glsl",
-                                           "/home/valentin/m2/opengl/2_salles_2_ambiances/src/shaders/pointlight.fs.glsl");
+        GlowStoneProg() : _glowStone(3) {
+                              // _program = glimac::loadProgram("/home/valentin/m2/opengl/2_salles_2_ambiances/src/shaders/3D.vs.glsl",
+                              //                                "/home/valentin/m2/opengl/2_salles_2_ambiances/src/shaders/pointlight.fs.glsl");
 
-            _uniformVariable.uMVPMatrix = glGetUniformLocation(_program.getGLId(), "uMVPMatrix");
-            _uniformVariable.uMVMatrix = glGetUniformLocation(_program.getGLId(), "uMVMatrix");
-            _uniformVariable.uNormalMatrix = glGetUniformLocation(_program.getGLId(), "uNormalMatrix");
-            _uniformVariable.uTexLoc = glGetUniformLocation(_program.getGLId(), "uTexture");
-            _uniformVariable.uKd = glGetUniformLocation(_program.getGLId(), "uKd");
-            _uniformVariable.uKs = glGetUniformLocation(_program.getGLId(), "uKs");
-            _uniformVariable.uShininess = glGetUniformLocation(_program.getGLId(), "uShininess");
-            _uniformVariable.uLightDir_vs = glGetUniformLocation(_program.getGLId(), "uLightPos_vs");
-            _uniformVariable.uLightIntensity = glGetUniformLocation(_program.getGLId(), "uLightIntensity");
+                              // _uniformVariable.uMVPMatrix = glGetUniformLocation(_program.getGLId(), "uMVPMatrix");
+                              // _uniformVariable.uMVMatrix = glGetUniformLocation(_program.getGLId(), "uMVMatrix");
+                              // _uniformVariable.uNormalMatrix = glGetUniformLocation(_program.getGLId(), "uNormalMatrix");
+                              // _uniformVariable.uTexLoc = glGetUniformLocation(_program.getGLId(), "uTexture");
+                              // _uniformVariable.uKd = glGetUniformLocation(_program.getGLId(), "uKd");
+                              // _uniformVariable.uKs = glGetUniformLocation(_program.getGLId(), "uKs");
+                              // _uniformVariable.uShininess = glGetUniformLocation(_program.getGLId(), "uShininess");
+                              // _uniformVariable.uLightDir_vs = glGetUniformLocation(_program.getGLId(), "uLightPos_vs");
+                              // _uniformVariable.uLightIntensity = glGetUniformLocation(_program.getGLId(), "uLightIntensity");
 
-            _glowStone.initTexture("/home/valentin/m2/opengl/2_salles_2_ambiances/src/assets/glow_stone.jpg");
-        };
+                              // _glowStone.initTexture("/home/valentin/m2/opengl/2_salles_2_ambiances/src/assets/glow_stone.jpg");
+                          };
     };
 
     struct SpotLight
@@ -35,7 +34,7 @@ class FirstRoom
         Sphere _spot;
 
         glm::vec3 position;
-        glm::vec3 direction;
+        glm::vec3 direction = glm::vec3(0., -1., 0.);
         glm::vec3 intensity;
 
         float cutoff, exponent;
@@ -68,6 +67,9 @@ public:
     Geometry::Material _spotMaterial;
     Geometry::Material _boxMaterial;
 
+    GLuint feedbackBuffer;
+    GLuint feedbackObject;
+
     FirstRoom() : _spotLight(
                       Sphere(),
                       glm::vec3(0.0f, 5.0f, 0.0f),
@@ -77,17 +79,21 @@ public:
                       2.0f)
 
     {
-        _spotMaterial.m_Ka = glm::vec3(1.0f, 1.0f, 0.0f);
-        _spotMaterial.m_Kd = glm::vec3(1.0f, 1.0f, 0.0f);
-        _spotMaterial.m_Ks = glm::vec3(1.0f, 1.0f, 0.0f);
+        // _spotMaterial.m_Ka = glm::vec3(1.0f, 1.0f, 0.0f);
+        // _spotMaterial.m_Kd = glm::vec3(1.0f, 1.0f, 0.0f);
+        // _spotMaterial.m_Ks = glm::vec3(1.0f, 1.0f, 0.0f);
+        _spotMaterial.m_Ka = glm::vec3(0.1f, 0.1f, 0.1f); // Couleur ambiante faible
+        _spotMaterial.m_Kd = glm::vec3(1.0f, 1.0f, 1.0f); // Diffuse blanche
+        _spotMaterial.m_Ks = glm::vec3(0.9f, 0.9f, 0.9f); // Spéculaire brillante
+
         _spotMaterial.m_Tr = glm::vec3(0.0f, 0.0f, 0.0f);
         _spotMaterial.m_Le = glm::vec3(1.0f, 1.0f, 0.0f);
         _spotMaterial.m_Shininess = 128.f;
         _spotMaterial.m_RefractionIndex = 1.f;
         _spotMaterial.m_Dissolve = 1.0f;
 
-        _boxMaterial.m_Kd = glm::vec3(0.4f, 0.3f, 0.2f);
-        _boxMaterial.m_Ks = glm::vec3(0.05f, 0.05f, 0.05f);
+        _boxMaterial.m_Kd = glm::vec3(0.5f, 0.5f, 0.5f);
+        _boxMaterial.m_Ks = glm::vec3(0.8f, 0.8f, 0.8f);
         _boxMaterial.m_Shininess = 2.0f;
 
         _spotLight._spot.initSphere(1, 32, 16, _spotMaterial);
@@ -132,6 +138,16 @@ public:
         _box.constructRoom(cameraPos, 1);
 
         _torch.loadOBJ(torchOBJFilePath, torchMatFilePath, true);
+
+        glGenBuffers(1, &feedbackBuffer);
+        glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, feedbackBuffer);
+        glBufferData(GL_TRANSFORM_FEEDBACK_BUFFER, sizeof(glm::vec3) * _box.getBounds().getVertexCount(), nullptr, GL_STATIC_READ); // Taille du buffer et type des données
+
+        glGenTransformFeedbacks(1, &feedbackObject);
+        glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, feedbackObject);
+
+        const char *varyings[] = {"vVertexPos"};
+        glTransformFeedbackVaryings(_box.getProgramId(), 1, varyings, GL_INTERLEAVED_ATTRIBS);
     }
 
     /**
@@ -162,5 +178,26 @@ public:
     const glm::vec3 &getLightPos()
     {
         return _lightPos;
+    }
+
+    void printDebugBuff()
+    {
+        // Lire le buffer après le rendu
+        glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, feedbackBuffer);
+        glm::vec3 *positions = (glm::vec3 *)glMapBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, GL_READ_ONLY);
+        // Accéder aux données et les afficher ou les enregistrer
+        for (int i = 0; i < _box.getBounds().getVertexCount(); ++i)
+        {
+            std::cout << "Vertex " << i << " Position: " << positions[i].x << ", " << positions[i].y << ", " << positions[i].z << std::endl;
+        }
+
+        auto vVertexPos = positions[0];
+        auto spotLight = _spotLight.position;
+        auto lightToPixel = glm::normalize(vVertexPos - spotLight);
+        auto dir = glm::normalize(glm::vec3(0, -1, 0));
+        float spotFactor = glm::dot(lightToPixel, dir);
+
+        std::cout << "lightToPixel = " << lightToPixel << " spotFactor = " << spotFactor << std::endl;
+        glUnmapBuffer(GL_TRANSFORM_FEEDBACK_BUFFER); // Libérer le buffer
     }
 };

@@ -51,6 +51,11 @@ public:
         return _mProgram;
     }
 
+    GLuint getProgramId()
+    {
+        return _mProgram.getGLId();
+    }
+
 private:
     std::list<Geometry> _objects;
     UniformVariable uniformVariable;

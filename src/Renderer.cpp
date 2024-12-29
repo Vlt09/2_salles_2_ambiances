@@ -125,7 +125,7 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
     auto &spotLight = firstRoom.getSpotLight();
 
     // glm::vec3 light_dir_world = glm::rotate(glm::mat4(1.f), glimac::getTime(), glm::vec3(0, 1, 0)) * glm::vec4(1, 1, 1, 0);
-    glm::vec3 light_dir_world = glm::normalize(glm::vec3(1.0f, 1.0f, 1.0f));
+    glm::vec3 light_dir_world = glm::normalize(glm::vec3(1.0f, -1.0f, 1.0f));
 
     setSpotLightUniform(uv, spotLight.position, spotLight.cutoff, spotLight.exponent);
 
@@ -135,14 +135,14 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
 
         glm::mat4 mv_matrix = this->_viewMatrix * mesh._transform;
         glm::mat4 normal_matrix = glm::transpose(glm::inverse(mv_matrix));
-        glm::vec3 light_dir_vs = glm::vec3(this->_viewMatrix * glm::vec4(light_dir_world, 1.0));
+        glm::vec3 light_dir_vs = glm::vec3(glm::vec4(light_dir_world, 1.0));
         glm::vec3 light_pos_vs = glm::vec3(this->_viewMatrix * glm::vec4(firstRoom.getLightPos(), 1.0));
 
         setMatricesToShader(uv, _projectionMatrix, mv_matrix, normal_matrix);
 
         if (firstRoom.getLightFlag() == 1)
         {
-            setMaterialAndLightingUniforms(uv, light_dir_vs, glm::vec3(1.f, 1.f, 1.f), firstRoom._boxMaterial.m_Kd, firstRoom._boxMaterial.m_Ks,
+            setMaterialAndLightingUniforms(uv, light_dir_vs, light_pos_vs, firstRoom._boxMaterial.m_Kd, firstRoom._boxMaterial.m_Ks,
                                            light_pos_vs, firstRoom._spotMaterial.m_Shininess);
         }
 
@@ -154,7 +154,9 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
     glBindTexture(GL_TEXTURE_2D, box.getBounds().getTex());
     glUniform1i(uv.uTexLoc, 0);
 
+    glBeginTransformFeedback(GL_TRIANGLES);
     applyToAllMeshes(box.getBounds().getMeshVector(), meshProcess);
+    glEndTransformFeedback();
     glBindTexture(GL_TEXTURE_2D, 0);
 
     // glBindTexture(GL_TEXTURE_2D, glowStoneProg._glowStone.getTex());
@@ -260,6 +262,6 @@ void Renderer::setMaterialAndLightingUniforms(const Room::UniformVariable &unifo
 void Renderer::setSpotLightUniform(const Room::UniformVariable &uniformVariable, const glm::vec3 &spotLight, float spotlightCutoff, float spotlightExponent)
 {
     glUniform3fv(uniformVariable.uSpotLight, 1, glm::value_ptr(spotLight));
-    glUniform1f(uniformVariable.uSpotlightCutoff, spotlightCutoff);
+    glUniform1f(uniformVariable.uSpotlightCutoff, cosf(spotlightCutoff));
     glUniform1f(uniformVariable.uSpotlightExponent, spotlightExponent);
 }
