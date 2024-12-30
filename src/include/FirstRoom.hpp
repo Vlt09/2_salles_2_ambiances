@@ -5,28 +5,19 @@
 
 class FirstRoom
 {
-    struct GlowStoneProg
+
+    static const unsigned int MAX_SPOT_LIGHT = 2;
+
+    struct SpotLightUniformVarLoc
     {
-        Cube _glowStone;
-        Room::UniformVariable _uniformVariable;
-        glimac::Program _program;
-
-        GlowStoneProg() : _glowStone(3) {
-                              // _program = glimac::loadProgram("/home/valentin/m2/opengl/2_salles_2_ambiances/src/shaders/3D.vs.glsl",
-                              //                                "/home/valentin/m2/opengl/2_salles_2_ambiances/src/shaders/pointlight.fs.glsl");
-
-                              // _uniformVariable.uMVPMatrix = glGetUniformLocation(_program.getGLId(), "uMVPMatrix");
-                              // _uniformVariable.uMVMatrix = glGetUniformLocation(_program.getGLId(), "uMVMatrix");
-                              // _uniformVariable.uNormalMatrix = glGetUniformLocation(_program.getGLId(), "uNormalMatrix");
-                              // _uniformVariable.uTexLoc = glGetUniformLocation(_program.getGLId(), "uTexture");
-                              // _uniformVariable.uKd = glGetUniformLocation(_program.getGLId(), "uKd");
-                              // _uniformVariable.uKs = glGetUniformLocation(_program.getGLId(), "uKs");
-                              // _uniformVariable.uShininess = glGetUniformLocation(_program.getGLId(), "uShininess");
-                              // _uniformVariable.uLightDir_vs = glGetUniformLocation(_program.getGLId(), "uLightPos_vs");
-                              // _uniformVariable.uLightIntensity = glGetUniformLocation(_program.getGLId(), "uLightIntensity");
-
-                              // _glowStone.initTexture("/home/valentin/m2/opengl/2_salles_2_ambiances/src/assets/glow_stone.jpg");
-                          };
+        GLuint position;
+        GLuint direction;
+        GLuint lightIntensity;
+        GLuint lightPos;
+        GLuint m_Kd;
+        GLuint m_Ks;
+        GLuint cutoff;
+        GLuint exponent;
     };
 
     struct SpotLight
@@ -54,12 +45,10 @@ private:
 
     Room _box;
     SpotLight _spotLight;
-
-    GlowStoneProg _glowStoneProg;
+    SpotLight _spotLights[MAX_SPOT_LIGHT];
+    SpotLightUniformVarLoc _spotLightUniformVarLoc[MAX_SPOT_LIGHT];
 
     Geometry _torch;
-
-    glm::vec3 _spotPosition;
 
     glm::vec3 _lightPos;
 
@@ -98,10 +87,15 @@ public:
         _boxMaterial.m_Ks = glm::vec3(0.2f, 0.2f, 0.1f);
         _boxMaterial.m_Shininess = 2.0f;
 
-        _spotLight._spot.initSphere(1, 32, 16, _spotMaterial);
         _boxLightIntensity = glm::vec3(0.5f, 0.5f, 0.5f);
+
+        _spotLight._spot.initSphere(1, 32, 16, _spotMaterial);
+        _spotLights[0]._spot.initSphere(1, 32, 16, _spotMaterial);
+
         _spotLight.intensity = glm::vec3(1.0f, 1.0f, 1.0f);
         _spotLight.cutoff = 2.f;
+        _spotLights[0].intensity = glm::vec3(1.0f, 1.0f, 1.0f);
+        _spotLights[0].cutoff = 2.f;
     }
 
     Sphere &getSpot()
@@ -119,11 +113,6 @@ public:
         return _boxLightIntensity;
     }
 
-    GlowStoneProg &getGlowStoneProg()
-    {
-        return _glowStoneProg;
-    }
-
     const Room::UniformVariable &getBoxUniformVariable()
     {
         return _box.getUniformVariable();
@@ -139,6 +128,79 @@ public:
         return _lightFlag;
     }
 
+    /**
+     * @brief this method translate sphere that represents spot light and update
+     * his position.
+     */
+    void translateSpotLight(const glm::vec3 &pos, int idx)
+    {
+        _spotLight._spot.translateModel(pos);
+        _spotLights[idx]._spot.translateModel(pos);
+
+        _spotLight.position = pos;
+        _spotLights[idx].position = pos;
+    }
+
+    const SpotLight &getSpotLight(int idx)
+    {
+        return _spotLight;
+    }
+
+    void setGlobalLightPos(const glm::vec3 &pos)
+    {
+        _lightPos = pos;
+    }
+
+    const glm::vec3 &getGlobalLightPos()
+    {
+        return _lightPos;
+    }
+
+    SpotLight *getSpotLightsData()
+    {
+        return &_spotLights[0];
+    }
+
+    SpotLightUniformVarLoc *getSpotLightsUniformVarLocData()
+    {
+        return &_spotLightUniformVarLoc[0];
+    }
+
+    void setSpotLightUniformLocations()
+    {
+        auto programID = _box.getProgramId();
+        for (int i = 0; i < 1; ++i)
+        {
+            std::string baseName = "uSpotLights[" + std::to_string(i) + "]";
+
+            _spotLightUniformVarLoc[i].position = glGetUniformLocation(programID, (baseName + "._position").c_str());
+            _spotLightUniformVarLoc[i].direction = glGetUniformLocation(programID, (baseName + "._direction").c_str());
+            _spotLightUniformVarLoc[i].lightIntensity = glGetUniformLocation(programID, (baseName + "._lightIntensity").c_str());
+            _spotLightUniformVarLoc[i].lightPos = glGetUniformLocation(programID, (baseName + "._lightPos").c_str());
+            _spotLightUniformVarLoc[i].cutoff = glGetUniformLocation(programID, (baseName + "._cutoff").c_str());
+            _spotLightUniformVarLoc[i].exponent = glGetUniformLocation(programID, (baseName + "._exponent").c_str());
+            _spotLightUniformVarLoc[i].m_Kd = glGetUniformLocation(programID, (baseName + ".m_Kd").c_str());
+            _spotLightUniformVarLoc[i].m_Ks = glGetUniformLocation(programID, (baseName + ".m_Ks").c_str());
+
+            if (_spotLightUniformVarLoc[i].position == -1)
+                std::cerr << "Error: Could not find " << baseName << "._position" << std::endl;
+            if (_spotLightUniformVarLoc[i].direction == -1)
+                std::cerr << "Error: Could not find " << baseName << "._direction" << std::endl;
+            if (_spotLightUniformVarLoc[i].lightIntensity == -1)
+                std::cerr << "Error: Could not find " << baseName << "._lightIntensity" << std::endl;
+            if (_spotLightUniformVarLoc[i].lightPos == -1)
+                std::cerr << "Error: Could not find " << baseName << "._lightPos" << std::endl;
+            if (_spotLightUniformVarLoc[i].cutoff == -1)
+                std::cerr << "Error: Could not find " << baseName << "._spotlightCutoff" << std::endl;
+            if (_spotLightUniformVarLoc[i].exponent == -1)
+                std::cerr << "Error: Could not find " << baseName << "._spotlightExponent" << std::endl;
+            if (_spotLightUniformVarLoc[i].m_Kd == -1)
+                std::cerr << "Error: Could not find " << baseName << "m_Kd" << std::endl;
+            if (_spotLightUniformVarLoc[i].m_Ks == -1)
+                std::cerr << "Error: Could not find " << baseName << "m_Ks" << std::endl;
+        }
+    }
+
     void initFirstRoom(const glimac::FilePath &vsFilePath, const glimac::FilePath &fsFilePath, const glimac::FilePath &torchOBJFilePath,
                        const glimac::FilePath &torchMatFilePath, glm::vec3 cameraPos)
     {
@@ -149,6 +211,8 @@ public:
 
         _torch.loadOBJ(torchOBJFilePath, torchMatFilePath, true);
 
+        setSpotLightUniformLocations();
+
         glGenBuffers(1, &feedbackBuffer);
         glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, feedbackBuffer);
         glBufferData(GL_TRANSFORM_FEEDBACK_BUFFER, sizeof(glm::vec3) * _box.getBounds().getVertexCount(), nullptr, GL_STATIC_READ);
@@ -158,36 +222,6 @@ public:
 
         const char *varyings[] = {"vVertexNormal"};
         glTransformFeedbackVaryings(_box.getProgramId(), 1, varyings, GL_INTERLEAVED_ATTRIBS);
-    }
-
-    /**
-     * @brief this method translate sphere that represents spot light and update
-     * his position.
-     */
-    void translateSpotLight(const glm::vec3 &pos)
-    {
-        _spotLight._spot.translateModel(pos);
-        _spotLight.position = pos;
-    }
-
-    const glm::vec3 &getLightDir()
-    {
-        return _spotPosition;
-    }
-
-    const SpotLight &getSpotLight()
-    {
-        return _spotLight;
-    }
-
-    void setLightPos(const glm::vec3 &pos)
-    {
-        _lightPos = pos;
-    }
-
-    const glm::vec3 &getLightPos()
-    {
-        return _lightPos;
     }
 
     void printDebugBuff()

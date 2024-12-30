@@ -6,6 +6,8 @@ in vec3 vVertexPos;
 
 uniform sampler2D uTexture;
 
+uniform mat4 uModelMatrix;
+
 uniform vec3 uKd;
 uniform vec3 uKs;
 uniform float uShininess;
@@ -18,6 +20,17 @@ uniform vec3 uLightPos_vs;
 uniform vec3 uSpotLight;
 uniform float uSpotlightCutoff; // Angle limite du spot de lumiere
 uniform float uSpotlightExponent;
+
+struct SpotLight{
+    vec3 _position, _direction, _lightIntensity;
+    vec3 _lightPos; // M space
+    float _cutoff, _exponent;
+    vec3 m_Kd;
+    vec3 m_Ks;
+
+};
+
+uniform SpotLight uSpotLights[2];
 
 out vec3 fFragColor;
 
@@ -58,8 +71,8 @@ vec3 pointLightblinnPhong(vec3 normal, vec3 fragPos_vs) {
 }
 
 
-vec3 spotlightAttenuation(vec3 spotLight, vec3 normal) {
-    vec3 lightToPixel = normalize(vVertexPos - spotLight);
+vec3 spotlightAttenuation(SpotLight spotLight, vec3 normal) {
+    vec3 lightToPixel = normalize(vVertexPos - spotLight._position);
     vec3 dir = vec3(0,-1,0);
     float spotFactor = dot(lightToPixel, dir);  
 
@@ -68,8 +81,8 @@ vec3 spotlightAttenuation(vec3 spotLight, vec3 normal) {
     }
 
     if (spotFactor > uSpotlightCutoff) {
-        vec3 color = pointLightblinnPhong(normal, uLightPos_vs);
-        float spotLightIntensity = (1.0 - (1.0 - spotFactor)/(1.0 - uSpotlightCutoff));
+        vec3 color = pointLightblinnPhong(normal, vec3(uModelMatrix * vec4(spotLight._position, 1.0)));
+        float spotLightIntensity = (1.0 - (1.0 - spotFactor)/(1.0 - spotLight._cutoff));
         return color * spotLightIntensity;
     }
 
@@ -84,11 +97,17 @@ void main()
     vec3 lighting = blinnPhong(uKd, normalColor);
 
     // fFragColor = lighting; 
-    
-    vec3 attenuation = spotlightAttenuation(uSpotLight, normalColor);
+
+    vec3 attenuation = vec3(0, 0, 0);
+
+    for (int i = 0 ;i < 1 ;i++) {
+        attenuation += spotlightAttenuation(uSpotLights[i], normalColor);
+    }
+
+    // attenuation += spotlightAttenuation(uSpotLight, normalColor);
     
 
-    fFragColor = (attenuation ); 
+    fFragColor = (attenuation); 
 
 
     // fFragColor = normalColor * 0.5 + 0.5;

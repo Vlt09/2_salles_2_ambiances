@@ -60,7 +60,8 @@ public:
     void setMatricesToShader(const Room::UniformVariable &uniformVariable,
                              const glm::mat4 &projectionMatrix,
                              const glm::mat4 &mvMatrix,
-                             const glm::mat4 &normalMatrix);
+                             const glm::mat4 &normalMatrix,
+                             const glm::mat4 &modelMatrix);
 
     void renderScene(const Scene &scene);
 
@@ -70,4 +71,6 @@ public:
     }
 
     void setSpotLightUniform(const Room::UniformVariable &uniformVariable, const glm::vec3 &spotLight, float spotlightCutoff, float spotlightExponent);
+
+    void setSpotLightsUniform(FirstRoom &firstRoom);
 };

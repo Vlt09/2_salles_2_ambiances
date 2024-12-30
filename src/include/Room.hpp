@@ -14,6 +14,7 @@ public:
         GLint uMVPMatrix;
         GLint uMVMatrix;
         GLint uNormalMatrix;
+        GLint uModelMatrix;
         GLint uTexLoc;
         GLint uKd;
         GLint uKs;

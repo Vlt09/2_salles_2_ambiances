@@ -10,124 +10,19 @@ Renderer::Renderer(glm::mat4 &projMatrix, glm::mat4 &viewMatrix) : _projectionMa
 {
 }
 
-void renderMultipleMesh(int meshCount, const Geometry::Mesh *meshBuff, glm::vec3 &light_dir_world,
-                        glm::mat4 &projMat, glm::mat4 &viewMat, Room::UniformVariable &uniformVariable, const std::vector<Geometry::Material> &matList)
-{
-    for (size_t i = 0; i < meshCount; i++)
-    {
-        auto &currentMesh = meshBuff[i];
-        glBindVertexArray(currentMesh.vao);
-
-        // Check if Mesh has local transform
-        if (currentMesh.isTransform)
-        {
-            auto mv_matrix = viewMat * currentMesh._transform;
-            glm::vec3 light_dir_vs = glm::vec3(mv_matrix * glm::vec4(light_dir_world, 0.0));
-
-            auto normal_matrix = glm::transpose(glm::inverse(mv_matrix));
-
-            glUniformMatrix4fv(uniformVariable.uMVPMatrix, 1, GL_FALSE, glm::value_ptr(projMat * mv_matrix));
-            glUniformMatrix4fv(uniformVariable.uMVMatrix, 1, GL_FALSE, glm::value_ptr(mv_matrix));
-            glUniformMatrix4fv(uniformVariable.uNormalMatrix, 1, GL_FALSE, glm::value_ptr(normal_matrix));
-
-            // Light parameter
-            glUniform3fv(uniformVariable.uLightDir_vs, 1, glm::value_ptr(light_dir_vs));
-            glUniform3f(uniformVariable.uLightIntensity, 1.0f, 1.0f, 1.0f);
-
-            if (currentMesh.m_nMaterialIndex != -1)
-            {
-                // Get the material
-                const Geometry::Material &material = matList[currentMesh.m_nMaterialIndex];
-
-                glUniform3fv(uniformVariable.uKd, 1, glm::value_ptr(material.m_Kd)); // Diffuse color
-                glUniform3fv(uniformVariable.uKs, 1, glm::value_ptr(material.m_Ks)); // Specular color
-                glUniform1f(uniformVariable.uShininess, material.m_Shininess);       // Shininess coefficient
-            }
-            else
-            {
-                glUniform3f(uniformVariable.uKd, 0.4f, 0.3f, 0.2f);
-                glUniform3f(uniformVariable.uKs, 0.05f, 0.05f, 0.05f);
-                glUniform1f(uniformVariable.uShininess, 2.0f);
-            }
-        }
-
-        // glBindVertexArray(currentMesh.vao);
-        // glBindTexture(GL_TEXTURE_2D, tex);
-        glDrawArrays(GL_TRIANGLES, currentMesh.m_nIndexOffset, currentMesh.m_nIndexCount);
-    }
-}
-
-void Renderer::render(const Geometry &object, Room::UniformVariable uniformVariable)
-{
-    if (uniformVariable.uTexLoc == -1)
-    {
-        std::cerr << "L'uniforme de texture n'est pas lié correctement." << std::endl;
-    }
-
-    glm::vec3 light_dir_world = glm::rotate(glm::mat4(1.f), glimac::getTime(), glm::vec3(0, 1, 0)) * glm::vec4(1, 1, 1, 0);
-
-    glBindTexture(GL_TEXTURE_2D, object.getTex());
-    glUniform1i(uniformVariable.uTexLoc, 0);
-
-    auto meshBuff = object.getMeshBuffer();
-    auto meshCount = object.getMeshCount();
-    const auto &matList = object.getMaterialList();
-
-    // Check if mesh's object has local transform
-    if (meshCount > 1 && meshBuff->isTransform == true)
-    {
-        renderMultipleMesh(meshCount, meshBuff, light_dir_world, this->_projectionMatrix, this->_viewMatrix, uniformVariable, matList);
-    }
-    else
-    {
-        auto mv_matrix = this->_viewMatrix * object.getModelMatrix();
-        glm::vec3 light_dir_vs = glm::vec3(mv_matrix * glm::vec4(light_dir_world, 0.0));
-
-        auto normal_matrix = glm::transpose(glm::inverse(mv_matrix));
-
-        glBindVertexArray(meshBuff[0].vao);
-
-        glUniformMatrix4fv(uniformVariable.uMVPMatrix, 1, GL_FALSE, glm::value_ptr(this->_projectionMatrix * mv_matrix));
-        glUniformMatrix4fv(uniformVariable.uMVMatrix, 1, GL_FALSE, glm::value_ptr(mv_matrix));
-        glUniformMatrix4fv(uniformVariable.uNormalMatrix, 1, GL_FALSE, glm::value_ptr(normal_matrix));
-
-        // Light parameter
-        glUniform3fv(uniformVariable.uLightDir_vs, 1, glm::value_ptr(light_dir_vs));
-        glUniform3f(uniformVariable.uLightIntensity, 1.0f, 1.0f, 1.0f);
-
-        glUniform3f(uniformVariable.uKd, 0.8f, 0.8f, 0.8f);
-        glUniform3f(uniformVariable.uKs, 0.5f, 0.5f, 0.5f);
-        glUniform1f(uniformVariable.uShininess, 32.0f);
-
-        if (meshBuff[0].m_nMaterialIndex != -1)
-        {
-            auto material = object.getMaterialList()[0];
-            glUniform3fv(uniformVariable.uKd, 1, glm::value_ptr(material.m_Kd)); // Diffuse color
-            glUniform3fv(uniformVariable.uKs, 1, glm::value_ptr(material.m_Ks)); // Specular color
-            glUniform1f(uniformVariable.uShininess, material.m_Shininess);       // Shininess coefficient
-        }
-
-        glDrawArrays(GL_TRIANGLES, 0, object.getVertexCount());
-    }
-
-    glBindVertexArray(0);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
-
 void Renderer::renderFirstRoom(FirstRoom &firstRoom)
 {
     auto &box = firstRoom.getBox();
     auto &uv = firstRoom.getBoxUniformVariable();
-    auto &spot = firstRoom.getSpotLight();
+    auto &spot = firstRoom.getSpotLight(0);
     auto &torch = firstRoom.getTorch();
-    auto &glowStoneProg = firstRoom.getGlowStoneProg();
-    auto &spotLight = firstRoom.getSpotLight();
+    auto &spotLight = firstRoom.getSpotLight(0);
 
     // glm::vec3 light_dir_world = glm::rotate(glm::mat4(1.f), glimac::getTime(), glm::vec3(0, 1, 0)) * glm::vec4(1, 1, 1, 0);
     glm::vec3 light_dir_world = glm::normalize(glm::vec3(0.0f, -1.0f, 0.0f));
 
     setSpotLightUniform(uv, spotLight.position, spotLight.cutoff, spotLight.exponent);
+    setSpotLightsUniform(firstRoom);
 
     auto meshProcess = [&](const Geometry::Mesh &mesh, const glm::vec3 &lightIntensity, const Geometry::Material &mat)
     {
@@ -135,10 +30,10 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
 
         glm::mat4 mv_matrix = this->_viewMatrix * mesh._transform;
         glm::mat4 normal_matrix = glm::transpose(glm::inverse(mv_matrix));
-        glm::vec3 light_dir_vs = glm::vec3(mesh._transform * glm::vec4(light_dir_world, 1.0));
-        glm::vec3 light_pos_vs = glm::vec3(mesh._transform * glm::vec4(firstRoom.getLightPos(), 1.0));
+        glm::vec3 light_dir_vs = glm::vec3(glm::vec4(light_dir_world, 1.0));
+        glm::vec3 light_pos_vs = glm::vec3(mesh._transform * glm::vec4(firstRoom.getGlobalLightPos(), 1.0));
 
-        setMatricesToShader(uv, _projectionMatrix, mv_matrix, normal_matrix);
+        setMatricesToShader(uv, _projectionMatrix, mv_matrix, normal_matrix, mesh._transform);
 
         if (firstRoom.getLightFlag() == 1)
         {
@@ -158,8 +53,6 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
     glEndTransformFeedback();
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    std::cout << "======================================================" << std::endl;
-
     // glBindTexture(GL_TEXTURE_2D, glowStoneProg._glowStone.getTex());
     // glUniform1i(glowStoneProg._uniformVariable.uTexLoc, 0);
 
@@ -167,61 +60,10 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
 
     // applyToAllMeshes(torch.getMeshVector(), meshProcess);
 
-    // applyToAllMeshes(glowStoneProg._glowStone.getMeshVector(), meshProcess);
-
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
     // sun.animateSphere();
     // firstRoom.printDebugBuff();
-}
-
-void Renderer::render(const Geometry &object, Geometry::Material material, Room::UniformVariable uniformVariable)
-{
-    if (uniformVariable.uTexLoc == -1)
-    {
-        std::cerr << "L'uniforme de texture n'est pas lié correctement." << std::endl;
-    }
-
-    glm::vec3 light_dir_world = glm::rotate(glm::mat4(1.f), glimac::getTime(), glm::vec3(0, 1, 0)) * glm::vec4(1, 1, 1, 0);
-
-    glBindTexture(GL_TEXTURE_2D, object.getTex());
-    glUniform1i(uniformVariable.uTexLoc, 0);
-
-    glUniform3fv(uniformVariable.uKd, 1, glm::value_ptr(material.m_Kd));
-    glUniform3fv(uniformVariable.uKs, 1, glm::value_ptr(material.m_Ks));
-    glUniform1f(uniformVariable.uShininess, material.m_Shininess);
-
-    auto meshBuff = object.getMeshBuffer();
-    auto meshCount = object.getMeshCount();
-    for (size_t i = 0; i < meshCount; i++)
-    {
-        auto &currentMesh = meshBuff[i];
-        glBindVertexArray(currentMesh.vao);
-
-        // Check if Mesh has local transform
-        if (currentMesh.isTransform)
-        {
-            auto mv_matrix = this->_viewMatrix * currentMesh._transform;
-            glm::vec3 light_dir_vs = glm::vec3(mv_matrix * glm::vec4(light_dir_world, 0.0));
-
-            auto normal_matrix = glm::transpose(glm::inverse(mv_matrix));
-
-            glUniformMatrix4fv(uniformVariable.uMVPMatrix, 1, GL_FALSE, glm::value_ptr(this->_projectionMatrix * mv_matrix));
-            glUniformMatrix4fv(uniformVariable.uMVMatrix, 1, GL_FALSE, glm::value_ptr(mv_matrix));
-            glUniformMatrix4fv(uniformVariable.uNormalMatrix, 1, GL_FALSE, glm::value_ptr(normal_matrix));
-
-            // Light parameter
-            glUniform3fv(uniformVariable.uLightDir_vs, 1, glm::value_ptr(light_dir_vs));
-            glUniform3f(uniformVariable.uLightIntensity, 1.0f, 1.0f, 1.0f);
-        }
-
-        // glBindVertexArray(currentMesh.vao);
-        // glBindTexture(GL_TEXTURE_2D, tex);
-        glDrawArrays(GL_TRIANGLES, currentMesh.m_nIndexOffset, currentMesh.m_nIndexCount);
-    }
-    glBindVertexArray(0);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 template <typename Func>
@@ -236,11 +78,13 @@ void Renderer::applyToAllMeshes(const std::vector<Geometry::Mesh> &meshes, Func 
 void Renderer::setMatricesToShader(const Room::UniformVariable &uniformVariable,
                                    const glm::mat4 &projectionMatrix,
                                    const glm::mat4 &mvMatrix,
-                                   const glm::mat4 &normalMatrix)
+                                   const glm::mat4 &normalMatrix,
+                                   const glm::mat4 &modelMatrix)
 {
     glUniformMatrix4fv(uniformVariable.uMVPMatrix, 1, GL_FALSE, glm::value_ptr(projectionMatrix * mvMatrix));
     glUniformMatrix4fv(uniformVariable.uMVMatrix, 1, GL_FALSE, glm::value_ptr(mvMatrix));
     glUniformMatrix4fv(uniformVariable.uNormalMatrix, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+    glUniformMatrix4fv(uniformVariable.uModelMatrix, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 }
 
 void Renderer::setMaterialAndLightingUniforms(const Room::UniformVariable &uniformVariable,
@@ -249,7 +93,6 @@ void Renderer::setMaterialAndLightingUniforms(const Room::UniformVariable &unifo
                                               const glm::vec3 &lightIntensity,
                                               const Geometry::Material &mat)
 {
-    std::cout << "light_dir_vs = " << light_dir_vs << std::endl;
     glUniform3fv(uniformVariable.uLightDir_vs, 1, glm::value_ptr(light_dir_vs));
     glUniform3fv(uniformVariable.uLightPos_vs, 1, glm::value_ptr(light_pos_vs));
 
@@ -265,4 +108,23 @@ void Renderer::setSpotLightUniform(const Room::UniformVariable &uniformVariable,
     glUniform3fv(uniformVariable.uSpotLight, 1, glm::value_ptr(spotLight));
     glUniform1f(uniformVariable.uSpotlightCutoff, cosf(glm::radians(spotlightCutoff)));
     glUniform1f(uniformVariable.uSpotlightExponent, spotlightExponent);
+}
+
+void Renderer::setSpotLightsUniform(FirstRoom &firstRoom)
+{
+
+    auto spotLight = firstRoom.getSpotLightsData();
+    auto spotLightVarLoc = firstRoom.getSpotLightsUniformVarLocData();
+    for (int i = 0; i < 1; i++)
+    {
+        glUniform3fv(spotLightVarLoc[i].position, 1, glm::value_ptr(spotLight[i].position));
+        glUniform3fv(spotLightVarLoc[i].direction, 1, glm::value_ptr(spotLight[i].direction));
+        glUniform3fv(spotLightVarLoc[i].lightIntensity, 1, glm::value_ptr(spotLight[i].intensity));
+        // glUniform3fv(spotLightVarLoc[i].lightPos, 1, glm::value_ptr(spotLight[i].lightPos));
+        glUniform3fv(spotLightVarLoc[i].m_Kd, 1, glm::value_ptr(firstRoom._spotMaterial.m_Kd));
+        glUniform3fv(spotLightVarLoc[i].m_Ks, 1, glm::value_ptr(firstRoom._spotMaterial.m_Ks));
+
+        glUniform1f(spotLightVarLoc[i].cutoff, spotLight[i].cutoff);
+        glUniform1f(spotLightVarLoc[i].exponent, spotLight[i].exponent);
+    }
 }

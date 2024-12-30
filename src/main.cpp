@@ -154,8 +154,8 @@ int main(int argc, char *argv[])
                      "/home/valentin/m2/opengl/2_salles_2_ambiances/src/assets/MC-Torch/model/obj/Torch.obj",
                      "/home/valentin/m2/opengl/2_salles_2_ambiances/src/assets/MC-Torch/model/material/Diffuse.png",
                      camera.cameraPosition());
-    fr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z));
-    fr.setLightPos(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z));
+    fr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z), 0);
+    fr.setGlobalLightPos(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z));
 
     // room.initProgram(applicationPath.dirPath() + "src/shaders/3D.vs.glsl",
     //  applicationPath.dirPath() + "src/shaders/directionallight.fs.glsl");
