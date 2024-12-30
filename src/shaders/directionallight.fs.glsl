@@ -35,14 +35,16 @@ vec3 blinnPhong(vec3 Kd, vec3 N) {
     return diffuse + specular;
 }
 
-
 vec3 pointLightblinnPhong(vec3 normal, vec3 fragPos_vs) {
     vec3 N = normalize(normal);
-    vec3 L = normalize(vVertexPos - fragPos_vs);
+    vec3 L = normalize(fragPos_vs - vVertexPos);
     vec3 V = normalize(-fragPos_vs);
 
     vec3 H = normalize(L + V);
 
+    float dist = distance(fragPos_vs, vVertexPos);
+    vec3 attenuation = uLightIntensity / (dist * dist);
+    
     float diff = max(dot(N, L), 0.0);
     vec3 diffuse = uKd * diff * uLightIntensity;
 
@@ -57,7 +59,7 @@ vec3 pointLightblinnPhong(vec3 normal, vec3 fragPos_vs) {
 
 vec3 spotlightAttenuation(vec3 spotLight, vec3 normal) {
     vec3 lightToPixel = normalize(vVertexPos - spotLight);
-    vec3 dir = normalize(vec3(0, -1, 0));
+    vec3 dir = vec3(0,-1,0);
     float spotFactor = dot(lightToPixel, dir);  
 
     if (isnan(spotFactor)){
@@ -65,10 +67,11 @@ vec3 spotlightAttenuation(vec3 spotLight, vec3 normal) {
     }
 
     if (spotFactor > uSpotlightCutoff) {
-        vec3 color = pointLightblinnPhong(normal, spotLight);
+        vec3 color = pointLightblinnPhong(normal, uLightPos_vs);
         float spotLightIntensity = (1.0 - (1.0 - spotFactor)/(1.0 - uSpotlightCutoff));
         return color * spotLightIntensity;
     }
+
     return vec3(0, 0, 0);
 }
 
@@ -76,15 +79,15 @@ void main()
 {
     vec3 tex = texture(uTexture, vVertexTex).xyz;
     vec3 normalColor = normalize(vVertexNormal);   
-        
-    vec3 lighting = blinnPhong(tex, normalColor);
+
+    vec3 lighting = blinnPhong(uKd, normalColor);
 
     // fFragColor = lighting; 
     
     vec3 attenuation = spotlightAttenuation(uSpotLight, normalColor);
     
 
-    fFragColor = lighting + attenuation; 
+    fFragColor = (attenuation); 
 
 
     // fFragColor = normalColor * 0.5 + 0.5;

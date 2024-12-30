@@ -119,18 +119,19 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
 {
     auto &box = firstRoom.getBox();
     auto &uv = firstRoom.getBoxUniformVariable();
-    auto &sun = firstRoom.getSpot();
+    auto &spot = firstRoom.getSpotLight();
     auto &torch = firstRoom.getTorch();
     auto &glowStoneProg = firstRoom.getGlowStoneProg();
     auto &spotLight = firstRoom.getSpotLight();
 
     // glm::vec3 light_dir_world = glm::rotate(glm::mat4(1.f), glimac::getTime(), glm::vec3(0, 1, 0)) * glm::vec4(1, 1, 1, 0);
-    glm::vec3 light_dir_world = glm::normalize(glm::vec3(1.0f, -1.0f, 1.0f));
+    glm::vec3 light_dir_world = glm::normalize(glm::vec3(0.0f, -1.0f, 0.0f));
 
-    // Le pb c'est que la spot light utilise la même direction que la light world
     setSpotLightUniform(uv, spotLight.position, spotLight.cutoff, spotLight.exponent);
 
-    auto meshProcess = [&](const Geometry::Mesh &mesh)
+    std::cout << "Light Pos = " << firstRoom.getLightPos() << " spot light = " << spotLight.position << std::endl;
+
+    auto meshProcess = [&](const Geometry::Mesh &mesh, const glm::vec3 &lightIntensity, const Geometry::Material &mat)
     {
         glBindVertexArray(mesh.vao);
 
@@ -143,8 +144,7 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
 
         if (firstRoom.getLightFlag() == 1)
         {
-            setMaterialAndLightingUniforms(uv, light_dir_vs, light_pos_vs, firstRoom._boxMaterial.m_Kd, firstRoom._boxMaterial.m_Ks,
-                                           light_pos_vs, firstRoom._spotMaterial.m_Shininess);
+            setMaterialAndLightingUniforms(uv, light_dir_vs, light_pos_vs, lightIntensity, mat);
         }
 
         glDrawArrays(GL_TRIANGLES, mesh.m_nIndexOffset, mesh.m_nIndexCount);
@@ -156,14 +156,14 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
     glUniform1i(uv.uTexLoc, 0);
 
     glBeginTransformFeedback(GL_TRIANGLES);
-    applyToAllMeshes(box.getBounds().getMeshVector(), meshProcess);
+    applyToAllMeshes(box.getBounds().getMeshVector(), meshProcess, firstRoom._boxMaterial, firstRoom.getBoxLightIntensity());
     glEndTransformFeedback();
     glBindTexture(GL_TEXTURE_2D, 0);
 
     // glBindTexture(GL_TEXTURE_2D, glowStoneProg._glowStone.getTex());
     // glUniform1i(glowStoneProg._uniformVariable.uTexLoc, 0);
 
-    applyToAllMeshes(sun.getMeshVector(), meshProcess);
+    applyToAllMeshes(spot._spot.getMeshVector(), meshProcess, firstRoom._spotMaterial, spot.intensity);
 
     // applyToAllMeshes(torch.getMeshVector(), meshProcess);
 
@@ -172,6 +172,7 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
     // sun.animateSphere();
+    // firstRoom.printDebugBuff();
 }
 
 void Renderer::render(const Geometry &object, Geometry::Material material, Room::UniformVariable uniformVariable)
@@ -224,11 +225,11 @@ void Renderer::render(const Geometry &object, Geometry::Material material, Room:
 }
 
 template <typename Func>
-void Renderer::applyToAllMeshes(const std::vector<Geometry::Mesh> &meshes, Func &&func)
+void Renderer::applyToAllMeshes(const std::vector<Geometry::Mesh> &meshes, Func &&func, const Geometry::Material &mat, const glm::vec3 &lightIntensity)
 {
     for (auto &mesh : meshes)
     {
-        func(mesh);
+        func(mesh, lightIntensity, mat);
     }
 }
 
@@ -246,23 +247,21 @@ void Renderer::setMaterialAndLightingUniforms(const Room::UniformVariable &unifo
                                               const glm::vec3 &light_dir_vs,
                                               const glm::vec3 &light_pos_vs,
                                               const glm::vec3 &lightIntensity,
-                                              const glm::vec3 &kd,
-                                              const glm::vec3 &ks,
-                                              float shininess)
+                                              const Geometry::Material &mat)
 {
     glUniform3fv(uniformVariable.uLightDir_vs, 1, glm::value_ptr(light_dir_vs));
     glUniform3fv(uniformVariable.uLightPos_vs, 1, glm::value_ptr(light_pos_vs));
 
     glUniform3f(uniformVariable.uLightIntensity, lightIntensity.x, lightIntensity.y, lightIntensity.z);
 
-    glUniform3fv(uniformVariable.uKd, 1, glm::value_ptr(kd));
-    glUniform3fv(uniformVariable.uKs, 1, glm::value_ptr(ks));
-    glUniform1f(uniformVariable.uShininess, shininess);
+    glUniform3fv(uniformVariable.uKd, 1, glm::value_ptr(mat.m_Kd));
+    glUniform3fv(uniformVariable.uKs, 1, glm::value_ptr(mat.m_Ks));
+    glUniform1f(uniformVariable.uShininess, mat.m_Shininess);
 }
 
 void Renderer::setSpotLightUniform(const Room::UniformVariable &uniformVariable, const glm::vec3 &spotLight, float spotlightCutoff, float spotlightExponent)
 {
     glUniform3fv(uniformVariable.uSpotLight, 1, glm::value_ptr(spotLight));
-    glUniform1f(uniformVariable.uSpotlightCutoff, cosf(spotlightCutoff));
+    glUniform1f(uniformVariable.uSpotlightCutoff, cosf(glm::radians(spotlightCutoff)));
     glUniform1f(uniformVariable.uSpotlightExponent, spotlightExponent);
 }

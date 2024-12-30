@@ -49,15 +49,13 @@ public:
     void renderFirstRoom(FirstRoom &firstRoom);
 
     template <typename Func>
-    void applyToAllMeshes(const std::vector<Geometry::Mesh> &meshes, Func &&func);
+    void applyToAllMeshes(const std::vector<Geometry::Mesh> &meshes, Func &&func, const Geometry::Material &mat, const glm::vec3 &lightIntensity);
 
     void setMaterialAndLightingUniforms(const Room::UniformVariable &uniformVariable,
                                         const glm::vec3 &light_dir_vs,
                                         const glm::vec3 &light_pos_vs,
                                         const glm::vec3 &lightIntensity,
-                                        const glm::vec3 &kd,
-                                        const glm::vec3 &ks,
-                                        float shininess);
+                                        const Geometry::Material &mat);
 
     void setMatricesToShader(const Room::UniformVariable &uniformVariable,
                              const glm::mat4 &projectionMatrix,

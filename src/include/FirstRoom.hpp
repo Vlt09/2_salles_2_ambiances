@@ -63,6 +63,8 @@ private:
 
     glm::vec3 _lightPos;
 
+    glm::vec3 _boxLightIntensity;
+
 public:
     Geometry::Material _spotMaterial;
     Geometry::Material _boxMaterial;
@@ -82,9 +84,9 @@ public:
         // _spotMaterial.m_Ka = glm::vec3(1.0f, 1.0f, 0.0f);
         // _spotMaterial.m_Kd = glm::vec3(1.0f, 1.0f, 0.0f);
         // _spotMaterial.m_Ks = glm::vec3(1.0f, 1.0f, 0.0f);
-        _spotMaterial.m_Ka = glm::vec3(0.1f, 0.1f, 0.1f); // Couleur ambiante faible
-        _spotMaterial.m_Kd = glm::vec3(1.0f, 1.0f, 1.0f); // Diffuse blanche
-        _spotMaterial.m_Ks = glm::vec3(0.9f, 0.9f, 0.9f); // Spéculaire brillante
+        _spotMaterial.m_Ka = glm::vec3(1.1f, 1.1f, 1.1f);
+        _spotMaterial.m_Kd = glm::vec3(0.8f, 0.8f, 0.8f);
+        _spotMaterial.m_Ks = glm::vec3(0.9f, 0.9f, 0.9f);
 
         _spotMaterial.m_Tr = glm::vec3(0.0f, 0.0f, 0.0f);
         _spotMaterial.m_Le = glm::vec3(1.0f, 1.0f, 0.0f);
@@ -92,11 +94,14 @@ public:
         _spotMaterial.m_RefractionIndex = 1.f;
         _spotMaterial.m_Dissolve = 1.0f;
 
-        _boxMaterial.m_Kd = glm::vec3(0.5f, 0.5f, 0.5f);
-        _boxMaterial.m_Ks = glm::vec3(0.8f, 0.8f, 0.8f);
+        _boxMaterial.m_Kd = glm::vec3(0.3f, 0.3f, 0.4f);
+        _boxMaterial.m_Ks = glm::vec3(0.2f, 0.2f, 0.1f);
         _boxMaterial.m_Shininess = 2.0f;
 
         _spotLight._spot.initSphere(1, 32, 16, _spotMaterial);
+        _boxLightIntensity = glm::vec3(0.5f, 0.5f, 0.5f);
+        _spotLight.intensity = glm::vec3(1.0f, 1.0f, 1.0f);
+        _spotLight.cutoff = 10.f;
     }
 
     Sphere &getSpot()
@@ -107,6 +112,11 @@ public:
     Room &getBox()
     {
         return _box;
+    }
+
+    const glm::vec3 &getBoxLightIntensity()
+    {
+        return _boxLightIntensity;
     }
 
     GlowStoneProg &getGlowStoneProg()
@@ -141,12 +151,12 @@ public:
 
         glGenBuffers(1, &feedbackBuffer);
         glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, feedbackBuffer);
-        glBufferData(GL_TRANSFORM_FEEDBACK_BUFFER, sizeof(glm::vec3) * _box.getBounds().getVertexCount(), nullptr, GL_STATIC_READ); // Taille du buffer et type des données
+        glBufferData(GL_TRANSFORM_FEEDBACK_BUFFER, sizeof(glm::vec3) * _box.getBounds().getVertexCount(), nullptr, GL_STATIC_READ);
 
         glGenTransformFeedbacks(1, &feedbackObject);
         glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, feedbackObject);
 
-        const char *varyings[] = {"vVertexPos"};
+        const char *varyings[] = {"vVertexNormal"};
         glTransformFeedbackVaryings(_box.getProgramId(), 1, varyings, GL_INTERLEAVED_ATTRIBS);
     }
 
@@ -198,6 +208,6 @@ public:
         float spotFactor = glm::dot(lightToPixel, dir);
 
         std::cout << "lightToPixel = " << lightToPixel << " spotFactor = " << spotFactor << std::endl;
-        glUnmapBuffer(GL_TRANSFORM_FEEDBACK_BUFFER); // Libérer le buffer
+        glUnmapBuffer(GL_TRANSFORM_FEEDBACK_BUFFER);
     }
 };
