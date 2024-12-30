@@ -129,16 +129,14 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
 
     setSpotLightUniform(uv, spotLight.position, spotLight.cutoff, spotLight.exponent);
 
-    std::cout << "Light Pos = " << firstRoom.getLightPos() << " spot light = " << spotLight.position << std::endl;
-
     auto meshProcess = [&](const Geometry::Mesh &mesh, const glm::vec3 &lightIntensity, const Geometry::Material &mat)
     {
         glBindVertexArray(mesh.vao);
 
         glm::mat4 mv_matrix = this->_viewMatrix * mesh._transform;
         glm::mat4 normal_matrix = glm::transpose(glm::inverse(mv_matrix));
-        glm::vec3 light_dir_vs = glm::vec3(glm::vec4(light_dir_world, 1.0));
-        glm::vec3 light_pos_vs = glm::vec3(glm::vec4(firstRoom.getLightPos(), 1.0));
+        glm::vec3 light_dir_vs = glm::vec3(mesh._transform * glm::vec4(light_dir_world, 1.0));
+        glm::vec3 light_pos_vs = glm::vec3(mesh._transform * glm::vec4(firstRoom.getLightPos(), 1.0));
 
         setMatricesToShader(uv, _projectionMatrix, mv_matrix, normal_matrix);
 
@@ -159,6 +157,8 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
     applyToAllMeshes(box.getBounds().getMeshVector(), meshProcess, firstRoom._boxMaterial, firstRoom.getBoxLightIntensity());
     glEndTransformFeedback();
     glBindTexture(GL_TEXTURE_2D, 0);
+
+    std::cout << "======================================================" << std::endl;
 
     // glBindTexture(GL_TEXTURE_2D, glowStoneProg._glowStone.getTex());
     // glUniform1i(glowStoneProg._uniformVariable.uTexLoc, 0);
@@ -249,6 +249,7 @@ void Renderer::setMaterialAndLightingUniforms(const Room::UniformVariable &unifo
                                               const glm::vec3 &lightIntensity,
                                               const Geometry::Material &mat)
 {
+    std::cout << "light_dir_vs = " << light_dir_vs << std::endl;
     glUniform3fv(uniformVariable.uLightDir_vs, 1, glm::value_ptr(light_dir_vs));
     glUniform3fv(uniformVariable.uLightPos_vs, 1, glm::value_ptr(light_pos_vs));
 

@@ -101,7 +101,7 @@ public:
         _spotLight._spot.initSphere(1, 32, 16, _spotMaterial);
         _boxLightIntensity = glm::vec3(0.5f, 0.5f, 0.5f);
         _spotLight.intensity = glm::vec3(1.0f, 1.0f, 1.0f);
-        _spotLight.cutoff = 10.f;
+        _spotLight.cutoff = 2.f;
     }
 
     Sphere &getSpot()

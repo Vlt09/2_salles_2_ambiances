@@ -16,6 +16,8 @@ out vec3 vVertexPos;
 void main() {
     vVertexTex = aVertexTex;
     vVertexNormal = vec3(uNormalMatrix * vec4(aVertexNormal, 0.0));
+    vVertexNormal = aVertexNormal;
+
     vVertexPos = aVertexPosition;
     gl_Position = uMVPMatrix * vec4(aVertexPosition, 1);
 };

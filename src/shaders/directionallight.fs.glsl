@@ -57,6 +57,7 @@ vec3 pointLightblinnPhong(vec3 normal, vec3 fragPos_vs) {
     return diffuse + specular;
 }
 
+
 vec3 spotlightAttenuation(vec3 spotLight, vec3 normal) {
     vec3 lightToPixel = normalize(vVertexPos - spotLight);
     vec3 dir = vec3(0,-1,0);
@@ -87,7 +88,7 @@ void main()
     vec3 attenuation = spotlightAttenuation(uSpotLight, normalColor);
     
 
-    fFragColor = (attenuation); 
+    fFragColor = (attenuation ); 
 
 
     // fFragColor = normalColor * 0.5 + 0.5;

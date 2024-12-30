@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
     uniformVariable.uLightDir_vs = uLightDir_vs;
     uniformVariable.uLightIntensity = uLightIntensity;
 
-    auto firstRoom_light_posY = camera.cameraPosition().y + 10.f;
+    auto firstRoom_light_posY = camera.cameraPosition().y + 5.f;
 
     Renderer renderer(proj_matrix, viewMatrix);
     // Room room;
@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
                      "/home/valentin/m2/opengl/2_salles_2_ambiances/src/assets/MC-Torch/model/material/Diffuse.png",
                      camera.cameraPosition());
     fr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z));
-    fr.setLightPos(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY + 10.f, camera.cameraPosition().z));
+    fr.setLightPos(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z));
 
     // room.initProgram(applicationPath.dirPath() + "src/shaders/3D.vs.glsl",
     //  applicationPath.dirPath() + "src/shaders/directionallight.fs.glsl");
