@@ -14,7 +14,7 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
 {
     auto &box = firstRoom.getBox();
     auto &uv = firstRoom.getBoxUniformVariable();
-    auto &spot = firstRoom.getSpotLight(0);
+    auto spots = firstRoom.getSpotLightsData();
     auto &torch = firstRoom.getTorch();
     auto &spotLight = firstRoom.getSpotLight(0);
 
@@ -56,7 +56,10 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
     // glBindTexture(GL_TEXTURE_2D, glowStoneProg._glowStone.getTex());
     // glUniform1i(glowStoneProg._uniformVariable.uTexLoc, 0);
 
-    applyToAllMeshes(spot._spot.getMeshVector(), meshProcess, firstRoom._spotMaterial, spot.intensity);
+    for (int i = 0; i < 1; i++)
+    {
+        applyToAllMeshes(spots[i]._spot.getMeshVector(), meshProcess, firstRoom._spotMaterial, spots[i].intensity);
+    }
 
     // applyToAllMeshes(torch.getMeshVector(), meshProcess);
 
@@ -64,6 +67,7 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
     glBindTexture(GL_TEXTURE_2D, 0);
     // sun.animateSphere();
     // firstRoom.printDebugBuff();
+    // exit(0);
 }
 
 template <typename Func>
@@ -115,7 +119,9 @@ void Renderer::setSpotLightsUniform(FirstRoom &firstRoom)
 
     auto spotLight = firstRoom.getSpotLightsData();
     auto spotLightVarLoc = firstRoom.getSpotLightsUniformVarLocData();
-    for (int i = 0; i < 1; i++)
+
+    // std::cout << "cut off = " << cosf(glm::radians(spotLight[1].cutoff)) << std::endl;
+    for (int i = 0; i < 2; i++)
     {
         glUniform3fv(spotLightVarLoc[i].position, 1, glm::value_ptr(spotLight[i].position));
         glUniform3fv(spotLightVarLoc[i].direction, 1, glm::value_ptr(spotLight[i].direction));
@@ -124,7 +130,7 @@ void Renderer::setSpotLightsUniform(FirstRoom &firstRoom)
         glUniform3fv(spotLightVarLoc[i].m_Kd, 1, glm::value_ptr(firstRoom._spotMaterial.m_Kd));
         glUniform3fv(spotLightVarLoc[i].m_Ks, 1, glm::value_ptr(firstRoom._spotMaterial.m_Ks));
 
-        glUniform1f(spotLightVarLoc[i].cutoff, spotLight[i].cutoff);
+        glUniform1f(spotLightVarLoc[i].cutoff, cosf(glm::radians(spotLight[i].cutoff)));
         glUniform1f(spotLightVarLoc[i].exponent, spotLight[i].exponent);
     }
 }

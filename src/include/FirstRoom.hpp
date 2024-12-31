@@ -25,7 +25,7 @@ class FirstRoom
         Sphere _spot;
 
         glm::vec3 position;
-        glm::vec3 direction = glm::vec3(0., -1., 0.);
+        glm::vec3 direction = glm::vec3(0., -1.f, 0.);
         glm::vec3 intensity;
 
         float cutoff, exponent;
@@ -91,11 +91,15 @@ public:
 
         _spotLight._spot.initSphere(1, 32, 16, _spotMaterial);
         _spotLights[0]._spot.initSphere(1, 32, 16, _spotMaterial);
+        _spotLights[1]._spot.initSphere(1, 32, 16, _spotMaterial);
 
         _spotLight.intensity = glm::vec3(1.0f, 1.0f, 1.0f);
         _spotLight.cutoff = 2.f;
         _spotLights[0].intensity = glm::vec3(1.0f, 1.0f, 1.0f);
-        _spotLights[0].cutoff = 2.f;
+        _spotLights[0].cutoff = 10.f;
+
+        _spotLights[1].intensity = glm::vec3(1.0f, 1.0f, 1.0f);
+        _spotLights[1].cutoff = 20.f;
     }
 
     Sphere &getSpot()
@@ -138,7 +142,13 @@ public:
         _spotLights[idx]._spot.translateModel(pos);
 
         _spotLight.position = pos;
-        _spotLights[idx].position = pos;
+        _spotLight.position = glm::vec3(_spotLight._spot.getModelMatrix() * glm::vec4(_spotLight.position, 1.0));
+        _spotLights[idx].position = glm::vec3(_spotLights[idx]._spot.getModelMatrix() * glm::vec4(pos, 1.0));
+    }
+
+    void setSpotLightDirection(const glm::vec3 &targetPosition, int idx)
+    {
+        _spotLights[idx].direction = targetPosition - _spotLights[idx].position;
     }
 
     const SpotLight &getSpotLight(int idx)
@@ -169,8 +179,9 @@ public:
     void setSpotLightUniformLocations()
     {
         auto programID = _box.getProgramId();
-        for (int i = 0; i < 1; ++i)
+        for (int i = 0; i < 2; ++i)
         {
+            std::cout << "set spot light number " << i << std::endl;
             std::string baseName = "uSpotLights[" + std::to_string(i) + "]";
 
             _spotLightUniformVarLoc[i].position = glGetUniformLocation(programID, (baseName + "._position").c_str());
@@ -220,7 +231,7 @@ public:
         glGenTransformFeedbacks(1, &feedbackObject);
         glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, feedbackObject);
 
-        const char *varyings[] = {"vVertexNormal"};
+        const char *varyings[] = {"vVertexPos"};
         glTransformFeedbackVaryings(_box.getProgramId(), 1, varyings, GL_INTERLEAVED_ATTRIBS);
     }
 
@@ -235,13 +246,13 @@ public:
             std::cout << "Vertex " << i << " Position: " << positions[i].x << ", " << positions[i].y << ", " << positions[i].z << std::endl;
         }
 
-        auto vVertexPos = positions[0];
+        auto vVertexPos = positions[30];
         auto spotLight = _spotLight.position;
         auto lightToPixel = glm::normalize(vVertexPos - spotLight);
         auto dir = glm::normalize(glm::vec3(0, -1, 0));
         float spotFactor = glm::dot(lightToPixel, dir);
 
-        std::cout << "lightToPixel = " << lightToPixel << " spotFactor = " << spotFactor << std::endl;
+        std::cout << "spotlight position = " << spotLight << "vVertexPos " << vVertexPos << " lightToPixel = " << lightToPixel << " spotFactor = " << spotFactor << std::endl;
         glUnmapBuffer(GL_TRANSFORM_FEEDBACK_BUFFER);
     }
 };

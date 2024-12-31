@@ -7,6 +7,7 @@ layout(location = 3) in vec2 aVertexTex;
 uniform mat4 uMVPMatrix;
 uniform mat4 uMVMatrix;
 uniform mat4 uNormalMatrix;
+uniform mat4 uModelMatrix;
 
 out vec2 vVertexTex;
 out vec3 vVertexNormal;
@@ -16,8 +17,12 @@ out vec3 vVertexPos;
 void main() {
     vVertexTex = aVertexTex;
     // vVertexNormal = vec3(uNormalMatrix * vec4(aVertexNormal, 0.0));
-    vVertexNormal = aVertexNormal;
 
-    vVertexPos = aVertexPosition;
+    vVertexNormal = mat3(transpose(inverse(uModelMatrix))) * aVertexNormal;
+
+    vVertexPos = vec3(uModelMatrix * vec4(aVertexPosition, 1.0));
+    // vVertexPos = aVertexPosition;
+
+
     gl_Position = uMVPMatrix * vec4(aVertexPosition, 1);
 };
