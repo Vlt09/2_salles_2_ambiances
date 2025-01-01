@@ -56,7 +56,7 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
     // glBindTexture(GL_TEXTURE_2D, glowStoneProg._glowStone.getTex());
     // glUniform1i(glowStoneProg._uniformVariable.uTexLoc, 0);
 
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < 2; i++)
     {
         applyToAllMeshes(spots[i]._spot.getMeshVector(), meshProcess, firstRoom._spotMaterial, spots[i].intensity);
     }

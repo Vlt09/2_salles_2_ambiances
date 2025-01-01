@@ -7,7 +7,7 @@ void Room::initProgram(const glimac::FilePath &vsFile, const glimac::FilePath &f
     uniformVariable.uMVPMatrix = glGetUniformLocation(_mProgram.getGLId(), "uMVPMatrix");
     uniformVariable.uMVMatrix = glGetUniformLocation(_mProgram.getGLId(), "uMVMatrix");
     uniformVariable.uNormalMatrix = glGetUniformLocation(_mProgram.getGLId(), "uNormalMatrix");
-    uniformVariable.uNormalMatrix = glGetUniformLocation(_mProgram.getGLId(), "uModelMatrix");
+    uniformVariable.uModelMatrix = glGetUniformLocation(_mProgram.getGLId(), "uModelMatrix");
 
     uniformVariable.uTexLoc = glGetUniformLocation(_mProgram.getGLId(), "uTexture");
     uniformVariable.uKd = glGetUniformLocation(_mProgram.getGLId(), "uKd");

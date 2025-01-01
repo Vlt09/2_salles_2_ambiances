@@ -158,8 +158,8 @@ int main(int argc, char *argv[])
     fr.setSpotLightDirection(camera.cameraPosition(), 0);
     // fr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY + 5.f, camera.cameraPosition().z), 1);
 
-    // fr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z - 5.f), 1);
-    // fr.setSpotLightDirection(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z - 5.f), 1);
+    fr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z - 5.f), 1);
+    fr.setSpotLightDirection(glm::vec3(camera.cameraPosition().x, 0., camera.cameraPosition().z - 5.f), 1);
 
     fr.setGlobalLightPos(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z));
 

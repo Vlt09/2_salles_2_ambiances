@@ -24,7 +24,7 @@ class FirstRoom
     {
         Sphere _spot;
 
-        glm::vec3 position;
+        glm::vec3 position = glm::vec3(0., 0., 0.);
         glm::vec3 direction = glm::vec3(0., -1.f, 0.);
         glm::vec3 intensity;
 
@@ -63,7 +63,7 @@ public:
 
     FirstRoom() : _spotLight(
                       Sphere(),
-                      glm::vec3(0.0f, 5.0f, 0.0f),
+                      glm::vec3(0.0f, 0.0f, 0.0f),
                       glm::vec3(0.0f, -1.0f, 0.0f),
                       glm::vec3(1.0f, 1.0f, 1.0f),
                       20.0f,
@@ -138,17 +138,19 @@ public:
      */
     void translateSpotLight(const glm::vec3 &pos, int idx)
     {
-        _spotLight._spot.translateModel(pos);
+        std::cout << "bf _position = " << _spotLights[idx].position << std::endl;
         _spotLights[idx]._spot.translateModel(pos);
+        _spotLights[idx].position = pos;
 
         _spotLight.position = pos;
         _spotLight.position = glm::vec3(_spotLight._spot.getModelMatrix() * glm::vec4(_spotLight.position, 1.0));
-        _spotLights[idx].position = glm::vec3(_spotLights[idx]._spot.getModelMatrix() * glm::vec4(pos, 1.0));
     }
 
     void setSpotLightDirection(const glm::vec3 &targetPosition, int idx)
     {
-        _spotLights[idx].direction = targetPosition - _spotLights[idx].position;
+        std::cout << "spotpos = " << _spotLights[idx].position << " targetPos = " << targetPosition << " direc bf = " << _spotLights[idx].direction << std::endl;
+        _spotLights[idx].direction = glm::normalize(targetPosition - _spotLights[idx].position);
+        std::cout << "direc = " << _spotLights[idx].direction << std::endl;
     }
 
     const SpotLight &getSpotLight(int idx)

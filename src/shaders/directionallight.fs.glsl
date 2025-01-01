@@ -76,7 +76,7 @@ vec3 pointLightblinnPhong(vec3 normal, SpotLight spotLight) {
 
 vec3 spotlightAttenuation(SpotLight spotLight, vec3 normal) {
     vec3 lightToPixel = normalize(spotLight._position - vVertexPos);
-    float spotFactor = dot(lightToPixel, normalize( - spotLight._direction));  
+    float spotFactor = dot(lightToPixel, normalize(-spotLight._direction));  
 
     if (isnan(spotFactor)){
         return vec3(255, 255, 255);
@@ -89,7 +89,7 @@ vec3 spotlightAttenuation(SpotLight spotLight, vec3 normal) {
         // return vec3(255, 0, 255);
     }
 
-    return vec3(255, 255, 255);
+    return vec3(0, 0, 0);
 
 }
 
@@ -104,11 +104,11 @@ void main()
 
     vec3 attenuation = vec3(0, 0, 0);
 
-    // for (int i = 0 ;i < 2 ;i++) {
-    //     attenuation += spotlightAttenuation(uSpotLights[i], normalColor);
-    // }
+    for (int i = 0 ;i < 2 ;i++) {
+        attenuation += spotlightAttenuation(uSpotLights[i], normalColor);
+    }
 
-    attenuation += spotlightAttenuation(uSpotLights[0], normalColor);
+    // attenuation += spotlightAttenuation(uSpotLights[1], normalColor);
 
     // attenuation += spotlightAttenuation(uSpotLight, normalColor);
     
