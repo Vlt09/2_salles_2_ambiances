@@ -22,6 +22,8 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
 
     setSpotLightsUniform(firstRoom);
 
+    box.getProgram().use();
+
     glBeginTransformFeedback(GL_TRIANGLES);
 
     // applyToAllMeshes(box.getBounds().getMeshVector(), meshProcess, firstRoom._boxMaterial, firstRoom.getBoxLightIntensity());
@@ -34,8 +36,10 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
     for (int i = 0; i < 2; i++)
     {
         glUniform3f(uv.uLightIntensity, spots[i].intensity.x, spots[i].intensity.y, spots[i].intensity.z);
+        // applyToAllMeshes(spots[i]._spot.getMeshVector(), meshProcess, firstRoom._spotMaterial[i], spots[i].intensity);
         renderObject(spots[i]._spot, _shaderProgram, uv);
     }
+    renderObject(torch, _shaderProgram, uv);
 
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
