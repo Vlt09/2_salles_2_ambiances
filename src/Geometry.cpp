@@ -193,18 +193,21 @@ bool Geometry::loadOBJ(const glimac::FilePath &filepath, const glimac::FilePath 
     return true;
 }
 
-Geometry::Mesh &Geometry::addFromVertices(std::vector<Geometry::Vertex> vertices)
+Geometry::Mesh &Geometry::addFromVertices(std::vector<Geometry::Vertex> vertices, int matIndex)
 {
     m_VertexBuffer.insert(m_VertexBuffer.end(), vertices.begin(), vertices.end());
 
     size_t newIndex = lastMeshIndex + vertices.size();
-    Geometry::Mesh mesh("shape", lastMeshIndex, vertices.size(), -1);
-    std::cout << "before update index = " << lastMeshIndex << " new index = " << newIndex << std::endl;
+    Geometry::Mesh mesh("shape", lastMeshIndex, vertices.size(), matIndex);
     updateLastMeshIndex(newIndex);
-    std::cout << "after update index = " << lastMeshIndex << std::endl;
     m_MeshBuffer.push_back(std::move(mesh));
 
     return m_MeshBuffer.back();
+}
+
+void Geometry::addMaterial(const Material &material)
+{
+    m_Materials.emplace_back(material);
 }
 
 void Geometry::initMeshData()

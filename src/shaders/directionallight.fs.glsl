@@ -8,6 +8,7 @@ uniform sampler2D uTexture;
 
 uniform mat4 uModelMatrix;
 
+uniform vec3 uKa;
 uniform vec3 uKd;
 uniform vec3 uKs;
 uniform float uShininess;
@@ -27,6 +28,7 @@ struct SpotLight{
     float _cutoff, _exponent;
     vec3 m_Kd;
     vec3 m_Ks;
+    vec3 m_Ka;
 
 };
 
@@ -49,7 +51,6 @@ vec3 blinnPhong(vec3 Kd, vec3 N) {
 }
 
 vec3 pointLightblinnPhong(vec3 normal, SpotLight spotLight) {
-    // vec3 vFrag_vs = vec3(uModelMatrix * vec4(spotLight._position, 1.0));
     vec3 vFrag_vs = spotLight._position;
 
     vec3 N = normalize(normal);
@@ -89,8 +90,7 @@ vec3 spotlightAttenuation(SpotLight spotLight, vec3 normal) {
         // return vec3(255, 0, 255);
     }
 
-    return vec3(0, 0, 0);
-
+    return vec3(0, 0, 0);//vec3(spotLight.m_Ka * texture(uTexture, vVertexTex).xyz * spotLight.m_Kd);
 }
 
 void main()
@@ -113,7 +113,7 @@ void main()
     // attenuation += spotlightAttenuation(uSpotLight, normalColor);
     
 
-    fFragColor = (attenuation); 
+    fFragColor = tex + (attenuation); 
 
 
     // fFragColor = normalColor * 0.5 + 0.5;

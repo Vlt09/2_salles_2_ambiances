@@ -73,4 +73,6 @@ public:
     void setSpotLightUniform(const Room::UniformVariable &uniformVariable, const glm::vec3 &spotLight, float spotlightCutoff, float spotlightExponent);
 
     void setSpotLightsUniform(FirstRoom &firstRoom);
+
+    void renderObject(const Geometry &geometry, glimac::Program &program, const Room::UniformVariable &uniformVar);
 };

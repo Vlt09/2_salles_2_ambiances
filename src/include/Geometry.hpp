@@ -28,7 +28,7 @@ public:
 
         GLuint vbo, vao;
 
-        bool isTransform = false;
+        bool isTransform = true;
         glm::mat4 _transform = glm::mat4(1);
 
         Mesh(std::string name, unsigned int indexOffset, unsigned int indexCount, int materialIndex) : m_sName(move(name)), m_nIndexOffset(indexOffset), m_nIndexCount(indexCount), m_nMaterialIndex(materialIndex)
@@ -140,7 +140,12 @@ public:
      * of vertices in the current Geometry object. In other word,
      * this function add one Mesh which is a simple shape (quad, sphere etc).
      */
-    Geometry::Mesh &addFromVertices(std::vector<Geometry::Vertex> vertices);
+    Geometry::Mesh &addFromVertices(std::vector<Geometry::Vertex> vertices, int matIndex);
+
+    /**
+     * @brief This function adds material to material list
+     */
+    void addMaterial(const Material &material);
 
     /**
      * @brief This function initialize VBO's object and vao of all Meshes in this

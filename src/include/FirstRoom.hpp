@@ -16,6 +16,7 @@ class FirstRoom
         GLuint lightPos;
         GLuint m_Kd;
         GLuint m_Ks;
+        GLuint m_Ka;
         GLuint cutoff;
         GLuint exponent;
     };
@@ -29,6 +30,9 @@ class FirstRoom
         glm::vec3 intensity;
 
         float cutoff, exponent;
+        float amplitude = 5.f;
+        float frequency = 0.2f;
+        float speed = 3.f;
 
         SpotLight()
         {
@@ -55,7 +59,7 @@ private:
     glm::vec3 _boxLightIntensity;
 
 public:
-    Geometry::Material _spotMaterial;
+    Geometry::Material _spotMaterial[2];
     Geometry::Material _boxMaterial;
 
     GLuint feedbackBuffer;
@@ -70,28 +74,27 @@ public:
                       2.0f)
 
     {
-        // _spotMaterial.m_Ka = glm::vec3(1.0f, 1.0f, 0.0f);
-        // _spotMaterial.m_Kd = glm::vec3(1.0f, 1.0f, 0.0f);
-        // _spotMaterial.m_Ks = glm::vec3(1.0f, 1.0f, 0.0f);
-        _spotMaterial.m_Ka = glm::vec3(1.1f, 1.1f, 1.1f);
-        _spotMaterial.m_Kd = glm::vec3(0.8f, 0.8f, 0.8f);
-        _spotMaterial.m_Ks = glm::vec3(0.9f, 0.9f, 0.9f);
+        _spotMaterial[0].m_Ka = glm::vec3(0.0f, 0.0f, 0.5f);
+        _spotMaterial[0].m_Kd = glm::vec3(0.0f, 0.0f, 0.5f);
+        _spotMaterial[0].m_Ks = glm::vec3(0.0f, 0.0f, 0.5f);
+        _spotMaterial[1].m_Ka = glm::vec3(0.5f, 0.0f, 0.0f);
+        _spotMaterial[1].m_Kd = glm::vec3(0.5f, 0.0f, 0.1f);
+        _spotMaterial[1].m_Ks = glm::vec3(0.5f, 0.0f, 0.1f);
 
-        _spotMaterial.m_Tr = glm::vec3(0.0f, 0.0f, 0.0f);
-        _spotMaterial.m_Le = glm::vec3(1.0f, 1.0f, 0.0f);
-        _spotMaterial.m_Shininess = 128.f;
-        _spotMaterial.m_RefractionIndex = 1.f;
-        _spotMaterial.m_Dissolve = 1.0f;
+        _spotMaterial[0].m_Tr = glm::vec3(0.0f, 0.0f, 0.0f);
+        _spotMaterial[0].m_Le = glm::vec3(1.0f, 1.0f, 0.0f);
+        _spotMaterial[0].m_Shininess = 128.f;
+        _spotMaterial[0].m_RefractionIndex = 1.f;
+        _spotMaterial[0].m_Dissolve = 1.0f;
 
         _boxMaterial.m_Kd = glm::vec3(0.3f, 0.3f, 0.4f);
         _boxMaterial.m_Ks = glm::vec3(0.2f, 0.2f, 0.1f);
         _boxMaterial.m_Shininess = 2.0f;
 
-        _boxLightIntensity = glm::vec3(0.5f, 0.5f, 0.5f);
+        _boxLightIntensity = glm::vec3(1.5f, 1.5f, 1.5f);
 
-        _spotLight._spot.initSphere(1, 32, 16, _spotMaterial);
-        _spotLights[0]._spot.initSphere(1, 32, 16, _spotMaterial);
-        _spotLights[1]._spot.initSphere(1, 32, 16, _spotMaterial);
+        _spotLights[0]._spot.initSphere(1, 32, 16, _spotMaterial[0]);
+        _spotLights[1]._spot.initSphere(1, 32, 16, _spotMaterial[1]);
 
         _spotLight.intensity = glm::vec3(1.0f, 1.0f, 1.0f);
         _spotLight.cutoff = 2.f;
@@ -99,7 +102,7 @@ public:
         _spotLights[0].cutoff = 10.f;
 
         _spotLights[1].intensity = glm::vec3(1.0f, 1.0f, 1.0f);
-        _spotLights[1].cutoff = 20.f;
+        _spotLights[1].cutoff = 10.f;
     }
 
     Sphere &getSpot()
@@ -138,19 +141,13 @@ public:
      */
     void translateSpotLight(const glm::vec3 &pos, int idx)
     {
-        std::cout << "bf _position = " << _spotLights[idx].position << std::endl;
         _spotLights[idx]._spot.translateModel(pos);
         _spotLights[idx].position = pos;
-
-        _spotLight.position = pos;
-        _spotLight.position = glm::vec3(_spotLight._spot.getModelMatrix() * glm::vec4(_spotLight.position, 1.0));
     }
 
     void setSpotLightDirection(const glm::vec3 &targetPosition, int idx)
     {
-        std::cout << "spotpos = " << _spotLights[idx].position << " targetPos = " << targetPosition << " direc bf = " << _spotLights[idx].direction << std::endl;
         _spotLights[idx].direction = glm::normalize(targetPosition - _spotLights[idx].position);
-        std::cout << "direc = " << _spotLights[idx].direction << std::endl;
     }
 
     const SpotLight &getSpotLight(int idx)
@@ -194,6 +191,7 @@ public:
             _spotLightUniformVarLoc[i].exponent = glGetUniformLocation(programID, (baseName + "._exponent").c_str());
             _spotLightUniformVarLoc[i].m_Kd = glGetUniformLocation(programID, (baseName + ".m_Kd").c_str());
             _spotLightUniformVarLoc[i].m_Ks = glGetUniformLocation(programID, (baseName + ".m_Ks").c_str());
+            _spotLightUniformVarLoc[i].m_Ka = glGetUniformLocation(programID, (baseName + ".m_Ka").c_str());
 
             if (_spotLightUniformVarLoc[i].position == -1)
                 std::cerr << "Error: Could not find " << baseName << "._position" << std::endl;
@@ -211,7 +209,49 @@ public:
                 std::cerr << "Error: Could not find " << baseName << "m_Kd" << std::endl;
             if (_spotLightUniformVarLoc[i].m_Ks == -1)
                 std::cerr << "Error: Could not find " << baseName << "m_Ks" << std::endl;
+            if (_spotLightUniformVarLoc[i].m_Ka == -1)
+                std::cerr << "Error: Could not find " << baseName << "m_Ka" << std::endl;
         }
+    }
+
+    void moveSpot(int idX)
+    {
+        auto minX = -10.f;
+        auto maxX = 10.f;
+        auto minY = 5.f;
+        auto maxY = 10.f;
+        auto minZ = -12.f;
+        auto maxZ = 12.f;
+
+        auto spot = _spotLights[idX];
+        auto time = glimac::getTime();
+
+        // Calculer la nouvelle position en utilisant des fonctions trigonométriques
+        float x = spot.amplitude * sinf((spot.frequency * spot.speed) * time);        // Mouvement en X
+        float y = spot.amplitude * cosf((spot.frequency * spot.speed) * time);        // Mouvement en Y
+        float z = spot.amplitude * sinf((spot.frequency * spot.speed) * time / 2.0f); // Mouvement en Z (modifié)
+
+        // Appliquer des bornes aux déplacements pour s'assurer que la sphère reste dans les limites
+        if (x < minX)
+            x = minX;
+        if (x > maxX)
+            x = maxX;
+        if (y < minY)
+            y = minY;
+        if (y > maxY)
+            y = maxY;
+        if (z < minZ)
+            z = minZ;
+        if (z > maxZ)
+            z = maxZ;
+
+        auto translation = glm::vec3(x, y, z);
+        spot._spot.translateModel(translation);
+        translateSpotLight(translation, idX);
+
+        // spot.modelMatrix = glm::rotate(spot.modelMatrix, glm::radians(30.0f * time), glm::vec3(0.0f, 1.0f, 0.0f));
+
+        // sphere.modelMatrix = glm::scale(sphere.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
     }
 
     void initFirstRoom(const glimac::FilePath &vsFilePath, const glimac::FilePath &fsFilePath, const glimac::FilePath &torchOBJFilePath,
@@ -220,9 +260,10 @@ public:
         _box.initProgram(vsFilePath,
                          fsFilePath);
 
-        _box.constructRoom(cameraPos, 1);
+        _box.constructRoom(cameraPos, 1, _boxMaterial);
 
         _torch.loadOBJ(torchOBJFilePath, torchMatFilePath, true);
+        _torch.translateModel(glm::vec3(cameraPos.x, cameraPos.y + 2.f, cameraPos.z - 5.f));
 
         setSpotLightUniformLocations();
 

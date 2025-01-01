@@ -16,12 +16,10 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
     auto &uv = firstRoom.getBoxUniformVariable();
     auto spots = firstRoom.getSpotLightsData();
     auto &torch = firstRoom.getTorch();
-    auto &spotLight = firstRoom.getSpotLight(0);
 
     // glm::vec3 light_dir_world = glm::rotate(glm::mat4(1.f), glimac::getTime(), glm::vec3(0, 1, 0)) * glm::vec4(1, 1, 1, 0);
     glm::vec3 light_dir_world = glm::normalize(glm::vec3(0.0f, -1.0f, 0.0f));
 
-    setSpotLightUniform(uv, spotLight.position, spotLight.cutoff, spotLight.exponent);
     setSpotLightsUniform(firstRoom);
 
     auto meshProcess = [&](const Geometry::Mesh &mesh, const glm::vec3 &lightIntensity, const Geometry::Material &mat)
@@ -30,7 +28,7 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
 
         glm::mat4 mv_matrix = this->_viewMatrix * mesh._transform;
         glm::mat4 normal_matrix = glm::transpose(glm::inverse(mv_matrix));
-        glm::vec3 light_dir_vs = glm::vec3(glm::vec4(light_dir_world, 1.0));
+        glm::vec3 light_dir_vs = glm::vec3(mesh._transform * glm::vec4(light_dir_world, 1.0));
         glm::vec3 light_pos_vs = glm::vec3(mesh._transform * glm::vec4(firstRoom.getGlobalLightPos(), 1.0));
 
         setMatricesToShader(uv, _projectionMatrix, mv_matrix, normal_matrix, mesh._transform);
@@ -45,28 +43,25 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
 
     box.getProgram().use();
 
-    glBindTexture(GL_TEXTURE_2D, box.getBounds().getTex());
-    glUniform1i(uv.uTexLoc, 0);
-
     glBeginTransformFeedback(GL_TRIANGLES);
-    applyToAllMeshes(box.getBounds().getMeshVector(), meshProcess, firstRoom._boxMaterial, firstRoom.getBoxLightIntensity());
+
+    // applyToAllMeshes(box.getBounds().getMeshVector(), meshProcess, firstRoom._boxMaterial, firstRoom.getBoxLightIntensity());
+    glUniform1i(uv.uTexLoc, 0);
+    renderObject(box.getBounds(), _shaderProgram, uv);
+
     glEndTransformFeedback();
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    // glBindTexture(GL_TEXTURE_2D, glowStoneProg._glowStone.getTex());
-    // glUniform1i(glowStoneProg._uniformVariable.uTexLoc, 0);
-
     for (int i = 0; i < 2; i++)
     {
-        applyToAllMeshes(spots[i]._spot.getMeshVector(), meshProcess, firstRoom._spotMaterial, spots[i].intensity);
+        glUniform3f(uv.uLightIntensity, spots[i].intensity.x, spots[i].intensity.y, spots[i].intensity.z);
+        renderObject(spots[i]._spot, _shaderProgram, uv);
     }
-
-    // applyToAllMeshes(torch.getMeshVector(), meshProcess);
 
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
-    // sun.animateSphere();
     // firstRoom.printDebugBuff();
+    firstRoom.moveSpot(1);
     // exit(0);
 }
 
@@ -127,10 +122,81 @@ void Renderer::setSpotLightsUniform(FirstRoom &firstRoom)
         glUniform3fv(spotLightVarLoc[i].direction, 1, glm::value_ptr(spotLight[i].direction));
         glUniform3fv(spotLightVarLoc[i].lightIntensity, 1, glm::value_ptr(spotLight[i].intensity));
         // glUniform3fv(spotLightVarLoc[i].lightPos, 1, glm::value_ptr(spotLight[i].lightPos));
-        glUniform3fv(spotLightVarLoc[i].m_Kd, 1, glm::value_ptr(firstRoom._spotMaterial.m_Kd));
-        glUniform3fv(spotLightVarLoc[i].m_Ks, 1, glm::value_ptr(firstRoom._spotMaterial.m_Ks));
+        glUniform3fv(spotLightVarLoc[i].m_Kd, 1, glm::value_ptr(firstRoom._spotMaterial[i].m_Kd));
+        glUniform3fv(spotLightVarLoc[i].m_Ks, 1, glm::value_ptr(firstRoom._spotMaterial[i].m_Ks));
+        glUniform3fv(spotLightVarLoc[i].m_Ka, 1, glm::value_ptr(firstRoom._spotMaterial[i].m_Ka));
 
         glUniform1f(spotLightVarLoc[i].cutoff, cosf(glm::radians(spotLight[i].cutoff)));
         glUniform1f(spotLightVarLoc[i].exponent, spotLight[i].exponent);
     }
+}
+
+void Renderer::renderObject(const Geometry &geometry, glimac::Program &program, const Room::UniformVariable &uniformVar)
+{
+    program.use();
+
+    auto texId = geometry.getTex();
+    auto &matList = geometry.getMaterialList();
+    for (const auto &mesh : geometry.getMeshVector())
+    {
+        glBindTexture(GL_TEXTURE_2D, texId);
+        glBindVertexArray(mesh.vao);
+        glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
+
+        glm::mat4 modelMatrix = mesh.isTransform ? mesh._transform : geometry.getModelMatrix();
+        glm::mat4 mv_matrix = this->_viewMatrix * modelMatrix;
+        glm::mat4 normal_matrix = glm::transpose(glm::inverse(mv_matrix));
+
+        setMatricesToShader(uniformVar, _projectionMatrix, mv_matrix, normal_matrix, modelMatrix);
+
+        if (mesh.m_nMaterialIndex != -1)
+        {
+            const auto &material = matList[mesh.m_nMaterialIndex];
+
+            glUniform3fv(uniformVar.uKa, 1, glm::value_ptr(material.m_Ka));
+            glUniform3fv(uniformVar.uKd, 1, glm::value_ptr(material.m_Kd));
+            glUniform3fv(uniformVar.uKs, 1, glm::value_ptr(material.m_Ks));
+            glUniform1f(uniformVar.uShininess, material.m_Shininess);
+
+            // if (material.m_pKaMap)
+            // {
+            //     GLuint texKaLoc = glGetUniformLocation(program.getGLId(), "uMaterial.KaMap");
+            //     glUniform1i(texKaLoc, 0);
+            //     glActiveTexture(GL_TEXTURE0);
+            //     glBindTexture(GL_TEXTURE_2D, material.m_pKaMap->getTextureID());
+            // }
+
+            // if (material.m_pKdMap)
+            // {
+            //     GLuint texKdLoc = glGetUniformLocation(program.getGLId(), "uMaterial.KdMap");
+            //     glUniform1i(texKdLoc, 1); // Texture unit 1
+            //     glActiveTexture(GL_TEXTURE1);
+            //     glBindTexture(GL_TEXTURE_2D, material.m_pKdMap->getTextureID());
+            // }
+
+            // if (material.m_pKsMap)
+            // {
+            //     GLuint texKsLoc = glGetUniformLocation(program.getGLId(), "uMaterial.KsMap");
+            //     glUniform1i(texKsLoc, 2); // Texture unit 2
+            //     glActiveTexture(GL_TEXTURE2);
+            //     glBindTexture(GL_TEXTURE_2D, material.m_pKsMap->getTextureID());
+            // }
+
+            // if (material.m_pNormalMap)
+            // {
+            //     GLuint texNormalLoc = glGetUniformLocation(program.getGLId(), "uMaterial.NormalMap");
+            //     glUniform1i(texNormalLoc, 3); // Texture unit 3
+            //     glActiveTexture(GL_TEXTURE3);
+            //     glBindTexture(GL_TEXTURE_2D, material.m_pNormalMap->getTextureID());
+            // }
+        }
+
+        glDrawArrays(GL_TRIANGLES, mesh.m_nIndexOffset, mesh.m_nIndexCount);
+
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+    // Unbind VAO and VBO
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }

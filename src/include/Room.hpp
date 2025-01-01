@@ -16,6 +16,7 @@ public:
         GLint uNormalMatrix;
         GLint uModelMatrix;
         GLint uTexLoc;
+        GLint uKa;
         GLint uKd;
         GLint uKs;
         GLint uShininess;
@@ -40,7 +41,7 @@ public:
 
     void addGroundAndFront(const glm::vec3 &cameraPos);
 
-    void constructRoom(const glm::vec3 &cameraPos, unsigned short order);
+    void constructRoom(const glm::vec3 &cameraPos, unsigned short order, Geometry::Material &roomMat);
 
     const UniformVariable &getUniformVariable()
     {
