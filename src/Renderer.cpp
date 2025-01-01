@@ -22,27 +22,6 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
 
     setSpotLightsUniform(firstRoom);
 
-    auto meshProcess = [&](const Geometry::Mesh &mesh, const glm::vec3 &lightIntensity, const Geometry::Material &mat)
-    {
-        glBindVertexArray(mesh.vao);
-
-        glm::mat4 mv_matrix = this->_viewMatrix * mesh._transform;
-        glm::mat4 normal_matrix = glm::transpose(glm::inverse(mv_matrix));
-        glm::vec3 light_dir_vs = glm::vec3(mesh._transform * glm::vec4(light_dir_world, 1.0));
-        glm::vec3 light_pos_vs = glm::vec3(mesh._transform * glm::vec4(firstRoom.getGlobalLightPos(), 1.0));
-
-        setMatricesToShader(uv, _projectionMatrix, mv_matrix, normal_matrix, mesh._transform);
-
-        if (firstRoom.getLightFlag() == 1)
-        {
-            setMaterialAndLightingUniforms(uv, light_dir_vs, light_pos_vs, lightIntensity, mat);
-        }
-
-        glDrawArrays(GL_TRIANGLES, mesh.m_nIndexOffset, mesh.m_nIndexCount);
-    };
-
-    box.getProgram().use();
-
     glBeginTransformFeedback(GL_TRIANGLES);
 
     // applyToAllMeshes(box.getBounds().getMeshVector(), meshProcess, firstRoom._boxMaterial, firstRoom.getBoxLightIntensity());
