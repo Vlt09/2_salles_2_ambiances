@@ -28,6 +28,8 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom, const glm::vec3 &cameraPos,
         box.getProgram().use();
     }
 
+    glUniform1i(uv.uActiveLight, 1);
+
     glBeginTransformFeedback(GL_TRIANGLES);
     glDisable(GL_BLEND);
 
@@ -75,6 +77,7 @@ void Renderer::renderSecondRoom(FirstRoom &sr, const glm::vec3 &cameraPos, const
         float distance = glm::length(cameraPos - glassPos);
         sortedGlass[distance] = &glass[i];
     }
+    glUniform1i(uv.uActiveLight, 0);
 
     if (cameraPos.x <= border.x)
     {
@@ -82,6 +85,7 @@ void Renderer::renderSecondRoom(FirstRoom &sr, const glm::vec3 &cameraPos, const
     }
 
     glUniform1i(uv.uTexLoc, 0);
+
     renderObject(box.getBounds(), uv);
     renderObject(sr.getTube(), uv);
     renderObject(sr.getRing(), uv);

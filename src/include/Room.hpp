@@ -26,6 +26,7 @@ public:
         GLint uSpotlightCutoff;
         GLint uSpotlightExponent;
         GLint uSpotLight;
+        GLint uActiveLight;
     };
 
     const Geometry &getBounds() const

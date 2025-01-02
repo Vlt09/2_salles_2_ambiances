@@ -21,6 +21,7 @@ uniform vec3 uLightPos_vs;
 uniform vec3 uSpotLight;
 uniform float uSpotlightCutoff; // Angle limite du spot de lumiere
 uniform float uSpotlightExponent;
+uniform int uActiveLight;
 
 struct SpotLight{
     vec3 _position, _direction, _lightIntensity;
@@ -96,22 +97,20 @@ vec3 spotlightAttenuation(SpotLight spotLight, vec3 normal) {
 void main()
 {
     vec3 tex = texture(uTexture, vVertexTex).xyz;
-    vec3 normalColor = normalize(vVertexNormal);   
+    vec3 normalColor = normalize(vVertexNormal);
+    vec3 border = vec3(12., 0., 0.);
 
     vec3 lighting = blinnPhong(uKd, normalColor);
 
     // fFragColor = lighting; 
 
     vec3 attenuation = vec3(0, 0, 0);
-
-    for (int i = 0 ;i < 2 ;i++) {
-        attenuation += spotlightAttenuation(uSpotLights[i], normalColor);
+    if (uActiveLight == 1){
+        for (int i = 0 ;i < 2 ;i++) {
+            attenuation += spotlightAttenuation(uSpotLights[i], normalColor);
+        }
     }
-
-    // attenuation += spotlightAttenuation(uSpotLights[1], normalColor);
-
-    // attenuation += spotlightAttenuation(uSpotLight, normalColor);
-    
+  
 
     fFragColor = tex + (attenuation); 
 

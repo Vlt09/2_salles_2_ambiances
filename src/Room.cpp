@@ -19,6 +19,7 @@ void Room::initProgram(const glimac::FilePath &vsFile, const glimac::FilePath &f
     uniformVariable.uSpotlightExponent = glGetUniformLocation(_mProgram.getGLId(), "uSpotlightExponent");
     uniformVariable.uSpotlightCutoff = glGetUniformLocation(_mProgram.getGLId(), "uSpotlightCutoff");
     uniformVariable.uSpotLight = glGetUniformLocation(_mProgram.getGLId(), "uSpotLight");
+    uniformVariable.uActiveLight = glGetUniformLocation(_mProgram.getGLId(), "uActiveLight");
 }
 
 void Room::addGroundAndFront(const glm::vec3 &cameraPos)

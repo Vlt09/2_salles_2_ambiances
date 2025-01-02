@@ -163,6 +163,7 @@ int main(int argc, char *argv[])
                       shift, applicationPath);
 
     glm::vec3 border = glm::vec3(cPos.x - 12, cPos.y, cPos.z);
+    std::cout << "border = " << border << std::endl;
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
