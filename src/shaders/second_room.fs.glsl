@@ -5,9 +5,11 @@ in vec3 vVertexNormal;
 
 uniform sampler2D uTexture;
 
-out vec3 fFragColor;
+out vec4 fFragColor;
 
 void main() {
-    vec3 tex = texture(uTexture, vVertexTex).xyz;
+    vec4 tex = texture(uTexture, vVertexTex);
+    vec3 normalColor = normalize(vVertexNormal);
+
     fFragColor = tex;
 }

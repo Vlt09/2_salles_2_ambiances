@@ -55,13 +55,34 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
     // exit(0);
 }
 
-template <typename Func>
-void Renderer::applyToAllMeshes(const std::vector<Geometry::Mesh> &meshes, Func &&func, const Geometry::Material &mat, const glm::vec3 &lightIntensity)
+void Renderer::renderSecondRoom(FirstRoom &sr, const glm::vec3 &cameraPos)
 {
-    for (auto &mesh : meshes)
+    auto &box = sr.getBox();
+    auto &uv = sr.getBoxUniformVariable();
+    auto size = sr.glassSize();
+    auto &prog = box.getProgram();
+    auto &sortedGlass = sr.getSortedGlass();
+    Quad *glass = sr.getGlassData();
+
+    // Sort Glass using distance of an object from the viewer's perspective
+    for (unsigned int i = 0; i < size; i++)
     {
-        func(mesh, lightIntensity, mat);
+        auto glassPos = glm::vec3(glass[i].getMeshBuffer()[0]._transform * glm::vec4(glass[i].getVertexBuffer()[0].m_Position, 1.0));
+        float distance = glm::length(cameraPos - glassPos);
+        sortedGlass[distance] = &glass[i];
     }
+
+    glUniform1i(uv.uTexLoc, 0);
+    renderObject(box.getBounds(), prog, uv);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    for (std::map<float, Quad *>::reverse_iterator it = sortedGlass.rbegin(); it != sortedGlass.rend(); ++it)
+    {
+        renderObject(*it->second, prog, uv);
+    }
+
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Renderer::setMatricesToShader(const Room::UniformVariable &uniformVariable,
@@ -181,14 +202,11 @@ void Renderer::renderObject(const Geometry &geometry, glimac::Program &program, 
             //     glBindTexture(GL_TEXTURE_2D, material.m_pNormalMap->getTextureID());
             // }
         }
-        std::cout << "Renderer 191 mesh = " << mesh.m_nIndexOffset << " index count = " << mesh.m_nIndexCount << std::endl;
         glDrawArrays(GL_TRIANGLES, mesh.m_nIndexOffset, mesh.m_nIndexCount);
-        std::cout << "Renderer 194" << std::endl;
-
-        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     // Unbind VAO and VBO
+    glBindTexture(GL_TEXTURE_2D, 0);
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }

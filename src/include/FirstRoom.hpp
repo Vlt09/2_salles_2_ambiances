@@ -4,6 +4,7 @@
 #include "Cube.hpp"
 #include "Shape.hpp"
 #include "Cylinder.hpp"
+#include <map>
 
 class FirstRoom
 {
@@ -56,12 +57,14 @@ private:
 
     TwistCube _tCube;
     Cylinder _cy;
-    Quad _glass;
+    std::vector<Quad> _glass;
+    std::map<float, Quad *> _sortedGlass;
 
     glm::vec3 _lightPos;
     glm::vec3 _boxLightIntensity;
 
 public:
+    static const size_t MAX_GLASS = 3;
     Geometry::Material _spotMaterial[2];
     Geometry::Material _boxMaterial;
 
@@ -75,9 +78,7 @@ public:
                       glm::vec3(1.0f, 1.0f, 1.0f),
                       20.0f,
                       2.0f),
-                  _tCube(5, 5, 5, 16, 8),
-                  _glass(3, 3)
-
+                  _tCube(5, 5, 5, 16, 8)
     {
         _spotMaterial[0].m_Ka = glm::vec3(0.0f, 0.0f, 0.5f);
         _spotMaterial[0].m_Kd = glm::vec3(0.0f, 0.0f, 0.5f);
@@ -130,6 +131,21 @@ public:
     Cylinder &getCylinder()
     {
         return _cy;
+    }
+
+    Quad *getGlassData()
+    {
+        return &_glass[0];
+    }
+
+    std::map<float, Quad *> &getSortedGlass()
+    {
+        return _sortedGlass;
+    }
+
+    size_t glassSize()
+    {
+        return _glass.size();
     }
 
     const glm::vec3 &getBoxLightIntensity()
@@ -298,7 +314,22 @@ public:
 
         _box.constructRoom(cameraPos, -1, _boxMaterial);
 
-        _glass.initTexture();
+        // Init glasses
+        for (int i = 0; i < MAX_GLASS; i++)
+        {
+            _glass.emplace_back(Quad(3, 3));
+            _glass[i].initTexture(applicationPath.dirPath() + "../src/assets/glass.png");
+            _glass[i].translateModel(glm::vec3(cameraPos.x, cameraPos.y + 3.f, cameraPos.z + 1.f + ((float)i * 1.5)));
+            _glass[i].rotateModel(glm::radians(90.f), glm::vec3(1., 0., 0.));
+        }
+
+        // Sort Glass using distance of an object from the viewer's perspective
+        for (unsigned int i = 0; i < MAX_GLASS; i++)
+        {
+            auto glassPos = glm::vec3(_glass[i].getMeshBuffer()[0]._transform * glm::vec4(_glass[i].getVertexBuffer()[0].m_Position, 1.0));
+            float distance = glm::length(cameraPos - glassPos);
+            _sortedGlass[distance] = &_glass[i];
+        }
     }
 
     void printDebugBuff()

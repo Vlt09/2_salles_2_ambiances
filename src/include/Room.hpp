@@ -48,7 +48,7 @@ public:
         return uniformVariable;
     }
 
-    const glimac::Program &getProgram()
+    glimac::Program &getProgram()
     {
         return _mProgram;
     }

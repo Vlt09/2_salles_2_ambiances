@@ -141,20 +141,9 @@ int main(int argc, char *argv[])
     // fr.setGlobalLightPos(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z));
 
     /* Init second Room */
-    sr.initFirstRoom(applicationPath.dirPath() + "src/shaders/3D.vs.glsl",
-                     applicationPath.dirPath() + "src/shaders/second_room.fs.glsl",
-                     "/home/valentin/m2/opengl/2_salles_2_ambiances/src/assets/MC-Torch/model/obj/Torch.obj",
-                     "/home/valentin/m2/opengl/2_salles_2_ambiances/src/assets/MC-Torch/model/obj/Torch.mtl",
-                     camera.cameraPosition());
-
-    sr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z), 0);
-    sr.setSpotLightDirection(camera.cameraPosition(), 0);
-    // sr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY + 5.f, camera.cameraPosition().z), 1);
-
-    sr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z - 5.f), 1);
-    sr.setSpotLightDirection(glm::vec3(camera.cameraPosition().x, 0., camera.cameraPosition().z - 5.f), 1);
-
-    sr.setGlobalLightPos(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z));
+    sr.initSecondRoom(applicationPath.dirPath() + "src/shaders/3D.vs.glsl",
+                      applicationPath.dirPath() + "src/shaders/second_room.fs.glsl",
+                      camera.cameraPosition(), applicationPath);
 
     auto t = camera.cameraPosition();
 
@@ -174,7 +163,8 @@ int main(int argc, char *argv[])
         // renderer.render(sphere, uniformVariable);
         // renderer.render(bounds, room.getUniformVariable());
 
-        renderer.renderFirstRoom(fr);
+        // renderer.renderFirstRoom(fr);
+        renderer.renderSecondRoom(sr, camera.cameraPosition());
 
         // glBindVertexArray(sphere.getMeshBuffer()->vao);
         // glDrawArrays(GL_TRIANGLES, 0, sphere.getVertexCount());

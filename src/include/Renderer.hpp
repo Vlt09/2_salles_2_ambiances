@@ -75,4 +75,6 @@ public:
     void setSpotLightsUniform(FirstRoom &firstRoom);
 
     void renderObject(const Geometry &geometry, glimac::Program &program, const Room::UniformVariable &uniformVar);
+
+    void renderSecondRoom(FirstRoom &sr, const glm::vec3 &cameraPos);
 };
