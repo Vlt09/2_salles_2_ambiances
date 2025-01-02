@@ -81,7 +81,7 @@ vec3 spotlightAttenuation(SpotLight spotLight, vec3 normal) {
     float spotFactor = dot(lightToPixel, normalize(-spotLight._direction));  
 
     if (isnan(spotFactor)){
-        return vec3(255, 255, 255);
+        return vec3(0, 255, 0);
     }
 
     if (spotFactor > spotLight._cutoff) {
@@ -91,7 +91,7 @@ vec3 spotlightAttenuation(SpotLight spotLight, vec3 normal) {
         // return vec3(255, 0, 255);
     }
 
-    return vec3(0, 0, 0);//vec3(spotLight.m_Ka * texture(uTexture, vVertexTex).xyz * spotLight.m_Kd);
+    return vec3(255, 255, 255);//vec3(spotLight.m_Ka * texture(uTexture, vVertexTex).xyz * spotLight.m_Kd);
 }
 
 void main()
@@ -106,14 +106,13 @@ void main()
 
     vec3 attenuation = vec3(0, 0, 0);
     vec3 t = vec3(uModelMatrix * vec4(vVertexPos, 1.0)); 
-    if (t.x >= 12.){
-        for (int i = 0 ;i < 2 ;i++) {
-            attenuation += spotlightAttenuation(uSpotLights[i], normalColor);
-        }
+    for (int i = 0 ;i < 2 ;i++) {
+        attenuation += spotlightAttenuation(uSpotLights[i], normalColor);
     }
   
 
-    fFragColor = tex + (attenuation); 
+    // fFragColor = tex + (lighting + attenuation); 
+    fFragColor = (attenuation); 
 
 
     // fFragColor = normalColor * 0.5 + 0.5;

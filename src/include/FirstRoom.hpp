@@ -199,11 +199,6 @@ public:
         _spotLights[idx].direction = glm::normalize(targetPosition - _spotLights[idx].position);
     }
 
-    const SpotLight &getSpotLight(int idx)
-    {
-        return _spotLight;
-    }
-
     void setGlobalLightPos(const glm::vec3 &pos)
     {
         _lightPos = pos;

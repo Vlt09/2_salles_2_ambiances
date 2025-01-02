@@ -192,28 +192,11 @@ int main(int argc, char *argv[])
         renderer.setViewMatrix(camera.getViewMatrix());
 
         glClearColor(1.f, 0.5f, 0.5f, 1.f);
-        // glClearColor(0.f, 0.f, 0.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        // glUniformMatrix4fv(mvp_loc, 1, GL_FALSE, glm::value_ptr(proj_matrix * mv_matrix));
-        // glUniformMatrix4fv(mv_loc, 1, GL_FALSE, glm::value_ptr(mv_matrix));
-        // glUniformMatrix4fv(normal_loc, 1, GL_FALSE, glm::value_ptr(normal_matrix));
-
-        // renderer.render(sphere, uniformVariable);
-        // renderer.render(bounds, room.getUniformVariable());
 
         renderer.renderSkybox(skybox);
         renderer.renderFirstRoom(fr, camera.cameraPosition(), border);
         renderer.renderSecondRoom(sr, camera.cameraPosition(), border);
-
-        // glBindVertexArray(sphere.getMeshBuffer()->vao);
-        // glDrawArrays(GL_TRIANGLES, 0, sphere.getVertexCount());
-        // GLenum err = glGetError();
-        // if (err != GL_NO_ERROR)
-        // {
-        //     std::cerr << "OpenGL error: " << err << std::endl;
-        // }
-        // glBindVertexArray(0);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);

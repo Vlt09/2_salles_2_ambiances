@@ -7,7 +7,7 @@
 class Skybox
 {
 private:
-    GLuint _vao, _vbo, _uskybox, _uMVPMatrix;
+    GLuint _vao, _vbo, _uskybox, _uMVPMatrix, _uModelMatrix;
     unsigned int _cubemapTexture;
     unsigned int loadCubemap(std::vector<std::string> &faces);
 
@@ -34,6 +34,7 @@ public:
 
         _uskybox = glGetUniformLocation(_shader.getGLId(), "uskybox");
         _uMVPMatrix = glGetUniformLocation(_shader.getGLId(), "uMVPMatrix");
+        _uModelMatrix = glGetUniformLocation(_shader.getGLId(), "uModelMatrix");
     }
 
     GLuint getShaderId()
