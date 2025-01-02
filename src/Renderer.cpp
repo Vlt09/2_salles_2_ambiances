@@ -15,7 +15,8 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
     auto &box = firstRoom.getBox();
     auto &uv = firstRoom.getBoxUniformVariable();
     auto spots = firstRoom.getSpotLightsData();
-    auto &torch = firstRoom.getTorch();
+    auto &tCube = firstRoom.getTwistCube();
+    auto &cy = firstRoom.getCylinder();
 
     // glm::vec3 light_dir_world = glm::rotate(glm::mat4(1.f), glimac::getTime(), glm::vec3(0, 1, 0)) * glm::vec4(1, 1, 1, 0);
     glm::vec3 light_dir_world = glm::normalize(glm::vec3(0.0f, -1.0f, 0.0f));
@@ -26,7 +27,6 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
 
     glBeginTransformFeedback(GL_TRIANGLES);
 
-    // applyToAllMeshes(box.getBounds().getMeshVector(), meshProcess, firstRoom._boxMaterial, firstRoom.getBoxLightIntensity());
     glUniform1i(uv.uTexLoc, 0);
     renderObject(box.getBounds(), _shaderProgram, uv);
 
@@ -36,13 +36,20 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
     for (int i = 0; i < 2; i++)
     {
         glUniform3f(uv.uLightIntensity, spots[i].intensity.x, spots[i].intensity.y, spots[i].intensity.z);
-        // applyToAllMeshes(spots[i]._spot.getMeshVector(), meshProcess, firstRoom._spotMaterial[i], spots[i].intensity);
         renderObject(spots[i]._spot, _shaderProgram, uv);
     }
-    renderObject(torch, _shaderProgram, uv);
+
+    // float twistAmount = sin(glimac::getTime()) * 0.005;
+    float twistAmount = 0.0005f;
+
+    renderObject(tCube._cube, _shaderProgram, uv);
+    renderObject(cy, _shaderProgram, uv);
 
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
+    cy.elasticDeformation();
+    tCube._cube.applyTwist(twistAmount);
+
     // firstRoom.printDebugBuff();
     firstRoom.moveSpot(1);
     // exit(0);
@@ -120,9 +127,13 @@ void Renderer::renderObject(const Geometry &geometry, glimac::Program &program, 
 
     auto texId = geometry.getTex();
     auto &matList = geometry.getMaterialList();
-    for (const auto &mesh : geometry.getMeshVector())
+    auto &meshes = geometry.getMeshVector();
+    for (const auto &mesh : meshes)
     {
-        glBindTexture(GL_TEXTURE_2D, texId);
+        if (texId != -1)
+        {
+            glBindTexture(GL_TEXTURE_2D, texId);
+        }
         glBindVertexArray(mesh.vao);
         glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
 
@@ -131,16 +142,13 @@ void Renderer::renderObject(const Geometry &geometry, glimac::Program &program, 
         glm::mat4 normal_matrix = glm::transpose(glm::inverse(mv_matrix));
 
         setMatricesToShader(uniformVar, _projectionMatrix, mv_matrix, normal_matrix, modelMatrix);
-
         if (mesh.m_nMaterialIndex != -1)
         {
             const auto &material = matList[mesh.m_nMaterialIndex];
-
             glUniform3fv(uniformVar.uKa, 1, glm::value_ptr(material.m_Ka));
             glUniform3fv(uniformVar.uKd, 1, glm::value_ptr(material.m_Kd));
             glUniform3fv(uniformVar.uKs, 1, glm::value_ptr(material.m_Ks));
             glUniform1f(uniformVar.uShininess, material.m_Shininess);
-
             // if (material.m_pKaMap)
             // {
             //     GLuint texKaLoc = glGetUniformLocation(program.getGLId(), "uMaterial.KaMap");
@@ -173,8 +181,9 @@ void Renderer::renderObject(const Geometry &geometry, glimac::Program &program, 
             //     glBindTexture(GL_TEXTURE_2D, material.m_pNormalMap->getTextureID());
             // }
         }
-
+        std::cout << "Renderer 191 mesh = " << mesh.m_nIndexOffset << " index count = " << mesh.m_nIndexCount << std::endl;
         glDrawArrays(GL_TRIANGLES, mesh.m_nIndexOffset, mesh.m_nIndexCount);
+        std::cout << "Renderer 194" << std::endl;
 
         glBindTexture(GL_TEXTURE_2D, 0);
     }

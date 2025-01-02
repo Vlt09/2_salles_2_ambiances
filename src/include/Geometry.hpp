@@ -65,7 +65,7 @@ protected:
     std::vector<Vertex> m_VertexBuffer;
     std::vector<Material> m_Materials;
     glm::mat4 _modelMatrix = glm::mat4(1);
-    GLuint _vbo, _tex;
+    GLuint _vbo, _tex = -1;
 
 public:
     const Vertex *getVertexBuffer() const
@@ -165,7 +165,13 @@ public:
 
     void translateModel(const glm::vec3 &translate);
 
+    void translateMesh(const glm::vec3 &translate, unsigned int idX);
+
     void scaleModel(const glm::vec3 &scale);
 
+    void scaleMesh(const glm::vec3 &scale, unsigned int idX);
+
     void rotateModel(float angle, const glm::vec3 &axis);
+
+    void rotateMesh(float angle, const glm::vec3 &axis, unsigned int idX);
 };

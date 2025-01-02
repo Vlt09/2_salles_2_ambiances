@@ -2,6 +2,8 @@
 #include "Room.hpp"
 #include "Sphere.hpp"
 #include "Cube.hpp"
+#include "Shape.hpp"
+#include "Cylinder.hpp"
 
 class FirstRoom
 {
@@ -52,10 +54,11 @@ private:
     SpotLight _spotLights[MAX_SPOT_LIGHT];
     SpotLightUniformVarLoc _spotLightUniformVarLoc[MAX_SPOT_LIGHT];
 
-    Geometry _torch;
+    TwistCube _tCube;
+    Cylinder _cy;
+    Quad _glass;
 
     glm::vec3 _lightPos;
-
     glm::vec3 _boxLightIntensity;
 
 public:
@@ -71,7 +74,9 @@ public:
                       glm::vec3(0.0f, -1.0f, 0.0f),
                       glm::vec3(1.0f, 1.0f, 1.0f),
                       20.0f,
-                      2.0f)
+                      2.0f),
+                  _tCube(5, 5, 5, 16, 8),
+                  _glass(3, 3)
 
     {
         _spotMaterial[0].m_Ka = glm::vec3(0.0f, 0.0f, 0.5f);
@@ -99,10 +104,12 @@ public:
         _spotLight.intensity = glm::vec3(1.0f, 1.0f, 1.0f);
         _spotLight.cutoff = 2.f;
         _spotLights[0].intensity = glm::vec3(1.0f, 1.0f, 1.0f);
-        _spotLights[0].cutoff = 10.f;
+        _spotLights[0].cutoff = 25.f;
 
         _spotLights[1].intensity = glm::vec3(1.0f, 1.0f, 1.0f);
-        _spotLights[1].cutoff = 10.f;
+        _spotLights[1].cutoff = 25.f;
+
+        _cy.initCylinder(1, 3, 16, 8, _boxMaterial);
     }
 
     Sphere &getSpot()
@@ -115,6 +122,16 @@ public:
         return _box;
     }
 
+    TwistCube &getTwistCube()
+    {
+        return _tCube;
+    }
+
+    Cylinder &getCylinder()
+    {
+        return _cy;
+    }
+
     const glm::vec3 &getBoxLightIntensity()
     {
         return _boxLightIntensity;
@@ -123,11 +140,6 @@ public:
     const Room::UniformVariable &getBoxUniformVariable()
     {
         return _box.getUniformVariable();
-    }
-
-    const Geometry &getTorch() const
-    {
-        return _torch;
     }
 
     unsigned short getLightFlag()
@@ -262,8 +274,9 @@ public:
 
         _box.constructRoom(cameraPos, 1, _boxMaterial);
 
-        _torch.loadOBJ(torchOBJFilePath, torchMatFilePath, true);
-        _torch.translateModel(glm::vec3(cameraPos.x, cameraPos.y + 2.f, cameraPos.z - 5.f));
+        _cy.translateModel(glm::vec3(cameraPos.x - 3.f, cameraPos.y + 2.f, cameraPos.z));
+
+        _tCube._cube.translateModel(glm::vec3(cameraPos.x + 3.f, cameraPos.y + 2.f, cameraPos.z + 2.f));
 
         setSpotLightUniformLocations();
 
@@ -276,6 +289,16 @@ public:
 
         const char *varyings[] = {"vVertexPos"};
         glTransformFeedbackVaryings(_box.getProgramId(), 1, varyings, GL_INTERLEAVED_ATTRIBS);
+    }
+
+    void initSecondRoom(const glimac::FilePath &vsFilePath, const glimac::FilePath &fsFilePath, glm::vec3 cameraPos, glimac::FilePath applicationPath)
+    {
+        _box.initProgram(vsFilePath,
+                         fsFilePath);
+
+        _box.constructRoom(cameraPos, -1, _boxMaterial);
+
+        _glass.initTexture();
     }
 
     void printDebugBuff()

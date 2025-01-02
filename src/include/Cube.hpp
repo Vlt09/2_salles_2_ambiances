@@ -1,5 +1,6 @@
 #pragma once
 #include "Geometry.hpp"
+#include "Cone.hpp"
 #include "Room.hpp"
 
 class Cube : public Geometry
@@ -128,5 +129,28 @@ public:
             {{halfSize, -halfSize, -halfSize}, {0.f, -1.f, 0.f}, {0.f, 1.f}}};
 
         return vertices;
+    }
+
+    void applyTwist(float twistAmount)
+    {
+        auto size = m_VertexBuffer.size();
+        for (int i = 0; i < size; i++)
+        {
+            // Calculate the angle based on the Y-coordinate of the vertex
+            float angle = twistAmount * (m_VertexBuffer[i].m_Position.y + 1.0f); // Normalize Y to range [-1, 1]
+
+            // Apply the rotation around the Y-axis
+            float x = m_VertexBuffer[i].m_Position.x;
+            float z = m_VertexBuffer[i].m_Position.z;
+
+            // Rotate around Y-axis (cos(angle) for x and sin(angle) for z)
+            m_VertexBuffer[i].m_Position.x = x * cos(angle) - z * sin(angle);
+            m_VertexBuffer[i].m_Position.z = x * sin(angle) + z * cos(angle);
+        }
+
+        // Rebuild the VBO after modifying the vertices
+        glBindBuffer(GL_ARRAY_BUFFER, this->_vbo);
+        glBufferData(GL_ARRAY_BUFFER, this->m_VertexBuffer.size() * sizeof(Geometry::Vertex), this->getVertexBuffer(), GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 };

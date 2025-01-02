@@ -8,50 +8,39 @@
 
 using Vertex = Geometry::Vertex;
 
-// Représente une sphère discrétisée centrée en (0, 0, 0) (dans son repère local)
+// Représente un cylindre discretisé centré en (0, 0, 0) (dans son repère local)
 // Son axe vertical est (0, 1, 0) et ses axes transversaux sont (1, 0, 0) et (0, 0, 1)
-class Sphere : public Geometry
+class Cylinder : public Geometry
 {
     // Alloue et construit les données (implantation dans le .cpp)
-    void build(GLfloat r, GLsizei discLat, GLsizei discLong)
+    void build(GLfloat r, GLfloat height, GLsizei discLat, GLsizei discLong)
     {
-        // Equation paramétrique en (r, phi, theta) de la sphère
-        // avec r >= 0, -PI / 2 <= theta <= PI / 2, 0 <= phi <= 2PI
-        //
-        // x(r, phi, theta) = r sin(phi) cos(theta)
-        // y(r, phi, theta) = r sin(theta)
-        // z(r, phi, theta) = r cos(phi) cos(theta)
-        //
-        // Discrétisation:
-        // dPhi = 2PI / discLat, dTheta = PI / discLong
-        //
-        // x(r, i, j) = r * sin(i * dPhi) * cos(-PI / 2 + j * dTheta)
-        // y(r, i, j) = r * sin(-PI / 2 + j * dTheta)
-        // z(r, i, j) = r * cos(i * dPhi) * cos(-PI / 2 + j * dTheta)
-
         GLfloat rcpLat = 1.f / discLat, rcpLong = 1.f / discLong;
-        GLfloat dPhi = 2 * glm::pi<float>() * rcpLat, dTheta = glm::pi<float>() * rcpLong;
+        GLfloat dPhi = 2 * glm::pi<float>() * rcpLat, dHeight = height * rcpLong;
 
         std::vector<Vertex> data;
 
-        // Construit l'ensemble des vertex
         for (GLsizei j = 0; j <= discLong; ++j)
         {
-            GLfloat cosTheta = cos(-glm::pi<float>() / 2 + j * dTheta);
-            GLfloat sinTheta = sin(-glm::pi<float>() / 2 + j * dTheta);
+            GLfloat z = -height / 2 + j * dHeight;
 
             for (GLsizei i = 0; i <= discLat; ++i)
             {
                 Vertex vertex;
 
+                // Coordonnées de texture
                 vertex.m_TexCoords.x = i * rcpLat;
                 vertex.m_TexCoords.y = 1.f - j * rcpLong;
 
-                vertex.m_Normal.x = sin(i * dPhi) * cosTheta;
-                vertex.m_Normal.y = sinTheta;
-                vertex.m_Normal.z = cos(i * dPhi) * cosTheta;
+                // Normales (unité) de la surface du cylindre
+                vertex.m_Normal.x = cos(i * dPhi);
+                vertex.m_Normal.y = 0.f; // Pas de composante verticale
+                vertex.m_Normal.z = sin(i * dPhi);
 
-                vertex.m_Position = r * vertex.m_Normal;
+                // Position (le long de l'axe Z et autour du cercle)
+                vertex.m_Position.x = r * vertex.m_Normal.x;
+                vertex.m_Position.y = z;
+                vertex.m_Position.z = r * vertex.m_Normal.z;
 
                 data.push_back(vertex);
             }
@@ -61,9 +50,6 @@ class Sphere : public Geometry
 
         GLuint idx = 0;
         // Construit les vertex finaux en regroupant les données en triangles:
-        // Pour une longitude donnée, les deux triangles formant une face sont de la forme:
-        // (i, i + 1, i + discLat + 1), (i, i + discLat + 1, i + discLat)
-        // avec i sur la bande correspondant à la longitude
         for (GLsizei j = 0; j < discLong; ++j)
         {
             GLsizei offset = j * (discLat + 1);
@@ -91,7 +77,7 @@ class Sphere : public Geometry
 
         size_t lastMeshIndex = getLastMeshIndex();
         size_t newIndex = lastMeshIndex + this->m_VertexBuffer.size();
-        Geometry::Mesh mesh("sphere", lastMeshIndex, newIndex, idMat);
+        Geometry::Mesh mesh("cylinder", lastMeshIndex, newIndex, idMat);
         updateLastMeshIndex(newIndex);
 
         const GLuint VERTEX_ATTR_POSITION = 1;
@@ -117,45 +103,82 @@ class Sphere : public Geometry
     }
 
 public:
-    Sphere()
+    Cylinder()
     {
     }
 
-    // Constructeur: alloue le tableau de données et construit les attributs des vertex
-    Sphere(GLfloat radius, GLsizei discLat, GLsizei discLong) : m_nVertexCount(0)
+    Cylinder(GLfloat radius, GLfloat height, GLsizei discLat, GLsizei discLong) : m_nVertexCount(0)
     {
-        build(radius, discLat, discLong); // Construction (voir le .cpp)
+        build(radius, height, discLat, discLong);
         initMesh();
-        // translateModel(0.f, 0.f, -5.f);
     }
 
-    Sphere(GLfloat radius, GLsizei discLat, GLsizei discLong, Geometry::Material material) : m_nVertexCount(0)
+    Cylinder(GLfloat radius, GLfloat height, GLsizei discLat, GLsizei discLong, Geometry::Material material) : m_nVertexCount(0)
     {
         m_Materials.push_back(material);
-        build(radius, discLat, discLong); // Construction (voir le .cpp)
+        build(radius, height, discLat, discLong);
         initMesh();
-        // translateModel(0.f, 0.f, -5.f);
     }
 
-    void initSphere(GLfloat radius, GLsizei discLat, GLsizei discLong, Geometry::Material sphereMat)
+    void initCylinder(GLfloat radius, GLfloat height, GLsizei discLat, GLsizei discLong, Geometry::Material cylMat)
     {
-        m_Materials.push_back(sphereMat);
-        build(radius, discLat, discLong);
+        m_Materials.push_back(cylMat);
+        build(radius, height, discLat, discLong);
         initMesh();
     }
 
-    // Renvoit le pointeur vers les données
     const Geometry::Vertex *getDataPointer() const
     {
         return &this->m_VertexBuffer[0];
     }
 
-    // Renvoit le nombre de vertex
     GLsizei getVertexCount() const
     {
         return m_nVertexCount;
     }
 
+    void animateCylinder()
+    {
+        auto time = glimac::getTime();
+
+        float waveFrequency = 2.0f; // Fréquence des vagues
+        float waveAmplitude = 0.5f; // Amplitude des vagues
+
+        for (auto &vertex : m_VertexBuffer)
+        {
+            float waveFactor = sin(vertex.m_Position.y * waveFrequency + time) * waveAmplitude;
+            vertex.m_Position.y += waveFactor;
+            vertex.m_Position.x += waveFactor;
+        }
+
+        glBindBuffer(GL_ARRAY_BUFFER, this->_vbo);
+        glBufferData(GL_ARRAY_BUFFER, this->m_VertexBuffer.size() * sizeof(Geometry::Vertex), this->getVertexBuffer(), GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+
+    void elasticDeformation()
+    {
+        auto time = glimac::getTime();
+
+        float amplitude = 0.3f;
+        float frequency = 0.5f;
+
+        for (auto &vertex : m_VertexBuffer)
+        {
+            float distance = glm::length(vertex.m_Position);
+            float elasticFactor = amplitude * sin(frequency * distance + time);
+
+            vertex.m_Position.x += elasticFactor * vertex.m_Normal.x;
+            vertex.m_Position.y += elasticFactor * vertex.m_Normal.y;
+            vertex.m_Position.z += elasticFactor * vertex.m_Normal.z;
+        }
+
+        // Mettre à jour les données du VBO après la déformation
+        glBindBuffer(GL_ARRAY_BUFFER, this->_vbo);
+        glBufferData(GL_ARRAY_BUFFER, this->m_VertexBuffer.size() * sizeof(Geometry::Vertex), this->getVertexBuffer(), GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+
 private:
-    GLsizei m_nVertexCount; // Nombre de sommets
+    GLsizei m_nVertexCount;
 };

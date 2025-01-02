@@ -263,12 +263,27 @@ void Geometry::translateModel(const glm::vec3 &translate)
     m_MeshBuffer[0]._transform = glm::translate(_modelMatrix, translate);
 }
 
+void Geometry::translateMesh(const glm::vec3 &translate, unsigned int idX)
+{
+    m_MeshBuffer[idX]._transform = glm::translate(_modelMatrix, translate);
+}
+
 void Geometry::scaleModel(const glm::vec3 &scale)
 {
     m_MeshBuffer[0]._transform = glm::scale(_modelMatrix, scale);
 }
 
+void Geometry::scaleMesh(const glm::vec3 &scale, unsigned int idX)
+{
+    m_MeshBuffer[idX]._transform = glm::scale(_modelMatrix, scale);
+}
+
 void Geometry::rotateModel(float angle, const glm::vec3 &axis)
 {
     m_MeshBuffer[0]._transform = glm::rotate(_modelMatrix, angle, axis);
+}
+
+void Geometry::rotateMesh(float angle, const glm::vec3 &axis, unsigned int idX)
+{
+    m_MeshBuffer[idX]._transform = glm::rotate(_modelMatrix, angle, axis);
 }

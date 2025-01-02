@@ -107,19 +107,6 @@ int main(int argc, char *argv[])
     }
 
     glimac::FilePath applicationPath(argv[0]);
-    glimac::Program program = glimac::loadProgram(applicationPath.dirPath() + "src/shaders/3D.vs.glsl",
-                                                  applicationPath.dirPath() + "src/shaders/directionallight.fs.glsl");
-
-    // program.use();
-    auto mvp_loc = glGetUniformLocation(program.getGLId(), "uMVPMatrix");
-    auto mv_loc = glGetUniformLocation(program.getGLId(), "uMVMatrix");
-    auto normal_loc = glGetUniformLocation(program.getGLId(), "uNormalMatrix");
-    auto tex_loc = glGetUniformLocation(program.getGLId(), "uTexture");
-    auto uKd = glGetUniformLocation(program.getGLId(), "uKd");
-    auto uKs = glGetUniformLocation(program.getGLId(), "uKs");
-    auto uShininess = glGetUniformLocation(program.getGLId(), "uShininess");
-    auto uLightDir_vs = glGetUniformLocation(program.getGLId(), "uLightDir_vs");
-    auto uLightIntensity = glGetUniformLocation(program.getGLId(), "uLightIntensity");
 
     glEnable(GL_DEPTH_TEST);
     /* Hook input callbacks */
@@ -132,61 +119,45 @@ int main(int argc, char *argv[])
     glm::mat4 proj_matrix = glm::perspective(glm::radians(70.f), (float)window_width / window_height, 0.1f, 100.f);
     auto viewMatrix = camera.getViewMatrix();
 
-    Room::UniformVariable uniformVariable;
-
-    uniformVariable.uMVPMatrix = mvp_loc;
-    uniformVariable.uMVMatrix = mv_loc;
-    uniformVariable.uNormalMatrix = normal_loc;
-    uniformVariable.uTexLoc = tex_loc;
-    uniformVariable.uKd = uKd;
-    uniformVariable.uKs = uKs;
-    uniformVariable.uShininess = uShininess;
-    uniformVariable.uLightDir_vs = uLightDir_vs;
-    uniformVariable.uLightIntensity = uLightIntensity;
-
     auto firstRoom_light_posY = camera.cameraPosition().y + 10.f;
 
     Renderer renderer(proj_matrix, viewMatrix);
     // Room room;
-    FirstRoom fr;
-    fr.initFirstRoom(applicationPath.dirPath() + "src/shaders/3D.vs.glsl",
-                     applicationPath.dirPath() + "src/shaders/directionallight.fs.glsl",
+    FirstRoom fr, sr;
+
+    /* Init first Room*/
+    // fr.initFirstRoom(applicationPath.dirPath() + "src/shaders/3D.vs.glsl",
+    //                  applicationPath.dirPath() + "src/shaders/directionallight.fs.glsl",
+    //                  "/home/valentin/m2/opengl/2_salles_2_ambiances/src/assets/MC-Torch/model/obj/Torch.obj",
+    //                  "/home/valentin/m2/opengl/2_salles_2_ambiances/src/assets/MC-Torch/model/obj/Torch.mtl",
+    //                  camera.cameraPosition());
+    // fr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z), 0);
+    // fr.setSpotLightDirection(camera.cameraPosition(), 0);
+    // // fr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY + 5.f, camera.cameraPosition().z), 1);
+
+    // fr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z - 5.f), 1);
+    // fr.setSpotLightDirection(glm::vec3(camera.cameraPosition().x, 0., camera.cameraPosition().z - 5.f), 1);
+
+    // fr.setGlobalLightPos(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z));
+
+    /* Init second Room */
+    sr.initFirstRoom(applicationPath.dirPath() + "src/shaders/3D.vs.glsl",
+                     applicationPath.dirPath() + "src/shaders/second_room.fs.glsl",
                      "/home/valentin/m2/opengl/2_salles_2_ambiances/src/assets/MC-Torch/model/obj/Torch.obj",
-                     "/home/valentin/m2/opengl/2_salles_2_ambiances/src/assets/MC-Torch/model/material/Diffuse.png",
+                     "/home/valentin/m2/opengl/2_salles_2_ambiances/src/assets/MC-Torch/model/obj/Torch.mtl",
                      camera.cameraPosition());
-    fr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z), 0);
-    fr.setSpotLightDirection(camera.cameraPosition(), 0);
-    // fr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY + 5.f, camera.cameraPosition().z), 1);
 
-    fr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z - 5.f), 1);
-    fr.setSpotLightDirection(glm::vec3(camera.cameraPosition().x, 0., camera.cameraPosition().z - 5.f), 1);
+    sr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z), 0);
+    sr.setSpotLightDirection(camera.cameraPosition(), 0);
+    // sr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY + 5.f, camera.cameraPosition().z), 1);
 
-    fr.setGlobalLightPos(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z));
+    sr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z - 5.f), 1);
+    sr.setSpotLightDirection(glm::vec3(camera.cameraPosition().x, 0., camera.cameraPosition().z - 5.f), 1);
 
-    // room.initProgram(applicationPath.dirPath() + "src/shaders/3D.vs.glsl",
-    //  applicationPath.dirPath() + "src/shaders/directionallight.fs.glsl");
+    sr.setGlobalLightPos(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z));
 
-    // room.constructRoom(camera.cameraPosition(), 1);
-    Geometry::Material sunMat;
-    sunMat.m_Ka = glm::vec3(1.0f, 1.0f, 0.0f);
-    sunMat.m_Kd = glm::vec3(1.0f, 1.0f, 0.0f);
-    sunMat.m_Ks = glm::vec3(1.0f, 1.0f, 0.0f);
-    sunMat.m_Tr = glm::vec3(0.0f, 0.0f, 0.0f);
-    sunMat.m_Le = glm::vec3(1.0f, 1.0f, 0.0f);
-    sunMat.m_Shininess = 128.f;
-    sunMat.m_RefractionIndex = 1.f;
-    sunMat.m_Dissolve = 1.0f;
-
-    Sphere sphere(1, 32, 16, sunMat);
     auto t = camera.cameraPosition();
-    sphere.translateModel(t);
 
-    // Quad quad(50, 20);
-
-    // auto bounds = room.getBounds();
-    auto bounds = fr.getBox().getBounds();
-
-    // bounds.rotateModel(90.f, glm::vec3(1.f, 0.f, 0.f));
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
