@@ -5,6 +5,7 @@
 #include "include/Quad.hpp"
 #include "include/Room.hpp"
 #include "include/FirstRoom.hpp"
+#include "include/Skybox.hpp"
 
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
@@ -22,6 +23,11 @@ bool first_mouse = true;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
+float xMax = 10.f;
+float xMin = -34.f;
+float zMax = 10.f;
+float zMin = -10.f;
+
 Camera camera{};
 
 void updateDeltaTime()
@@ -31,9 +37,24 @@ void updateDeltaTime()
     lastFrame = currentFrame;
 }
 
+bool checkBorder()
+{
+    auto pos = camera.cameraPosition();
+    if (pos.x <= xMin || pos.x >= xMax)
+    {
+        return false;
+    }
+
+    if (pos.z <= zMin || pos.z >= zMax)
+    {
+        return false;
+    }
+    return true;
+}
+
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
-    if (action == GLFW_PRESS || action == GLFW_REPEAT)
+    if (action == GLFW_PRESS || action == GLFW_REPEAT && checkBorder())
     {
         float movementSpeed = 0.5f * deltaTime;
         switch (key)
@@ -138,6 +159,7 @@ int main(int argc, char *argv[])
     auto firstRoom_light_posY = camera.cameraPosition().y + 10.f;
 
     Renderer renderer(proj_matrix, viewMatrix);
+    Skybox skybox(applicationPath);
     FirstRoom fr, sr;
 
     /* Init first Room*/
@@ -180,6 +202,7 @@ int main(int argc, char *argv[])
         // renderer.render(sphere, uniformVariable);
         // renderer.render(bounds, room.getUniformVariable());
 
+        renderer.renderSkybox(skybox);
         renderer.renderFirstRoom(fr, camera.cameraPosition(), border);
         renderer.renderSecondRoom(sr, camera.cameraPosition(), border);
 

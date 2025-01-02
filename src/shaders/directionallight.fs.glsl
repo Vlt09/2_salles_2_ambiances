@@ -105,7 +105,8 @@ void main()
     // fFragColor = lighting; 
 
     vec3 attenuation = vec3(0, 0, 0);
-    if (uActiveLight == 1){
+    vec3 t = vec3(uModelMatrix * vec4(vVertexPos, 1.0)); 
+    if (t.x >= 12.){
         for (int i = 0 ;i < 2 ;i++) {
             attenuation += spotlightAttenuation(uSpotLights[i], normalColor);
         }

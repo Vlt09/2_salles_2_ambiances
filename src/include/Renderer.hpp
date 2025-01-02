@@ -3,6 +3,7 @@
 #include "Scene.hpp"
 #include "Room.hpp"
 #include "FirstRoom.hpp"
+#include "Skybox.hpp"
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 #include <glimac/glm.hpp>
@@ -27,6 +28,8 @@ public:
     void renderFirstRoom(FirstRoom &firstRoom, const glm::vec3 &cameraPos, const glm::vec3 &border);
 
     void renderSecondRoom(FirstRoom &sr, const glm::vec3 &cameraPos, const glm::vec3 &border);
+
+    void renderSkybox(Skybox &skybox);
 
     void setMaterialAndLightingUniforms(const Room::UniformVariable &uniformVariable,
                                         const glm::vec3 &light_dir_vs,

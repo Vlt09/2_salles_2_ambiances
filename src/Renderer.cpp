@@ -77,7 +77,6 @@ void Renderer::renderSecondRoom(FirstRoom &sr, const glm::vec3 &cameraPos, const
         float distance = glm::length(cameraPos - glassPos);
         sortedGlass[distance] = &glass[i];
     }
-    glUniform1i(uv.uActiveLight, 0);
 
     if (cameraPos.x <= border.x)
     {
@@ -85,6 +84,7 @@ void Renderer::renderSecondRoom(FirstRoom &sr, const glm::vec3 &cameraPos, const
     }
 
     glUniform1i(uv.uTexLoc, 0);
+    glUniform1i(uv.uActiveLight, 0);
 
     renderObject(box.getBounds(), uv);
     renderObject(sr.getTube(), uv);
@@ -100,6 +100,21 @@ void Renderer::renderSecondRoom(FirstRoom &sr, const glm::vec3 &cameraPos, const
 
     glBindTexture(GL_TEXTURE_2D, 0);
     cy.applyVortexEffect(0.003f);
+}
+
+void Renderer::renderSkybox(Skybox &skybox)
+{
+    auto model = glm::scale(glm::mat4(1), glm::vec3(43.f));
+
+    auto mv_matrix = glm::mat4(glm::mat3(_viewMatrix)) * model;
+    skybox.use(); // use shader
+    glUniformMatrix4fv(skybox.getUMVPLoc(), 1, GL_FALSE, glm::value_ptr(_projectionMatrix * mv_matrix));
+    glBindVertexArray(skybox.getVAO());
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, skybox.getCubemapTexture());
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glBindVertexArray(0);
+    glDepthFunc(GL_LESS);
 }
 
 void Renderer::setMatricesToShader(const Room::UniformVariable &uniformVariable,
