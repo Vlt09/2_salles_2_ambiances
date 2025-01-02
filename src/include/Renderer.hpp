@@ -24,32 +24,9 @@ public:
 
     Renderer(glm::highp_mat4 &projMatrix, glm::mat4 &viewMatrix);
 
-    /**
-     * @brief Renders a 3D object in the scene.
-     *
-     * This function takes a geometric object and renders it to the screen
-     * by applying a model transformation matrix. If no model matrix is provided,
-     * the identity matrix is used by default.
-     *
-     * @param object The 3D object in a Room to render. It should be an instance of a class derived from `glimac::Geometry`,
-     *               which contains the necessary data for rendering (vertices, normals, etc.).
-     *
-     * @param uniformMatrix The struct which contains the uniform variable for the current Room.
-     *
-     * @param modelMatrix The model transformation matrix to apply to the object. By default, it is the identity matrix
-     *                    (`glm::mat4(1)`) which doesn't modify the object
-     *
-     */
-    void render(const Geometry &object, Room::UniformVariable uniformVariable);
+    void renderFirstRoom(FirstRoom &firstRoom, const glm::vec3 &cameraPos, const glm::vec3 &border);
 
-    void render(const Geometry &object, Geometry::Material material, Room::UniformVariable uniformVariable);
-
-    void render(const Geometry &object, Room::UniformVariable uniformVariable, glm::vec3 shift);
-
-    void renderFirstRoom(FirstRoom &firstRoom);
-
-    template <typename Func>
-    void applyToAllMeshes(const std::vector<Geometry::Mesh> &meshes, Func &&func, const Geometry::Material &mat, const glm::vec3 &lightIntensity);
+    void renderSecondRoom(FirstRoom &sr, const glm::vec3 &cameraPos, const glm::vec3 &border);
 
     void setMaterialAndLightingUniforms(const Room::UniformVariable &uniformVariable,
                                         const glm::vec3 &light_dir_vs,
@@ -74,7 +51,5 @@ public:
 
     void setSpotLightsUniform(FirstRoom &firstRoom);
 
-    void renderObject(const Geometry &geometry, glimac::Program &program, const Room::UniformVariable &uniformVar);
-
-    void renderSecondRoom(FirstRoom &sr, const glm::vec3 &cameraPos);
+    void renderObject(const Geometry &geometry, const Room::UniformVariable &uniformVar);
 };

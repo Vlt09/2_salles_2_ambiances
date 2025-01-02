@@ -19,13 +19,23 @@ int window_height = 800;
 float last_xpos = 400;
 float last_ypos = 400;
 bool first_mouse = true;
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
 
 Camera camera{};
 
+void updateDeltaTime()
+{
+    float currentFrame = glimac::getTime();
+    deltaTime = currentFrame - lastFrame;
+    lastFrame = currentFrame;
+}
+
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
-    if (action == GLFW_PRESS)
+    if (action == GLFW_PRESS || action == GLFW_REPEAT)
     {
+        float movementSpeed = 0.5f * deltaTime;
         switch (key)
         {
         case GLFW_KEY_W:
@@ -39,6 +49,12 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
             break;
         case GLFW_KEY_D:
             camera.moveLeft(-1.);
+            break;
+        case GLFW_KEY_E:
+            camera.rotateLeft(-15.);
+            break;
+        case GLFW_KEY_Q:
+            camera.rotateLeft(15.f);
             break;
         }
     }
@@ -122,31 +138,31 @@ int main(int argc, char *argv[])
     auto firstRoom_light_posY = camera.cameraPosition().y + 10.f;
 
     Renderer renderer(proj_matrix, viewMatrix);
-    // Room room;
     FirstRoom fr, sr;
 
     /* Init first Room*/
-    // fr.initFirstRoom(applicationPath.dirPath() + "src/shaders/3D.vs.glsl",
-    //                  applicationPath.dirPath() + "src/shaders/directionallight.fs.glsl",
-    //                  "/home/valentin/m2/opengl/2_salles_2_ambiances/src/assets/MC-Torch/model/obj/Torch.obj",
-    //                  "/home/valentin/m2/opengl/2_salles_2_ambiances/src/assets/MC-Torch/model/obj/Torch.mtl",
-    //                  camera.cameraPosition());
-    // fr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z), 0);
-    // fr.setSpotLightDirection(camera.cameraPosition(), 0);
-    // // fr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY + 5.f, camera.cameraPosition().z), 1);
+    fr.initFirstRoom(applicationPath.dirPath() + "src/shaders/3D.vs.glsl",
+                     applicationPath.dirPath() + "src/shaders/directionallight.fs.glsl",
+                     "/home/valentin/m2/opengl/2_salles_2_ambiances/src/assets/MC-Torch/model/obj/Torch.obj",
+                     "/home/valentin/m2/opengl/2_salles_2_ambiances/src/assets/MC-Torch/model/obj/Torch.mtl",
+                     camera.cameraPosition());
+    fr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z), 0);
+    fr.setSpotLightDirection(camera.cameraPosition(), 0);
+    fr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY + 5.f, camera.cameraPosition().z), 1);
 
-    // fr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z - 5.f), 1);
-    // fr.setSpotLightDirection(glm::vec3(camera.cameraPosition().x, 0., camera.cameraPosition().z - 5.f), 1);
+    fr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z - 5.f), 1);
+    fr.setSpotLightDirection(glm::vec3(camera.cameraPosition().x, 0., camera.cameraPosition().z - 5.f), 1);
 
-    // fr.setGlobalLightPos(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z));
+    fr.setGlobalLightPos(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z));
 
     /* Init second Room */
+    auto cPos = camera.cameraPosition();
+    auto shift = glm::vec3(cPos.x - 24.f, cPos.y, cPos.z);
     sr.initSecondRoom(applicationPath.dirPath() + "src/shaders/3D.vs.glsl",
                       applicationPath.dirPath() + "src/shaders/second_room.fs.glsl",
-                      camera.cameraPosition(), applicationPath);
+                      shift, applicationPath);
 
-    auto t = camera.cameraPosition();
-
+    glm::vec3 border = glm::vec3(cPos.x - 12, cPos.y, cPos.z);
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -163,8 +179,8 @@ int main(int argc, char *argv[])
         // renderer.render(sphere, uniformVariable);
         // renderer.render(bounds, room.getUniformVariable());
 
-        // renderer.renderFirstRoom(fr);
-        renderer.renderSecondRoom(sr, camera.cameraPosition());
+        renderer.renderFirstRoom(fr, camera.cameraPosition(), border);
+        renderer.renderSecondRoom(sr, camera.cameraPosition(), border);
 
         // glBindVertexArray(sphere.getMeshBuffer()->vao);
         // glDrawArrays(GL_TRIANGLES, 0, sphere.getVertexCount());
@@ -179,6 +195,7 @@ int main(int argc, char *argv[])
         glfwSwapBuffers(window);
         /* Poll for and process events */
         glfwPollEvents();
+        updateDeltaTime();
     }
 
     glfwTerminate();

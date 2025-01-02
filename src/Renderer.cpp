@@ -10,7 +10,7 @@ Renderer::Renderer(glm::mat4 &projMatrix, glm::mat4 &viewMatrix) : _projectionMa
 {
 }
 
-void Renderer::renderFirstRoom(FirstRoom &firstRoom)
+void Renderer::renderFirstRoom(FirstRoom &firstRoom, const glm::vec3 &cameraPos, const glm::vec3 &border)
 {
     auto &box = firstRoom.getBox();
     auto &uv = firstRoom.getBoxUniformVariable();
@@ -23,12 +23,16 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
 
     setSpotLightsUniform(firstRoom);
 
-    box.getProgram().use();
+    if (cameraPos.x >= border.x)
+    {
+        box.getProgram().use();
+    }
 
     glBeginTransformFeedback(GL_TRIANGLES);
+    glDisable(GL_BLEND);
 
     glUniform1i(uv.uTexLoc, 0);
-    renderObject(box.getBounds(), _shaderProgram, uv);
+    renderObject(box.getBounds(), uv);
 
     glEndTransformFeedback();
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -36,14 +40,13 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
     for (int i = 0; i < 2; i++)
     {
         glUniform3f(uv.uLightIntensity, spots[i].intensity.x, spots[i].intensity.y, spots[i].intensity.z);
-        renderObject(spots[i]._spot, _shaderProgram, uv);
+        renderObject(spots[i]._spot, uv);
     }
 
-    // float twistAmount = sin(glimac::getTime()) * 0.005;
     float twistAmount = 0.0005f;
 
-    renderObject(tCube._cube, _shaderProgram, uv);
-    renderObject(cy, _shaderProgram, uv);
+    renderObject(tCube._cube, uv);
+    renderObject(cy, uv);
 
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -52,10 +55,9 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom)
 
     // firstRoom.printDebugBuff();
     firstRoom.moveSpot(1);
-    // exit(0);
 }
 
-void Renderer::renderSecondRoom(FirstRoom &sr, const glm::vec3 &cameraPos)
+void Renderer::renderSecondRoom(FirstRoom &sr, const glm::vec3 &cameraPos, const glm::vec3 &border)
 {
     auto &box = sr.getBox();
     auto &uv = sr.getBoxUniformVariable();
@@ -74,20 +76,26 @@ void Renderer::renderSecondRoom(FirstRoom &sr, const glm::vec3 &cameraPos)
         sortedGlass[distance] = &glass[i];
     }
 
+    if (cameraPos.x <= border.x)
+    {
+        prog.use();
+    }
+
     glUniform1i(uv.uTexLoc, 0);
-    renderObject(box.getBounds(), prog, uv);
-    renderObject(sr.getTore(), prog, uv);
-    // renderObject(cy, prog, uv);
+    renderObject(box.getBounds(), uv);
+    renderObject(sr.getTube(), uv);
+    renderObject(sr.getRing(), uv);
+
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     for (std::map<float, Quad *>::reverse_iterator it = sortedGlass.rbegin(); it != sortedGlass.rend(); ++it)
     {
-        renderObject(*it->second, prog, uv);
+        renderObject(*it->second, uv);
     }
 
     glBindTexture(GL_TEXTURE_2D, 0);
-    // cy.applyVortexEffect(0.003f);
+    cy.applyVortexEffect(0.003f);
 }
 
 void Renderer::setMatricesToShader(const Room::UniformVariable &uniformVariable,
@@ -147,13 +155,12 @@ void Renderer::setSpotLightsUniform(FirstRoom &firstRoom)
     }
 }
 
-void Renderer::renderObject(const Geometry &geometry, glimac::Program &program, const Room::UniformVariable &uniformVar)
+void Renderer::renderObject(const Geometry &geometry, const Room::UniformVariable &uniformVar)
 {
-    program.use();
-
     auto texId = geometry.getTex();
     auto &matList = geometry.getMaterialList();
     auto &meshes = geometry.getMeshVector();
+
     for (const auto &mesh : meshes)
     {
         if (texId != -1)
@@ -161,7 +168,6 @@ void Renderer::renderObject(const Geometry &geometry, glimac::Program &program, 
             glBindTexture(GL_TEXTURE_2D, texId);
         }
         glBindVertexArray(mesh.vao);
-        glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
 
         glm::mat4 modelMatrix = mesh.isTransform ? mesh._transform : geometry.getModelMatrix();
         glm::mat4 mv_matrix = this->_viewMatrix * modelMatrix;

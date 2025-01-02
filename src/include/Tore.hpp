@@ -9,14 +9,62 @@ private:
 
     void build(GLfloat R, GLfloat r, int numSegments = 36, int numCirclePoints = 36)
     {
-        // Generate the vertices for the Tore
-        m_VertexBuffer = generateToreVertices(R, r, numSegments, numCirclePoints);
+        for (int i = 0; i < numSegments; ++i)
+        {
+            GLfloat theta = (i / GLfloat(numSegments)) * 2.0f * M_PI; // Angle around the big circle
+
+            for (int j = 0; j < numCirclePoints; ++j)
+            {
+                GLfloat phi = (j / GLfloat(numCirclePoints)) * 2.0f * M_PI; // Angle around the tube
+
+                // Parametric equations of the torus
+                GLfloat x = (R + r * cos(phi)) * cos(theta);
+                GLfloat y = (R + r * cos(phi)) * sin(theta);
+                GLfloat z = r * sin(phi);
+
+                glm::vec3 position(x, y, z);
+
+                // Normal vector (direction of the surface at the vertex)
+                glm::vec3 normal = glm::normalize(position - glm::vec3(R, 0, 0));
+
+                // Texture coordinates
+                glm::vec2 texCoords(float(i) / numSegments, float(j) / numCirclePoints);
+
+                Geometry::Vertex vertex = {position, normal, texCoords};
+                m_VertexBuffer.push_back(vertex);
+
+                // Generate indices for drawing triangles
+                int nextI = (i + 1) % numSegments;
+                int nextJ = (j + 1) % numCirclePoints;
+
+                // Indices for two triangles making up a quadrilateral
+                unsigned int idx0 = i * numCirclePoints + j;
+                unsigned int idx1 = nextI * numCirclePoints + j;
+                unsigned int idx2 = i * numCirclePoints + nextJ;
+                unsigned int idx3 = nextI * numCirclePoints + nextJ;
+
+                // First triangle
+                m_IndexBuffer.push_back(idx0);
+                m_IndexBuffer.push_back(idx2);
+                m_IndexBuffer.push_back(idx1);
+
+                // Second triangle
+                m_IndexBuffer.push_back(idx1);
+                m_IndexBuffer.push_back(idx2);
+                m_IndexBuffer.push_back(idx3);
+            }
+        }
 
         // Init VBO
         glGenBuffers(1, &this->_vbo);
         glBindBuffer(GL_ARRAY_BUFFER, this->_vbo);
         glBufferData(GL_ARRAY_BUFFER, this->m_VertexBuffer.size() * sizeof(Geometry::Vertex), this->getVertexBuffer(), GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        glGenBuffers(1, &this->_ibo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->_ibo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_IndexBuffer.size() * sizeof(unsigned int), m_IndexBuffer.data(), GL_STATIC_DRAW);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
 
     void initMesh()
@@ -46,38 +94,6 @@ private:
         glBindVertexArray(0);
 
         this->m_MeshBuffer.emplace_back(std::move(mesh));
-    }
-
-    // Generate vertices for the Tore based on parametric equations
-    static std::vector<Geometry::Vertex> generateToreVertices(GLfloat R, GLfloat r, int numSegments, int numCirclePoints)
-    {
-        std::vector<Geometry::Vertex> vertices;
-
-        // Parametric equations for the Tore
-        for (int i = 0; i < numSegments; ++i)
-        {
-            float u = (float)i / numSegments * 2.0f * M_PI;
-            for (int j = 0; j < numCirclePoints; ++j)
-            {
-                float v = (float)j / numCirclePoints * 2.0f * M_PI;
-
-                glm::vec3 position;
-                position.x = (R + r * cos(v)) * cos(u);
-                position.y = (R + r * cos(v)) * sin(u);
-                position.z = r * sin(v);
-
-                glm::vec3 tangentU, tangentV, normal;
-                tangentU = glm::vec3(-sin(u), cos(u), 0.0f);
-                tangentV = glm::vec3(cos(v) * cos(u), cos(v) * sin(u), sin(v));
-                normal = glm::normalize(glm::cross(tangentU, tangentV));
-
-                glm::vec2 texCoord = glm::vec2((float)i / numSegments, (float)j / numCirclePoints);
-
-                vertices.push_back({position, normal, texCoord});
-            }
-        }
-
-        return vertices;
     }
 
 public:

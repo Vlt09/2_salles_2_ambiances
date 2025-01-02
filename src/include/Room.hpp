@@ -41,7 +41,7 @@ public:
 
     void addGroundAndFront(const glm::vec3 &cameraPos);
 
-    void constructRoom(const glm::vec3 &cameraPos, unsigned short order, Geometry::Material &roomMat);
+    void constructRoom(const glm::vec3 &cameraPos, float order, Geometry::Material &roomMat);
 
     const UniformVariable &getUniformVariable()
     {
@@ -82,5 +82,5 @@ private:
      *
      * @note The scaling values are defined according to the specifications of the project
      */
-    void addRightAndLeft(const glm::vec3 &cameraPos, unsigned short order);
+    void addRightAndLeft(const glm::vec3 &cameraPos, float order);
 };

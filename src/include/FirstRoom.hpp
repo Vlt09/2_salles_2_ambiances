@@ -5,6 +5,8 @@
 #include "Shape.hpp"
 #include "Cylinder.hpp"
 #include "Tore.hpp"
+#include "Ring.hpp"
+#include "Tube.hpp"
 #include <map>
 
 class FirstRoom
@@ -56,9 +58,13 @@ private:
     SpotLight _spotLights[MAX_SPOT_LIGHT];
     SpotLightUniformVarLoc _spotLightUniformVarLoc[MAX_SPOT_LIGHT];
 
+    // FirstRoom
     TwistCube _tCube;
     Cylinder _cy;
-    Tore _tore;
+
+    // Second Room
+    Ring _ring;
+    WeirdTube _tube;
 
     std::vector<Quad> _glass;
     std::map<float, Quad *> _sortedGlass;
@@ -82,7 +88,8 @@ public:
                       20.0f,
                       2.0f),
                   _tCube(5, 5, 5, 16, 8),
-                  _tore(5.0f, 1.0f, 256, 256)
+                  _ring(1.0f, 1.0f, 32, 32),
+                  _tube(1.0f, 7.0f, 16, 16)
     {
         _spotMaterial[0].m_Ka = glm::vec3(0.0f, 0.0f, 0.5f);
         _spotMaterial[0].m_Kd = glm::vec3(0.0f, 0.0f, 0.5f);
@@ -137,9 +144,14 @@ public:
         return _cy;
     }
 
-    Tore &getTore()
+    WeirdTube &getTube()
     {
-        return _tore;
+        return _tube;
+    }
+
+    Ring &getRing()
+    {
+        return _ring;
     }
 
     Quad *getGlassData()
@@ -318,6 +330,10 @@ public:
 
     void initSecondRoom(const glimac::FilePath &vsFilePath, const glimac::FilePath &fsFilePath, glm::vec3 cameraPos, glimac::FilePath applicationPath)
     {
+
+        // Shift for the second room
+        glm::vec3 shift = cameraPos;
+
         _box.initProgram(vsFilePath,
                          fsFilePath);
 
@@ -339,6 +355,10 @@ public:
             float distance = glm::length(cameraPos - glassPos);
             _sortedGlass[distance] = &_glass[i];
         }
+
+        // Place other object
+        _ring.translateModel(glm::vec3(shift.x, shift.y + 1.5f, shift.z - 10.f));
+        _tube.translateModel(glm::vec3(shift.x - 5.f, shift.y + 3.f, shift.z));
     }
 
     void printDebugBuff()

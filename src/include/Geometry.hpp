@@ -53,7 +53,6 @@ public:
     };
 
 private:
-    std::vector<unsigned int> m_IndexBuffer;
     glimac::BBox3f m_BBox;
 
     size_t lastMeshIndex = 0;
@@ -65,7 +64,9 @@ protected:
     std::vector<Vertex> m_VertexBuffer;
     std::vector<Material> m_Materials;
     glm::mat4 _modelMatrix = glm::mat4(1);
-    GLuint _vbo, _tex = -1;
+    std::vector<unsigned int> m_IndexBuffer;
+
+    GLuint _vbo, _ibo = -1, _tex = -1;
 
 public:
     const Vertex *getVertexBuffer() const
@@ -96,6 +97,11 @@ public:
     size_t getMeshCount() const
     {
         return m_MeshBuffer.size();
+    }
+
+    GLuint getIBO() const
+    {
+        return _ibo;
     }
 
     bool loadOBJ(const glimac::FilePath &filepath, const glimac::FilePath &mtlBasePath, bool loadTextures = true);

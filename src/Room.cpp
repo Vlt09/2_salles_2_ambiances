@@ -48,13 +48,12 @@ void Room::addGroundAndFront(const glm::vec3 &cameraPos)
     backWallMesh.isTransform = true;
 }
 
-void Room::addRightAndLeft(const glm::vec3 &cameraPos, unsigned short order)
+void Room::addRightAndLeft(const glm::vec3 &cameraPos, float order)
 {
-
     auto vertices = Quad::QuadVertices(1, 1);
     auto &leftWallMesh = _bounds.addFromVertices(vertices, 0);
 
-    leftWallMesh._transform = glm::translate(leftWallMesh._transform, glm::vec3((cameraPos.x + 10.f) * order, cameraPos.y + 2.f, cameraPos.z));
+    leftWallMesh._transform = glm::translate(leftWallMesh._transform, glm::vec3(cameraPos.x + (10.f * order), cameraPos.y + 2.f, cameraPos.z));
     leftWallMesh._transform = glm::rotate(leftWallMesh._transform, glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
     leftWallMesh._transform = glm::scale(leftWallMesh._transform, glm::vec3(20.f, 1.f, 24.f));
 
@@ -62,7 +61,7 @@ void Room::addRightAndLeft(const glm::vec3 &cameraPos, unsigned short order)
 
     auto &halfRightWallMesh1 = _bounds.addFromVertices(vertices, 0);
 
-    halfRightWallMesh1._transform = glm::translate(halfRightWallMesh1._transform, glm::vec3((cameraPos.x + 10.f) * order, cameraPos.y, cameraPos.z + 7.f));
+    halfRightWallMesh1._transform = glm::translate(halfRightWallMesh1._transform, glm::vec3((cameraPos.x - (10.f * order)), cameraPos.y, cameraPos.z + 7.f));
     halfRightWallMesh1._transform = glm::rotate(halfRightWallMesh1._transform, glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
     halfRightWallMesh1._transform = glm::scale(halfRightWallMesh1._transform, glm::vec3(20.f, 1.f, 10.f));
 
@@ -70,14 +69,14 @@ void Room::addRightAndLeft(const glm::vec3 &cameraPos, unsigned short order)
 
     auto &halfRightWallMesh2 = _bounds.addFromVertices(vertices, 0);
 
-    halfRightWallMesh2._transform = glm::translate(halfRightWallMesh2._transform, glm::vec3((cameraPos.x + 10.f) * order, cameraPos.y, cameraPos.z - 7.f));
+    halfRightWallMesh2._transform = glm::translate(halfRightWallMesh2._transform, glm::vec3(cameraPos.x - (10.f * order), cameraPos.y, cameraPos.z - 7.f));
     halfRightWallMesh2._transform = glm::rotate(halfRightWallMesh2._transform, glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
     halfRightWallMesh2._transform = glm::scale(halfRightWallMesh2._transform, glm::vec3(20.f, 1.f, 10.f));
 
     halfRightWallMesh2.isTransform = true;
 }
 
-void Room::constructRoom(const glm::vec3 &cameraPos, unsigned short order, Geometry::Material &roomMat)
+void Room::constructRoom(const glm::vec3 &cameraPos, float order, Geometry::Material &roomMat)
 {
     addGroundAndFront(cameraPos);
     addRightAndLeft(cameraPos, order);
