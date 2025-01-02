@@ -61,7 +61,9 @@ void Renderer::renderSecondRoom(FirstRoom &sr, const glm::vec3 &cameraPos)
     auto &uv = sr.getBoxUniformVariable();
     auto size = sr.glassSize();
     auto &prog = box.getProgram();
+
     auto &sortedGlass = sr.getSortedGlass();
+    auto &cy = sr.getCylinder();
     Quad *glass = sr.getGlassData();
 
     // Sort Glass using distance of an object from the viewer's perspective
@@ -74,6 +76,8 @@ void Renderer::renderSecondRoom(FirstRoom &sr, const glm::vec3 &cameraPos)
 
     glUniform1i(uv.uTexLoc, 0);
     renderObject(box.getBounds(), prog, uv);
+    renderObject(sr.getTore(), prog, uv);
+    // renderObject(cy, prog, uv);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -83,6 +87,7 @@ void Renderer::renderSecondRoom(FirstRoom &sr, const glm::vec3 &cameraPos)
     }
 
     glBindTexture(GL_TEXTURE_2D, 0);
+    // cy.applyVortexEffect(0.003f);
 }
 
 void Renderer::setMatricesToShader(const Room::UniformVariable &uniformVariable,

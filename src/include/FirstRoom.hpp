@@ -4,6 +4,7 @@
 #include "Cube.hpp"
 #include "Shape.hpp"
 #include "Cylinder.hpp"
+#include "Tore.hpp"
 #include <map>
 
 class FirstRoom
@@ -57,6 +58,8 @@ private:
 
     TwistCube _tCube;
     Cylinder _cy;
+    Tore _tore;
+
     std::vector<Quad> _glass;
     std::map<float, Quad *> _sortedGlass;
 
@@ -78,7 +81,8 @@ public:
                       glm::vec3(1.0f, 1.0f, 1.0f),
                       20.0f,
                       2.0f),
-                  _tCube(5, 5, 5, 16, 8)
+                  _tCube(5, 5, 5, 16, 8),
+                  _tore(5.0f, 1.0f, 256, 256)
     {
         _spotMaterial[0].m_Ka = glm::vec3(0.0f, 0.0f, 0.5f);
         _spotMaterial[0].m_Kd = glm::vec3(0.0f, 0.0f, 0.5f);
@@ -131,6 +135,11 @@ public:
     Cylinder &getCylinder()
     {
         return _cy;
+    }
+
+    Tore &getTore()
+    {
+        return _tore;
     }
 
     Quad *getGlassData()

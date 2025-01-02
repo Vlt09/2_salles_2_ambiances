@@ -179,6 +179,29 @@ public:
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
+    void applyVortexEffect(float vortexStrength)
+    {
+        auto time = glimac::getTime();
+
+        for (auto &vertex : m_VertexBuffer)
+        {
+            float angle = vortexStrength * vertex.m_Position.y + time;
+
+            float cosTheta = cos(angle);
+            float sinTheta = sin(angle);
+
+            float newX = cosTheta * vertex.m_Position.x - sinTheta * vertex.m_Position.z;
+            float newZ = sinTheta * vertex.m_Position.x + cosTheta * vertex.m_Position.z;
+
+            vertex.m_Position.x = newX;
+            vertex.m_Position.z = newZ;
+        }
+
+        glBindBuffer(GL_ARRAY_BUFFER, this->_vbo);
+        glBufferData(GL_ARRAY_BUFFER, this->m_VertexBuffer.size() * sizeof(Geometry::Vertex), this->getVertexBuffer(), GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+
 private:
     GLsizei m_nVertexCount;
 };
