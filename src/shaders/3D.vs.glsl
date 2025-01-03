@@ -21,7 +21,6 @@ void main() {
     vVertexNormal = mat3(transpose(inverse(uModelMatrix))) * aVertexNormal;
 
     vVertexPos = vec3(uModelMatrix * vec4(aVertexPosition, 1.0));
-    // vVertexPos = aVertexPosition;
 
 
     gl_Position = uMVPMatrix * vec4(aVertexPosition, 1);

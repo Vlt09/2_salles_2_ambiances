@@ -81,17 +81,16 @@ vec3 spotlightAttenuation(SpotLight spotLight, vec3 normal) {
     float spotFactor = dot(lightToPixel, normalize(-spotLight._direction));  
 
     if (isnan(spotFactor)){
-        return vec3(0, 255, 0);
+        return vec3(255, 255, 255);
     }
 
     if (spotFactor > spotLight._cutoff) {
         vec3 color = pointLightblinnPhong(normal, spotLight);
         float spotLightIntensity = (1.0 - (1.0 - spotFactor)/(1.0 - spotLight._cutoff));
         return color * spotLightIntensity;
-        // return vec3(255, 0, 255);
     }
 
-    return vec3(255, 255, 255);//vec3(spotLight.m_Ka * texture(uTexture, vVertexTex).xyz * spotLight.m_Kd);
+    return vec3(0, 0, 0);//vec3(spotLight.m_Ka * texture(uTexture, vVertexTex).xyz * spotLight.m_Kd);
 }
 
 void main()
@@ -111,8 +110,7 @@ void main()
     }
   
 
-    // fFragColor = tex + (lighting + attenuation); 
-    fFragColor = (attenuation); 
+    fFragColor = tex + (lighting + attenuation); 
 
 
     // fFragColor = normalColor * 0.5 + 0.5;
