@@ -184,6 +184,8 @@ public:
 
     void translateMesh(const glm::vec3 &translate, unsigned int idX);
 
+    void translateMeshWithIdentity(const glm::vec3 &translate, unsigned int idX);
+
     void scaleModel(const glm::vec3 &scale);
 
     void scaleMesh(const glm::vec3 &scale, unsigned int idX);

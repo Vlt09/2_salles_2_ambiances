@@ -33,7 +33,7 @@ struct SpotLight{
 
 };
 
-uniform SpotLight uSpotLights[2];
+uniform SpotLight uSpotLights[15];
 
 out vec3 fFragColor;
 
@@ -105,7 +105,7 @@ void main()
 
     vec3 attenuation = vec3(0, 0, 0);
     if (uActiveLight == 1){
-        for (int i = 0 ;i < 2 ;i++) {
+        for (int i = 0; i < 15 ;i++) {
             attenuation += spotlightAttenuation(uSpotLights[i], normalColor);
         }
     }

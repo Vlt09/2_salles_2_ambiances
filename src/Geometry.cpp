@@ -268,7 +268,12 @@ void Geometry::translateModel(const glm::vec3 &translate)
 
 void Geometry::translateMesh(const glm::vec3 &translate, unsigned int idX)
 {
-    m_MeshBuffer[idX]._transform = glm::translate(m_MeshBuffer[0]._transform, translate);
+    m_MeshBuffer[idX]._transform = glm::translate(m_MeshBuffer[idX]._transform, translate);
+}
+
+void Geometry::translateMeshWithIdentity(const glm::vec3 &translate, unsigned int idX)
+{
+    m_MeshBuffer[idX]._transform = glm::translate(glm::mat4(1), translate);
 }
 
 void Geometry::scaleModel(const glm::vec3 &scale)

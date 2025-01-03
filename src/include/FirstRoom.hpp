@@ -14,50 +14,15 @@ class FirstRoom
 {
 
 public:
-    static const unsigned int MAX_SPOT_LIGHT = 2;
-    struct SpotLightUniformVarLoc
-    {
-        GLuint position;
-        GLuint direction;
-        GLuint lightIntensity;
-        GLuint lightPos;
-        GLuint m_Kd;
-        GLuint m_Ks;
-        GLuint m_Ka;
-        GLuint cutoff;
-        GLuint exponent;
-    };
-
-    struct SpotLight
-    {
-        Sphere _spot;
-
-        glm::vec3 position = glm::vec3(0., 0., 0.);
-        glm::vec3 direction = glm::vec3(0., -1.f, 0.);
-        glm::vec3 intensity;
-
-        float cutoff, exponent;
-        float amplitude = 5.f;
-        float frequency = 0.2f;
-        float speed = 3.f;
-
-        SpotLight()
-        {
-        }
-
-        SpotLight(Sphere spot, glm::vec3 pos, glm::vec3 dir, glm::vec3 inten, float cut, float exp)
-            : _spot(spot), position(pos), direction(dir), intensity(inten), cutoff(cut), exponent(exp)
-        {
-        }
-    };
+    static const unsigned int MAX_SPOT_LIGHT = 15;
 
 private:
     unsigned short _lightFlag = 1; // Enable or Disable light process
 
     Room _box;
-    SpotLight _spotLight;
-    SpotLight _spotLights[MAX_SPOT_LIGHT];
-    SpotLightUniformVarLoc _spotLightUniformVarLoc[MAX_SPOT_LIGHT];
+    Utils::SpotLight _spotLight;
+    Utils::SpotLight _spotLights[MAX_SPOT_LIGHT];
+    Utils::SpotLightUniformVarLoc _spotLightUniformVarLoc[MAX_SPOT_LIGHT];
 
     // FirstRoom
     TwistCube _tCube;
@@ -73,9 +38,35 @@ private:
     glm::vec3 _lightPos;
     glm::vec3 _boxLightIntensity;
 
+    void initSpotLight()
+    {
+        Utils::generateMaterials(_spotMaterials, MAX_SPOT_LIGHT, 0.0f, 1.0f);
+
+        for (size_t i = 0; i < MAX_SPOT_LIGHT; i++)
+        {
+            glm::vec3 randomPosition = Utils::randomVec3(-10.0f, 10.0f);
+            glm::vec3 randomDirection = glm::normalize(Utils::randomVec3(-1.0f, 1.0f));
+            glm::vec3 randomIntensity = Utils::randomVec3(0.5f, 1.5f);
+
+            _spotLights[i] = Utils::SpotLight(
+                Sphere(),
+                randomPosition,
+                randomDirection,
+                randomIntensity,
+                Utils::randomFloat(10.f, 30.f),
+                1.0f,
+                Utils::randomFloat(0.1, 0.9),
+                Utils::randomFloat(1.f, 15.f));
+
+            _spotLights[i]._spot.initSphere(0.5f, 32, 16, _spotMaterials[i]);
+        }
+    }
+
 public:
     static const size_t MAX_GLASS = 3;
-    Geometry::Material _spotMaterial[2];
+    // Geometry::Material _spotMaterial[2];
+    std::vector<Geometry::Material> _spotMaterials;
+
     Geometry::Material _boxMaterial;
 
     GLuint feedbackBuffer;
@@ -92,18 +83,18 @@ public:
                   _ring(1.0f, 1.0f, 32, 32),
                   _tube(1.0f, 7.0f, 16, 16)
     {
-        _spotMaterial[0].m_Ka = glm::vec3(0.0f, 0.0f, 0.5f);
-        _spotMaterial[0].m_Kd = glm::vec3(0.0f, 0.0f, 0.5f);
-        _spotMaterial[0].m_Ks = glm::vec3(0.0f, 0.0f, 0.5f);
-        _spotMaterial[1].m_Ka = glm::vec3(0.5f, 0.0f, 0.0f);
-        _spotMaterial[1].m_Kd = glm::vec3(0.5f, 0.0f, 0.1f);
-        _spotMaterial[1].m_Ks = glm::vec3(0.5f, 0.0f, 0.1f);
+        // _spotMaterial[0].m_Ka = glm::vec3(0.0f, 0.0f, 0.5f);
+        // _spotMaterial[0].m_Kd = glm::vec3(0.0f, 0.0f, 0.5f);
+        // _spotMaterial[0].m_Ks = glm::vec3(0.0f, 0.0f, 0.5f);
+        // _spotMaterial[1].m_Ka = glm::vec3(0.5f, 0.0f, 0.0f);
+        // _spotMaterial[1].m_Kd = glm::vec3(0.5f, 0.0f, 0.1f);
+        // _spotMaterial[1].m_Ks = glm::vec3(0.5f, 0.0f, 0.1f);
 
-        _spotMaterial[0].m_Tr = glm::vec3(0.0f, 0.0f, 0.0f);
-        _spotMaterial[0].m_Le = glm::vec3(1.0f, 1.0f, 0.0f);
-        _spotMaterial[0].m_Shininess = 128.f;
-        _spotMaterial[0].m_RefractionIndex = 1.f;
-        _spotMaterial[0].m_Dissolve = 1.0f;
+        // _spotMaterial[0].m_Tr = glm::vec3(0.0f, 0.0f, 0.0f);
+        // _spotMaterial[0].m_Le = glm::vec3(1.0f, 1.0f, 0.0f);
+        // _spotMaterial[0].m_Shininess = 128.f;
+        // _spotMaterial[0].m_RefractionIndex = 1.f;
+        // _spotMaterial[0].m_Dissolve = 1.0f;
 
         _boxMaterial.m_Kd = glm::vec3(0.3f, 0.3f, 0.4f);
         _boxMaterial.m_Ks = glm::vec3(0.2f, 0.2f, 0.1f);
@@ -111,17 +102,18 @@ public:
 
         _boxLightIntensity = glm::vec3(1.5f, 1.5f, 1.5f);
 
-        _spotLights[0]._spot.initSphere(1, 32, 16, _spotMaterial[0]);
-        _spotLights[1]._spot.initSphere(1, 32, 16, _spotMaterial[1]);
+        // _spotLights[0]._spot.initSphere(1, 32, 16, _spotMaterial[0]);
+        // _spotLights[1]._spot.initSphere(1, 32, 16, _spotMaterial[1]);
 
         _spotLight.intensity = glm::vec3(1.0f, 1.0f, 1.0f);
         _spotLight.cutoff = 2.f;
-        _spotLights[0].intensity = glm::vec3(1.0f, 1.0f, 1.0f);
-        _spotLights[0].cutoff = 25.f;
+        // _spotLights[0].intensity = glm::vec3(1.0f, 1.0f, 1.0f);
+        // _spotLights[0].cutoff = 25.f;
 
-        _spotLights[1].intensity = glm::vec3(1.0f, 1.0f, 1.0f);
-        _spotLights[1].cutoff = 25.f;
+        // _spotLights[1].intensity = glm::vec3(1.0f, 1.0f, 1.0f);
+        // _spotLights[1].cutoff = 25.f;
 
+        initSpotLight();
         _cy.initCylinder(1, 3, 16, 8, _boxMaterial);
     }
 
@@ -180,6 +172,11 @@ public:
         return _box.getUniformVariable();
     }
 
+    const std::vector<Geometry::Material> &getSpotLightMaterials()
+    {
+        return _spotMaterials;
+    }
+
     unsigned short getLightFlag()
     {
         return _lightFlag;
@@ -191,7 +188,7 @@ public:
      */
     void translateSpotLight(const glm::vec3 &pos, int idx)
     {
-        _spotLights[idx]._spot.translateModel(pos);
+        _spotLights[idx]._spot.translateMeshWithIdentity(pos, 0);
         _spotLights[idx].position = pos;
     }
 
@@ -210,12 +207,12 @@ public:
         return _lightPos;
     }
 
-    SpotLight *getSpotLightsData()
+    Utils::SpotLight *getSpotLightsData()
     {
         return &_spotLights[0];
     }
 
-    SpotLightUniformVarLoc *getSpotLightsUniformVarLocData()
+    Utils::SpotLightUniformVarLoc *getSpotLightsUniformVarLocData()
     {
         return &_spotLightUniformVarLoc[0];
     }
@@ -223,7 +220,7 @@ public:
     void setSpotLightUniformLocations()
     {
         auto programID = _box.getProgramId();
-        for (int i = 0; i < 2; ++i)
+        for (int i = 0; i < MAX_SPOT_LIGHT; ++i)
         {
             std::cout << "set spot light number " << i << std::endl;
             std::string baseName = "uSpotLights[" + std::to_string(i) + "]";
@@ -281,14 +278,12 @@ public:
         auto mapZ = Utils::linearMapping(z, -spot.amplitude, spot.amplitude, minZ, maxZ);
 
         auto translation = glm::vec3(mapX, mapY, mapZ);
-        std::cout << "translation = " << translation << std::endl;
 
-        // std::cout << " translation " << translation << " " << _spotLights[idX]._spot.getMeshBuffer()[0]._transform << std::endl;
         translateSpotLight(translation, idX);
     }
 
-    void initFirstRoom(const glimac::FilePath &vsFilePath, const glimac::FilePath &fsFilePath, const glimac::FilePath &torchOBJFilePath,
-                       const glimac::FilePath &torchMatFilePath, glm::vec3 cameraPos, std::vector<glimac::BBox3f> &bboxVector)
+    void initFirstRoom(const glimac::FilePath &vsFilePath, const glimac::FilePath &fsFilePath,
+                       glm::vec3 cameraPos, std::vector<glimac::BBox3f> &bboxVector)
     {
         _box.initProgram(vsFilePath,
                          fsFilePath);

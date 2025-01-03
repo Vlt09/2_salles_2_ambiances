@@ -55,7 +55,10 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom, const glm::vec3 &cameraPos,
     tCube._cube.applyTwist(twistAmount);
 
     // firstRoom.printDebugBuff();
-    firstRoom.moveSpot(1);
+    for (int i = 0; i < FirstRoom::MAX_SPOT_LIGHT; i++)
+    {
+        firstRoom.moveSpot(i);
+    }
     glUniform1i(uv.uActiveLight, 0); // Desac spot light for other room
 }
 
@@ -160,17 +163,18 @@ void Renderer::setSpotLightsUniform(FirstRoom &firstRoom)
 
     auto spotLight = firstRoom.getSpotLightsData();
     auto spotLightVarLoc = firstRoom.getSpotLightsUniformVarLocData();
+    auto &spotMaterials = firstRoom.getSpotLightMaterials();
 
     // std::cout << "cut off = " << cosf(glm::radians(spotLight[1].cutoff)) << std::endl;
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < FirstRoom::MAX_SPOT_LIGHT; i++)
     {
         glUniform3fv(spotLightVarLoc[i].position, 1, glm::value_ptr(spotLight[i].position));
         glUniform3fv(spotLightVarLoc[i].direction, 1, glm::value_ptr(spotLight[i].direction));
         glUniform3fv(spotLightVarLoc[i].lightIntensity, 1, glm::value_ptr(spotLight[i].intensity));
         // glUniform3fv(spotLightVarLoc[i].lightPos, 1, glm::value_ptr(spotLight[i].lightPos));
-        glUniform3fv(spotLightVarLoc[i].m_Kd, 1, glm::value_ptr(firstRoom._spotMaterial[i].m_Kd));
-        glUniform3fv(spotLightVarLoc[i].m_Ks, 1, glm::value_ptr(firstRoom._spotMaterial[i].m_Ks));
-        glUniform3fv(spotLightVarLoc[i].m_Ka, 1, glm::value_ptr(firstRoom._spotMaterial[i].m_Ka));
+        glUniform3fv(spotLightVarLoc[i].m_Kd, 1, glm::value_ptr(spotMaterials[i].m_Kd));
+        glUniform3fv(spotLightVarLoc[i].m_Ks, 1, glm::value_ptr(spotMaterials[i].m_Ks));
+        glUniform3fv(spotLightVarLoc[i].m_Ka, 1, glm::value_ptr(spotMaterials[i].m_Ka));
 
         glUniform1f(spotLightVarLoc[i].cutoff, cosf(glm::radians(spotLight[i].cutoff)));
         glUniform1f(spotLightVarLoc[i].exponent, spotLight[i].exponent);
