@@ -205,8 +205,7 @@ Geometry::Mesh &Geometry::addFromVertices(std::vector<Geometry::Vertex> vertices
     updateLastMeshIndex(newIndex);
     m_MeshBuffer.push_back(std::move(mesh));
 
-    m_BBox = glimac::merge(m_BBox, bBoxFromMesh(newIndex, vertices.size(), mesh._transform)); // calc BBox in world space
-    std::cout << "BBox = " << m_BBox << std::endl;
+    m_BBox = glimac::merge(m_BBox, bBoxFromMesh(lastMeshIndex, vertices.size(), mesh._transform)); // calc BBox in world space
 
     return m_MeshBuffer.back();
 }
@@ -319,7 +318,6 @@ glimac::BBox3f Geometry::bBoxFromMesh(size_t begin, size_t size, const glm::mat4
     glm::vec3 min(FLT_MAX);
     glm::vec3 max(-FLT_MAX);
 
-    // std::cout << "transfo mat = " << modelMatrix << std::endl;
     size = begin + size;
     for (size_t i = begin; i < size; i++)
     {
