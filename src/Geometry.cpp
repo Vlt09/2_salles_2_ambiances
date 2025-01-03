@@ -193,14 +193,20 @@ bool Geometry::loadOBJ(const glimac::FilePath &filepath, const glimac::FilePath 
     return true;
 }
 
-Geometry::Mesh &Geometry::addFromVertices(std::vector<Geometry::Vertex> vertices, int matIndex)
+Geometry::Mesh &Geometry::addFromVertices(std::vector<Geometry::Vertex> vertices, int matIndex, glm::mat4 transformMatrix)
 {
     m_VertexBuffer.insert(m_VertexBuffer.end(), vertices.begin(), vertices.end());
 
     size_t newIndex = lastMeshIndex + vertices.size();
     Geometry::Mesh mesh("shape", lastMeshIndex, vertices.size(), matIndex);
+    mesh._transform = transformMatrix;
+    mesh.isTransform = true;
+
     updateLastMeshIndex(newIndex);
     m_MeshBuffer.push_back(std::move(mesh));
+
+    m_BBox = glimac::merge(m_BBox, bBoxFromMesh(newIndex, vertices.size(), mesh._transform)); // calc BBox in world space
+    std::cout << "BBox = " << m_BBox << std::endl;
 
     return m_MeshBuffer.back();
 }
@@ -286,4 +292,41 @@ void Geometry::rotateModel(float angle, const glm::vec3 &axis)
 void Geometry::rotateMesh(float angle, const glm::vec3 &axis, unsigned int idX)
 {
     m_MeshBuffer[idX]._transform = glm::rotate(m_MeshBuffer[idX]._transform, angle, axis);
+}
+
+void Geometry::calculateBoundingBox()
+{
+    if (m_VertexBuffer.empty())
+        return;
+
+    glm::vec3 min(FLT_MAX);
+    glm::vec3 max(-FLT_MAX);
+
+    for (const auto &vertex : m_VertexBuffer)
+    {
+        min = glm::min(min, vertex.m_Position);
+        max = glm::max(max, vertex.m_Position);
+    }
+
+    auto minWS = glm::vec3(m_MeshBuffer[0]._transform * glm::vec4(min, 1.0));
+    auto maxWS = glm::vec3(m_MeshBuffer[0]._transform * glm::vec4(max, 1.0));
+
+    m_BBox = glimac::BBox3f(minWS, maxWS);
+}
+
+glimac::BBox3f Geometry::bBoxFromMesh(size_t begin, size_t size, const glm::mat4 &modelMatrix)
+{
+    glm::vec3 min(FLT_MAX);
+    glm::vec3 max(-FLT_MAX);
+
+    // std::cout << "transfo mat = " << modelMatrix << std::endl;
+    size = begin + size;
+    for (size_t i = begin; i < size; i++)
+    {
+        auto posWS = glm::vec3(modelMatrix * glm::vec4(m_VertexBuffer[i].m_Position, 1.0));
+        min = glm::min(min, posWS);
+        max = glm::max(max, posWS);
+    }
+
+    return glimac::BBox3f(min, max);
 }

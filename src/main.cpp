@@ -29,6 +29,7 @@ float zMax = 10.f;
 float zMin = -10.f;
 
 Camera camera{};
+std::vector<std::shared_ptr<glimac::BBox3f>> bboxVector;
 
 void updateDeltaTime()
 {
@@ -39,22 +40,32 @@ void updateDeltaTime()
 
 bool checkBorder()
 {
-    auto pos = camera.cameraPosition();
-    if (pos.x <= xMin || pos.x >= xMax)
-    {
-        return false;
-    }
+    // auto pos = camera.cameraPosition();
+    // if (pos.x <= xMin || pos.x >= xMax)
+    // {
+    //     return false;
+    // }
 
-    if (pos.z <= zMin || pos.z >= zMax)
+    // if (pos.z <= zMin || pos.z >= zMax)
+    // {
+    //     return false;
+    // }
+    // return true;
+    auto &cameraBbox = camera.getBbox();
+    for (auto &bbox : bboxVector)
     {
-        return false;
+        // std::cout << *bbox << std::endl;
+        if (glimac::conjoint(*bbox, cameraBbox))
+        {
+            return true;
+        }
     }
-    return true;
+    return false;
 }
 
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
-    if (action == GLFW_PRESS || action == GLFW_REPEAT && checkBorder())
+    if ((action == GLFW_PRESS || action == GLFW_REPEAT) && checkBorder())
     {
         float movementSpeed = 0.5f * deltaTime;
         switch (key)
@@ -167,7 +178,7 @@ int main(int argc, char *argv[])
                      applicationPath.dirPath() + "src/shaders/directionallight.fs.glsl",
                      "/home/valentin/m2/opengl/2_salles_2_ambiances/src/assets/MC-Torch/model/obj/Torch.obj",
                      "/home/valentin/m2/opengl/2_salles_2_ambiances/src/assets/MC-Torch/model/obj/Torch.mtl",
-                     camera.cameraPosition());
+                     camera.cameraPosition(), bboxVector);
     fr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z), 0);
     fr.setSpotLightDirection(camera.cameraPosition(), 0);
     fr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY + 5.f, camera.cameraPosition().z), 1);
@@ -180,12 +191,12 @@ int main(int argc, char *argv[])
     /* Init second Room */
     auto cPos = camera.cameraPosition();
     auto shift = glm::vec3(cPos.x - 24.f, cPos.y, cPos.z);
-    sr.initSecondRoom(applicationPath.dirPath() + "src/shaders/3D.vs.glsl",
-                      applicationPath.dirPath() + "src/shaders/second_room.fs.glsl",
-                      shift, applicationPath);
+    // sr.initSecondRoom(applicationPath.dirPath() + "src/shaders/3D.vs.glsl",
+    //                   applicationPath.dirPath() + "src/shaders/second_room.fs.glsl",
+    //                   shift, applicationPath, bboxVector);
 
     glm::vec3 border = glm::vec3(cPos.x - 12, cPos.y, cPos.z);
-    std::cout << "border = " << border << std::endl;
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -196,7 +207,7 @@ int main(int argc, char *argv[])
 
         renderer.renderSkybox(skybox);
         renderer.renderFirstRoom(fr, camera.cameraPosition(), border);
-        renderer.renderSecondRoom(sr, camera.cameraPosition(), border);
+        // renderer.renderSecondRoom(sr, camera.cameraPosition(), border);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);

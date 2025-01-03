@@ -42,7 +42,7 @@ public:
 
     void addGroundAndFront(const glm::vec3 &cameraPos);
 
-    void constructRoom(const glm::vec3 &cameraPos, float order, Geometry::Material &roomMat);
+    void constructRoom(const glm::vec3 &cameraPos, float order, Geometry::Material &roomMat, std::vector<std::shared_ptr<glimac::BBox3f>> &bboxVector);
 
     const UniformVariable &getUniformVariable()
     {

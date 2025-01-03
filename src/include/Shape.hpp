@@ -61,28 +61,3 @@ struct TwistCube
         // }
     }
 };
-
-struct Helix
-{
-    Geometry _helix;
-
-    Helix(int size)
-    {
-        float yOffset = 1.5f;
-        float xOffset = 1.0f;
-
-        glm::vec3 offSet = glm::vec3(0., 0., 0.);
-        glm::mat4 prevMat = glm::mat4(1);
-        auto vertice = Quad::QuadVertices(1, 1);
-        for (int i = 0; i < size; i++)
-        {
-            auto mesh = _helix.addFromVertices(vertice, -1);
-            mesh._transform = glm::translate(prevMat, offSet);
-
-            prevMat = mesh._transform;
-            offSet.x += xOffset;
-            offSet.y += yOffset;
-        }
-        _helix.initMeshData();
-    }
-};

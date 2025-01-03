@@ -53,8 +53,6 @@ public:
     };
 
 private:
-    glimac::BBox3f m_BBox;
-
     size_t lastMeshIndex = 0;
 
     void generateNormals(unsigned int meshIndex);
@@ -65,6 +63,7 @@ protected:
     std::vector<Material> m_Materials;
     glm::mat4 _modelMatrix = glm::mat4(1);
     std::vector<unsigned int> m_IndexBuffer;
+    glimac::BBox3f m_BBox = glimac::BBox3f(glm::vec3(FLT_MAX), glm::vec3(-FLT_MAX));
 
     GLuint _vbo, _ibo = -1, _tex = -1;
 
@@ -102,6 +101,11 @@ public:
     GLuint getIBO() const
     {
         return _ibo;
+    }
+
+    const glimac::BBox3f &getBBox()
+    {
+        return m_BBox;
     }
 
     bool loadOBJ(const glimac::FilePath &filepath, const glimac::FilePath &mtlBasePath, bool loadTextures = true);
@@ -146,7 +150,7 @@ public:
      * of vertices in the current Geometry object. In other word,
      * this function add one Mesh which is a simple shape (quad, sphere etc).
      */
-    Geometry::Mesh &addFromVertices(std::vector<Geometry::Vertex> vertices, int matIndex);
+    Geometry::Mesh &addFromVertices(std::vector<Geometry::Vertex> vertices, int matIndex, glm::mat4 transformMatrix);
 
     /**
      * @brief This function adds material to material list
@@ -168,6 +172,13 @@ public:
      * @param path A constant reference to a string that specifies the file path of the image to load.
      */
     void initTexture(const std::string &path);
+
+    void calculateBoundingBox();
+
+    /**
+     * @brief Calculate Bbox from a Mesh in world space
+     */
+    glimac::BBox3f bBoxFromMesh(size_t begin, size_t size, const glm::mat4 &modelMatrix);
 
     void translateModel(const glm::vec3 &translate);
 

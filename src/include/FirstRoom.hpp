@@ -299,12 +299,12 @@ public:
     }
 
     void initFirstRoom(const glimac::FilePath &vsFilePath, const glimac::FilePath &fsFilePath, const glimac::FilePath &torchOBJFilePath,
-                       const glimac::FilePath &torchMatFilePath, glm::vec3 cameraPos)
+                       const glimac::FilePath &torchMatFilePath, glm::vec3 cameraPos, std::vector<std::shared_ptr<glimac::BBox3f>> &bboxVector)
     {
         _box.initProgram(vsFilePath,
                          fsFilePath);
 
-        _box.constructRoom(cameraPos, 1, _boxMaterial);
+        _box.constructRoom(cameraPos, 1, _boxMaterial, bboxVector);
 
         _cy.translateModel(glm::vec3(cameraPos.x - 3.f, cameraPos.y + 2.f, cameraPos.z));
 
@@ -323,7 +323,8 @@ public:
         glTransformFeedbackVaryings(_box.getProgramId(), 1, varyings, GL_INTERLEAVED_ATTRIBS);
     }
 
-    void initSecondRoom(const glimac::FilePath &vsFilePath, const glimac::FilePath &fsFilePath, glm::vec3 cameraPos, glimac::FilePath applicationPath)
+    void initSecondRoom(const glimac::FilePath &vsFilePath, const glimac::FilePath &fsFilePath, glm::vec3 cameraPos,
+                        glimac::FilePath applicationPath, std::vector<std::shared_ptr<glimac::BBox3f>> &bboxVector)
     {
 
         // Shift for the second room
@@ -332,7 +333,7 @@ public:
         _box.initProgram(vsFilePath,
                          fsFilePath);
 
-        _box.constructRoom(cameraPos, -1, _boxMaterial);
+        _box.constructRoom(cameraPos, -1, _boxMaterial, bboxVector);
 
         // Init glasses
         for (int i = 0; i < MAX_GLASS; i++)
