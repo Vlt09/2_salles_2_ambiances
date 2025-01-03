@@ -7,13 +7,14 @@
 #include "Tore.hpp"
 #include "Ring.hpp"
 #include "Tube.hpp"
+#include "Utils.hpp"
 #include <map>
 
 class FirstRoom
 {
 
+public:
     static const unsigned int MAX_SPOT_LIGHT = 2;
-
     struct SpotLightUniformVarLoc
     {
         GLuint position;
@@ -260,42 +261,30 @@ public:
 
     void moveSpot(int idX)
     {
-        auto minX = -10.f;
-        auto maxX = 10.f;
+        auto minX = -9.f;
+        auto maxX = 9.f;
         auto minY = 5.f;
         auto maxY = 10.f;
-        auto minZ = -12.f;
-        auto maxZ = 12.f;
+        auto minZ = -11.f;
+        auto maxZ = 11.f;
 
         auto spot = _spotLights[idX];
         auto time = glimac::getTime();
 
         // Calculer la nouvelle position en utilisant des fonctions trigonométriques
-        float x = spot.amplitude * sinf((spot.frequency * spot.speed) * time);        // Mouvement en X
-        float y = spot.amplitude * cosf((spot.frequency * spot.speed) * time);        // Mouvement en Y
-        float z = spot.amplitude * sinf((spot.frequency * spot.speed) * time / 2.0f); // Mouvement en Z (modifié)
+        float x = spot.amplitude * sinf((spot.frequency * spot.speed) * time);
+        float y = spot.amplitude * cosf((spot.frequency * spot.speed) * time);
+        float z = spot.amplitude * sinf((spot.frequency * spot.speed) * time / 2.0f);
 
-        // Appliquer des bornes aux déplacements pour s'assurer que la sphère reste dans les limites
-        if (x < minX)
-            x = minX;
-        if (x > maxX)
-            x = maxX;
-        if (y < minY)
-            y = minY;
-        if (y > maxY)
-            y = maxY;
-        if (z < minZ)
-            z = minZ;
-        if (z > maxZ)
-            z = maxZ;
+        auto mapX = Utils::linearMapping(x, -spot.amplitude, spot.amplitude, minX, maxX);
+        auto mapY = Utils::linearMapping(y, -spot.amplitude, spot.amplitude, minY, maxY);
+        auto mapZ = Utils::linearMapping(z, -spot.amplitude, spot.amplitude, minZ, maxZ);
 
-        auto translation = glm::vec3(x, y, z);
-        spot._spot.translateModel(translation);
+        auto translation = glm::vec3(mapX, mapY, mapZ);
+        std::cout << "translation = " << translation << std::endl;
+
+        // std::cout << " translation " << translation << " " << _spotLights[idX]._spot.getMeshBuffer()[0]._transform << std::endl;
         translateSpotLight(translation, idX);
-
-        // spot.modelMatrix = glm::rotate(spot.modelMatrix, glm::radians(30.0f * time), glm::vec3(0.0f, 1.0f, 0.0f));
-
-        // sphere.modelMatrix = glm::scale(sphere.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
     }
 
     void initFirstRoom(const glimac::FilePath &vsFilePath, const glimac::FilePath &fsFilePath, const glimac::FilePath &torchOBJFilePath,

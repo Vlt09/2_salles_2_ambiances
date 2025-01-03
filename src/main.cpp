@@ -40,14 +40,14 @@ void updateDeltaTime()
 
 bool thereIsCollision(glm::vec3 &position)
 {
-    for (auto &bbox : bboxVector)
-    {
-        std::cout << bbox << " position = " << position << std::endl;
-        if (camera.willIntersect(position, bbox))
-        {
-            return true;
-        }
-    }
+    // for (auto &bbox : bboxVector)
+    // {
+    //     std::cout << bbox << " position = " << position << std::endl;
+    //     if (camera.willIntersect(position, bbox))
+    //     {
+    //         return true;
+    //     }
+    // }
     return false;
 }
 

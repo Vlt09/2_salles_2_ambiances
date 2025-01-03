@@ -26,9 +26,8 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom, const glm::vec3 &cameraPos,
         box.getProgram().use();
     }
 
-    setSpotLightsUniform(firstRoom);
-
     glUniform1i(uv.uActiveLight, 1);
+    setSpotLightsUniform(firstRoom);
 
     glBeginTransformFeedback(GL_TRIANGLES);
     glDisable(GL_BLEND);
@@ -39,7 +38,7 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom, const glm::vec3 &cameraPos,
     glEndTransformFeedback();
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < FirstRoom::MAX_SPOT_LIGHT; i++)
     {
         glUniform3f(uv.uLightIntensity, spots[i].intensity.x, spots[i].intensity.y, spots[i].intensity.z);
         renderObject(spots[i]._spot, uv);
@@ -57,6 +56,7 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom, const glm::vec3 &cameraPos,
 
     // firstRoom.printDebugBuff();
     firstRoom.moveSpot(1);
+    glUniform1i(uv.uActiveLight, 0); // Desac spot light for other room
 }
 
 void Renderer::renderSecondRoom(FirstRoom &sr, const glm::vec3 &cameraPos, const glm::vec3 &border)
@@ -78,7 +78,6 @@ void Renderer::renderSecondRoom(FirstRoom &sr, const glm::vec3 &cameraPos, const
         sortedGlass[distance] = &glass[i];
     }
 
-    glUniform1i(uv.uActiveLight, 0);
     if (cameraPos.x <= border.x)
     {
         prog.use();
