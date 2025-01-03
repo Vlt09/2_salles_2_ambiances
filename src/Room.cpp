@@ -22,7 +22,7 @@ void Room::initProgram(const glimac::FilePath &vsFile, const glimac::FilePath &f
     uniformVariable.uActiveLight = glGetUniformLocation(_mProgram.getGLId(), "uActiveLight");
 }
 
-void Room::addGroundAndFront(const glm::vec3 &cameraPos)
+void Room::addGroundAndFront(const glm::vec3 &cameraPos, std::vector<glimac::BBox3f> &bboxVector)
 {
     float groundHeight = cameraPos.y - 0.15f;
     auto vertices = Quad::QuadVertices(1, 1);
@@ -30,24 +30,24 @@ void Room::addGroundAndFront(const glm::vec3 &cameraPos)
 
     transformMat = glm::translate(transformMat, glm::vec3(cameraPos.x, groundHeight, cameraPos.z));
     transformMat = glm::scale(transformMat, glm::vec3(20.f, 1.f, 24.f));
-    _bounds.addFromVertices(vertices, 0, transformMat);
+    bboxVector.emplace_back(_bounds.addFromVertices(vertices, 0, transformMat));
 
     transformMat = glm::mat4(1);
     transformMat = glm::translate(transformMat, glm::vec3(cameraPos.x, cameraPos.y, cameraPos.z + 12.f));
     transformMat = glm::rotate(transformMat, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
     transformMat = glm::scale(transformMat, glm::vec3(20.f, 1.f, 24.f));
 
-    _bounds.addFromVertices(vertices, 0, transformMat);
+    bboxVector.emplace_back(_bounds.addFromVertices(vertices, 0, transformMat));
 
     transformMat = glm::mat4(1);
     transformMat = glm::translate(transformMat, glm::vec3(cameraPos.x, cameraPos.y, cameraPos.z - 12.f));
     transformMat = glm::rotate(transformMat, glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
     transformMat = glm::scale(transformMat, glm::vec3(20.f, 1.f, 24.f));
 
-    _bounds.addFromVertices(vertices, 0, transformMat);
+    bboxVector.emplace_back(_bounds.addFromVertices(vertices, 0, transformMat));
 }
 
-void Room::addRightAndLeft(const glm::vec3 &cameraPos, float order)
+void Room::addRightAndLeft(const glm::vec3 &cameraPos, float order, std::vector<glimac::BBox3f> &bboxVector)
 {
     auto vertices = Quad::QuadVertices(1, 1);
     auto transformMat = glm::mat4(1);
@@ -55,30 +55,28 @@ void Room::addRightAndLeft(const glm::vec3 &cameraPos, float order)
     transformMat = glm::translate(transformMat, glm::vec3(cameraPos.x + (10.f * order), cameraPos.y + 2.f, cameraPos.z));
     transformMat = glm::rotate(transformMat, glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
     transformMat = glm::scale(transformMat, glm::vec3(20.f, 1.f, 24.f));
-    std::cout << "Left transfo matrix = " << transformMat << std::endl;
-    _bounds.addFromVertices(vertices, 0, transformMat);
+
+    bboxVector.emplace_back(_bounds.addFromVertices(vertices, 0, transformMat));
 
     transformMat = glm::mat4(1);
     transformMat = glm::translate(transformMat, glm::vec3((cameraPos.x - (10.f * order)), cameraPos.y, cameraPos.z + 7.f));
     transformMat = glm::rotate(transformMat, glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
     transformMat = glm::scale(transformMat, glm::vec3(20.f, 1.f, 10.f));
-    _bounds.addFromVertices(vertices, 0, transformMat);
+    bboxVector.emplace_back(_bounds.addFromVertices(vertices, 0, transformMat));
 
     transformMat = glm::mat4(1);
     transformMat = glm::translate(transformMat, glm::vec3(cameraPos.x - (10.f * order), cameraPos.y, cameraPos.z - 7.f));
     transformMat = glm::rotate(transformMat, glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
     transformMat = glm::scale(transformMat, glm::vec3(20.f, 1.f, 10.f));
-    _bounds.addFromVertices(vertices, 0, transformMat);
+    bboxVector.emplace_back(_bounds.addFromVertices(vertices, 0, transformMat));
 }
 
-void Room::constructRoom(const glm::vec3 &cameraPos, float order, Geometry::Material &roomMat, std::vector<std::shared_ptr<glimac::BBox3f>> &bboxVector)
+void Room::constructRoom(const glm::vec3 &cameraPos, float order, Geometry::Material &roomMat, std::vector<glimac::BBox3f> &bboxVector)
 {
-    addGroundAndFront(cameraPos);
-    addRightAndLeft(cameraPos, order);
+    addGroundAndFront(cameraPos, bboxVector);
+    addRightAndLeft(cameraPos, order, bboxVector);
     _bounds.initMeshData();
     _bounds.addMaterial(roomMat);
 
     _bounds.initTexture("/home/valentin/m2/opengl/2_salles_2_ambiances/src/assets/minecraft_stonewall.png");
-    // _bounds.calculateBoundingBox();
-    bboxVector.emplace_back(std::make_shared<glimac::BBox3f>(_bounds.getBBox()));
 }

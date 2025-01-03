@@ -40,9 +40,9 @@ public:
 
     void initProgram(const glimac::FilePath &vsFile, const glimac::FilePath &fsFile);
 
-    void addGroundAndFront(const glm::vec3 &cameraPos);
+    void addGroundAndFront(const glm::vec3 &cameraPos, std::vector<glimac::BBox3f> &bboxVector);
 
-    void constructRoom(const glm::vec3 &cameraPos, float order, Geometry::Material &roomMat, std::vector<std::shared_ptr<glimac::BBox3f>> &bboxVector);
+    void constructRoom(const glm::vec3 &cameraPos, float order, Geometry::Material &roomMat, std::vector<glimac::BBox3f> &bboxVector);
 
     const UniformVariable &getUniformVariable()
     {
@@ -83,5 +83,5 @@ private:
      *
      * @note The scaling values are defined according to the specifications of the project
      */
-    void addRightAndLeft(const glm::vec3 &cameraPos, float order);
+    void addRightAndLeft(const glm::vec3 &cameraPos, float order, std::vector<glimac::BBox3f> &bboxVector);
 };

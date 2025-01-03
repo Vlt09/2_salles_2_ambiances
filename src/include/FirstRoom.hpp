@@ -299,7 +299,7 @@ public:
     }
 
     void initFirstRoom(const glimac::FilePath &vsFilePath, const glimac::FilePath &fsFilePath, const glimac::FilePath &torchOBJFilePath,
-                       const glimac::FilePath &torchMatFilePath, glm::vec3 cameraPos, std::vector<std::shared_ptr<glimac::BBox3f>> &bboxVector)
+                       const glimac::FilePath &torchMatFilePath, glm::vec3 cameraPos, std::vector<glimac::BBox3f> &bboxVector)
     {
         _box.initProgram(vsFilePath,
                          fsFilePath);
@@ -324,7 +324,7 @@ public:
     }
 
     void initSecondRoom(const glimac::FilePath &vsFilePath, const glimac::FilePath &fsFilePath, glm::vec3 cameraPos,
-                        glimac::FilePath applicationPath, std::vector<std::shared_ptr<glimac::BBox3f>> &bboxVector)
+                        glimac::FilePath applicationPath, std::vector<glimac::BBox3f> &bboxVector)
     {
 
         // Shift for the second room

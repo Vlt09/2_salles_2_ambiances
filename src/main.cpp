@@ -29,7 +29,7 @@ float zMax = 10.f;
 float zMin = -10.f;
 
 Camera camera{};
-std::vector<std::shared_ptr<glimac::BBox3f>> bboxVector;
+std::vector<glimac::BBox3f> bboxVector;
 
 void updateDeltaTime()
 {
@@ -38,24 +38,12 @@ void updateDeltaTime()
     lastFrame = currentFrame;
 }
 
-bool checkBorder()
+bool thereIsCollision(glm::vec3 &position)
 {
-    // auto pos = camera.cameraPosition();
-    // if (pos.x <= xMin || pos.x >= xMax)
-    // {
-    //     return false;
-    // }
-
-    // if (pos.z <= zMin || pos.z >= zMax)
-    // {
-    //     return false;
-    // }
-    // return true;
-    auto &cameraBbox = camera.getBbox();
     for (auto &bbox : bboxVector)
     {
-        // std::cout << *bbox << std::endl;
-        if (glimac::conjoint(*bbox, cameraBbox))
+        std::cout << bbox << " position = " << position << std::endl;
+        if (camera.willIntersect(position, bbox))
         {
             return true;
         }
@@ -65,22 +53,39 @@ bool checkBorder()
 
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
-    if ((action == GLFW_PRESS || action == GLFW_REPEAT) && checkBorder())
+    glm::vec3 nextPos;
+    if (action == GLFW_PRESS || action == GLFW_REPEAT)
     {
         float movementSpeed = 0.5f * deltaTime;
         switch (key)
         {
         case GLFW_KEY_W:
-            camera.moveUp(1.);
+            nextPos = camera.nextMoveUp(1.);
+            if (!thereIsCollision(nextPos))
+            {
+                camera.moveUp(1.);
+            }
             break;
         case GLFW_KEY_A:
-            camera.moveLeft(1.);
+            nextPos = camera.nextMoveLeft(1.f);
+            if (!thereIsCollision(nextPos))
+            {
+                camera.moveLeft(1.);
+            }
             break;
         case GLFW_KEY_S:
-            camera.moveUp(-1.);
+            nextPos = camera.nextMoveUp(-1.f);
+            if (!thereIsCollision(nextPos))
+            {
+                camera.moveUp(-1.);
+            }
             break;
         case GLFW_KEY_D:
-            camera.moveLeft(-1.);
+            nextPos = camera.nextMoveLeft(-1.f);
+            if (!thereIsCollision(nextPos))
+            {
+                camera.moveLeft(-1.);
+            }
             break;
         case GLFW_KEY_E:
             camera.rotateLeft(-15.);
@@ -191,12 +196,13 @@ int main(int argc, char *argv[])
     /* Init second Room */
     auto cPos = camera.cameraPosition();
     auto shift = glm::vec3(cPos.x - 24.f, cPos.y, cPos.z);
-    // sr.initSecondRoom(applicationPath.dirPath() + "src/shaders/3D.vs.glsl",
-    //                   applicationPath.dirPath() + "src/shaders/second_room.fs.glsl",
-    //                   shift, applicationPath, bboxVector);
+    sr.initSecondRoom(applicationPath.dirPath() + "src/shaders/3D.vs.glsl",
+                      applicationPath.dirPath() + "src/shaders/second_room.fs.glsl",
+                      shift, applicationPath, bboxVector);
 
     glm::vec3 border = glm::vec3(cPos.x - 12, cPos.y, cPos.z);
 
+    std::cout << "bbox size = " << bboxVector.size() << std::endl;
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -207,7 +213,7 @@ int main(int argc, char *argv[])
 
         renderer.renderSkybox(skybox);
         renderer.renderFirstRoom(fr, camera.cameraPosition(), border);
-        // renderer.renderSecondRoom(sr, camera.cameraPosition(), border);
+        renderer.renderSecondRoom(sr, camera.cameraPosition(), border);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);

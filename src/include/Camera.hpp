@@ -43,6 +43,16 @@ public:
         updateBoundingBox();
     }
 
+    glm::vec3 nextMoveLeft(float t)
+    {
+        return m_Position + (t * m_LeftVector);
+    }
+
+    glm::vec3 nextMoveUp(float t)
+    {
+        return m_Position + (t * m_FrontVector);
+    }
+
     void moveUp(float t)
     {
         m_Position += t * m_FrontVector;
@@ -78,5 +88,27 @@ public:
     const glimac::BBox3f &getBbox()
     {
         return _bbox;
+    }
+
+    /**
+     * @brief Simulates the camera's next position and checks for an intersection with another bounding box.
+     *
+     * This function does not update the camera's position but instead creates a temporary bounding box
+     * that reflects where the camera would be after the movement. It then checks for an intersection
+     * between the simulated bounding box and the given bounding box.
+     *
+     * @param nextPos The vector representing the simulated next position of the camera.
+     * @param bbox The bounding box to check for intersection.
+     * @return true If the simulated position of the camera results in an intersection.
+     * @return false Otherwise.
+     */
+    bool willIntersect(const glm::vec3 &nextPos, const glimac::BBox3f &bbox) const
+    {
+        glimac::BBox3f tempBBox = _bbox;
+
+        tempBBox.lower += (nextPos - m_Position);
+        tempBBox.upper += (nextPos - m_Position);
+
+        return glimac::conjoint(tempBBox, bbox);
     }
 };

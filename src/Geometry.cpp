@@ -193,21 +193,19 @@ bool Geometry::loadOBJ(const glimac::FilePath &filepath, const glimac::FilePath 
     return true;
 }
 
-Geometry::Mesh &Geometry::addFromVertices(std::vector<Geometry::Vertex> vertices, int matIndex, glm::mat4 transformMatrix)
+glimac::BBox3f Geometry::addFromVertices(std::vector<Geometry::Vertex> vertices, int matIndex, glm::mat4 transformMatrix)
 {
     m_VertexBuffer.insert(m_VertexBuffer.end(), vertices.begin(), vertices.end());
 
-    size_t newIndex = lastMeshIndex + vertices.size();
-    Geometry::Mesh mesh("shape", lastMeshIndex, vertices.size(), matIndex);
+    auto tmp = _lastMeshIndex;
+    size_t newIndex = _lastMeshIndex + vertices.size();
+    Geometry::Mesh mesh("shape", _lastMeshIndex, vertices.size(), matIndex);
     mesh._transform = transformMatrix;
     mesh.isTransform = true;
-
     updateLastMeshIndex(newIndex);
     m_MeshBuffer.push_back(std::move(mesh));
 
-    m_BBox = glimac::merge(m_BBox, bBoxFromMesh(lastMeshIndex, vertices.size(), mesh._transform)); // calc BBox in world space
-
-    return m_MeshBuffer.back();
+    return bBoxFromMesh(tmp, vertices.size(), mesh._transform);
 }
 
 void Geometry::addMaterial(const Material &material)
@@ -318,6 +316,7 @@ glimac::BBox3f Geometry::bBoxFromMesh(size_t begin, size_t size, const glm::mat4
     glm::vec3 min(FLT_MAX);
     glm::vec3 max(-FLT_MAX);
 
+    // std::cout << "transfo mat = " << modelMatrix << std::endl;
     size = begin + size;
     for (size_t i = begin; i < size; i++)
     {

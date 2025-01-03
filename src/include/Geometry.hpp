@@ -53,7 +53,7 @@ public:
     };
 
 private:
-    size_t lastMeshIndex = 0;
+    size_t _lastMeshIndex = 0;
 
     void generateNormals(unsigned int meshIndex);
 
@@ -127,12 +127,12 @@ public:
 
     size_t getLastMeshIndex() const
     {
-        return lastMeshIndex;
+        return _lastMeshIndex;
     }
 
     void updateLastMeshIndex(size_t index)
     {
-        lastMeshIndex = index;
+        _lastMeshIndex = index;
     }
 
     GLuint getTex() const
@@ -150,7 +150,7 @@ public:
      * of vertices in the current Geometry object. In other word,
      * this function add one Mesh which is a simple shape (quad, sphere etc).
      */
-    Geometry::Mesh &addFromVertices(std::vector<Geometry::Vertex> vertices, int matIndex, glm::mat4 transformMatrix);
+    glimac::BBox3f addFromVertices(std::vector<Geometry::Vertex> vertices, int matIndex, glm::mat4 transformMatrix);
 
     /**
      * @brief This function adds material to material list
