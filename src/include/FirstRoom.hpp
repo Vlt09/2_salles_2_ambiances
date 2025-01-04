@@ -30,11 +30,36 @@ public:
         Ring _ring;
         WeirdTube _tube;
 
+        SecondRoomComposent() : _ring(1.0f, 1.0f, 32, 32),
+                                _tube(1.0f, 7.0f, 16, 16),
+                                _direcLightLoc(MAX_DIR_LIGHT),
+                                _pointLightLoc(MAX_POINT_LIGHT)
+        {
+        }
+
         SecondRoomComposent(GLuint progID) : _ring(1.0f, 1.0f, 32, 32),
                                              _tube(1.0f, 7.0f, 16, 16)
         {
             Utils::setDirectionalLightUniformLocations(progID, _direcLightLoc.data(), MAX_DIR_LIGHT);
             Utils::setPointLightUniformLocations(progID, _pointLightLoc.data(), MAX_POINT_LIGHT);
+        }
+
+        void initComponent(GLuint progID, glm::vec3 dirLightDir, glm::vec3 pointLightPos)
+        {
+            Utils::setDirectionalLightUniformLocations(progID, _direcLightLoc.data(), MAX_DIR_LIGHT);
+            Utils::setPointLightUniformLocations(progID, _pointLightLoc.data(), MAX_POINT_LIGHT);
+
+            _pointLight.emplace_back(Utils::PointLight(
+                Utils::randomVec3(0.3f, 0.8f),
+                pointLightPos,
+                Utils::randomFloat(0.5f, 1.5f),
+                Utils::randomFloat(0.2f, 0.9f),
+                Utils::randomFloat(0.2f, 0.9f),
+                Utils::randomFloat(0.2f, 0.9f)));
+
+            _dirLight.emplace_back(Utils::DirectionalLight(
+                glm::vec3(1),
+                dirLightDir));
         }
     };
 
@@ -53,6 +78,7 @@ private:
     // Second Room
     Ring _ring;
     WeirdTube _tube;
+    SecondRoomComposent _secondRoom;
 
     std::vector<Quad> _glass;
     std::map<float, Quad *> _sortedGlass;
@@ -290,8 +316,8 @@ public:
         _box.constructRoom(cameraPos, 1, _boxMaterial, bboxVector);
 
         initSpotLight();
-        _tCube._cube.initTexture(applicationFilePath.dirPath() + "../src/assets/fract_perlin_noise.jpg");
 
+        _tCube._cube.initTexture(applicationFilePath.dirPath() + "../src/assets/fract_perlin_noise.jpg");
         _cy.initCylinder(1, 3, 16, 8, _boxMaterial);
         _cy.translateModel(glm::vec3(cameraPos.x - 3.f, cameraPos.y + 2.f, cameraPos.z));
 
@@ -314,13 +340,14 @@ public:
                         glimac::FilePath applicationPath, std::vector<glimac::BBox3f> &bboxVector)
     {
 
-        // Shift for the second room
-        glm::vec3 shift = cameraPos;
-
         _box.initProgram(vsFilePath,
                          fsFilePath);
 
         _box.constructRoom(cameraPos, -1, _boxMaterial, bboxVector);
+
+        auto id = _box.getProgramId();
+        std::cout << "prog id = " << id << std::endl;
+        _secondRoom.initComponent(id, glm::vec3(0, -1, 0), glm::vec3(cameraPos.x, cameraPos.y + 5.f, cameraPos.z));
 
         // Init glasses
         for (int i = 0; i < MAX_GLASS; i++)
@@ -340,8 +367,8 @@ public:
         }
 
         // Place other object
-        _ring.translateModel(glm::vec3(shift.x, shift.y + 1.5f, shift.z - 10.f));
-        _tube.translateModel(glm::vec3(shift.x - 5.f, shift.y + 3.f, shift.z));
+        _ring.translateModel(glm::vec3(cameraPos.x, cameraPos.y + 1.5f, cameraPos.z - 10.f));
+        _tube.translateModel(glm::vec3(cameraPos.x - 5.f, cameraPos.y + 3.f, cameraPos.z));
     }
 
     void printDebugBuff()

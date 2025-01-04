@@ -33,27 +33,53 @@ namespace Utils
 
     struct DirectionalLightUniformVarLoc
     {
-        GLuint colour;
+        GLuint color;
         GLuint direction;
         GLuint intensity;
     };
 
     struct PointLight
     {
-        glm::vec3 _colour;
+        glm::vec3 _color;
         glm::vec3 _position;
         float _intensity;
 
         float _constant;
         float _linear;
         float _exponent;
+
+        PointLight()
+            : _color(1.0f, 1.0f, 1.0f),
+              _position(0.0f, 0.0f, 0.0f),
+              _intensity(1.0f),
+              _constant(1.0f),
+              _linear(0.0f),
+              _exponent(1.0f)
+        {
+        }
+
+        PointLight(const glm::vec3 &color, const glm::vec3 &position, float intensity,
+                   float constant, float linear, float exponent)
+            : _color(color),
+              _position(position),
+              _intensity(intensity),
+              _constant(constant),
+              _linear(linear),
+              _exponent(exponent)
+        {
+        }
     };
 
     struct DirectionalLight
     {
-        glm::vec3 _colour;
+        glm::vec3 _color;
         glm::vec3 _direction;
         float _intensity;
+
+        DirectionalLight(const glm::vec3 &color = glm::vec3(1.0f),
+                         const glm::vec3 &direction = glm::vec3(0.0f, -1.0f, 0.0f),
+                         float intensity = 1.0f)
+            : _color(color), _direction(direction), _intensity(intensity) {}
     };
 
     struct SpotLight
@@ -150,12 +176,12 @@ namespace Utils
             std::cout << "Setting DirectionalLight uniform locations for light " << i << std::endl;
             std::string baseName = "uDirectionalLights[" + std::to_string(i) + "]";
 
-            directionalLightUniformVarLoc[i].colour = glGetUniformLocation(programID, (baseName + ".colour").c_str());
+            directionalLightUniformVarLoc[i].color = glGetUniformLocation(programID, (baseName + ".color").c_str());
             directionalLightUniformVarLoc[i].direction = glGetUniformLocation(programID, (baseName + ".direction").c_str());
             directionalLightUniformVarLoc[i].intensity = glGetUniformLocation(programID, (baseName + ".intensity").c_str());
 
-            if (directionalLightUniformVarLoc[i].colour == -1)
-                std::cerr << "Error: Could not find " << baseName << ".colour" << std::endl;
+            if (directionalLightUniformVarLoc[i].color == -1)
+                std::cerr << "Error: Could not find " << baseName << ".color" << std::endl;
             if (directionalLightUniformVarLoc[i].direction == -1)
                 std::cerr << "Error: Could not find " << baseName << ".direction" << std::endl;
             if (directionalLightUniformVarLoc[i].intensity == -1)
@@ -177,7 +203,6 @@ namespace Utils
             pointLightUniformVarLoc[i].linear = glGetUniformLocation(programID, (baseName + ".linear").c_str());
             pointLightUniformVarLoc[i].exponent = glGetUniformLocation(programID, (baseName + ".exponent").c_str());
 
-            // Gestion des erreurs
             if (pointLightUniformVarLoc[i].color == -1)
                 std::cerr << "Error: Could not find " << baseName << ".color" << std::endl;
             if (pointLightUniformVarLoc[i].position == -1)
