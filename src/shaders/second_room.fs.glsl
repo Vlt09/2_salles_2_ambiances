@@ -5,8 +5,29 @@ in vec3 vVertexNormal;
 
 uniform sampler2D uTexture;
 
-out vec4 fFragColor;
+struct DirectionalLight
+{
+	vec3 color;
+	vec3 direction;
+	float intensity;
+};
 
+struct PointLight
+{
+	vec3 color;
+	vec3 position; // in world space
+	float intensity;
+
+    float constant;
+	float linear;
+	float exponent;
+};
+
+uniform DirectionalLight uDirectionalLights[1];
+uniform PointLight uPointLights[1];
+
+
+out vec4 fFragColor;
 
 // vec3 pointLightblinnPhong(vec3 normal, SpotLight spotLight) {
 //     vec3 vFrag_vs = spotLight._position;
