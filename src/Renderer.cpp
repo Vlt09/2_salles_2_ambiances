@@ -93,7 +93,7 @@ void Renderer::renderSecondRoom(FirstRoom &sr, const glm::vec3 &cameraPos, const
     {
         prog.use();
 
-        glUniform3fv(uv.uCamerapos, 1, glm::value_ptr(cameraPos));
+        glUniform3fv(uv.uCamerapos, 1, glm::value_ptr(glm::vec3(glm::mat3(_viewMatrix) * cameraPos)));
         glUniform3fv(uv.uColor, 1, glm::value_ptr(src._matColor));
         std::cout << "ambient light = " << src._ambientLight << std::endl;
         glUniform3fv(uv.uAmbientLight, 1, glm::value_ptr(src._ambientLight));

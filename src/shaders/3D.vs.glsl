@@ -11,16 +11,19 @@ uniform mat4 uModelMatrix;
 
 out vec2 vVertexTex;
 out vec3 vVertexNormal;
+out vec3 vVertexNormalViewSpace;
+out vec3 vVertexPosViewSpace;
 out vec3 vVertexPos;
 
 
 void main() {
     vVertexTex = aVertexTex;
-    // vVertexNormal = vec3(uNormalMatrix * vec4(aVertexNormal, 0.0));
+    vVertexNormalViewSpace = vec3(uNormalMatrix * vec4(aVertexNormal, 0.0));
 
     vVertexNormal = mat3(transpose(inverse(uModelMatrix))) * aVertexNormal;
 
     vVertexPos = vec3(uModelMatrix * vec4(aVertexPosition, 1.0));
+    vVertexPosViewSpace = vec3(uMVMatrix * vec4(aVertexPosition, 1.0));
 
 
     gl_Position = uMVPMatrix * vec4(aVertexPosition, 1);

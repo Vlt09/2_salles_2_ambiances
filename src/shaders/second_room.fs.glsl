@@ -3,7 +3,8 @@
 in vec2 vVertexTex;
 in vec3 vVertexNormal;
 in vec3 vVertexPos; // World space
-
+in vec3 vVertexNormalViewSpace;
+in vec3 vVertexPosViewSpace;
 
 uniform sampler2D uTexture;
 
@@ -39,6 +40,12 @@ uniform vec3 uCameraPos;
 uniform bool uIsGlass;
 
 out vec4 fFragColor;
+
+
+vec4 quantizeColor(vec4 color) {
+    color.rgb = floor(color.rgb * 255.0 + 0.5) / 255.0; // Quantize to 8-bit
+    return color;
+}
 
 
 vec4 calcLightColour(vec3 light_color, float light_intensity, vec3 position, vec3 to_light_dir, vec3 normal)
@@ -94,21 +101,21 @@ void main() {
 
     // fFragColor = tex;
 	vec4 baseColour = vec4(uColor, 1);
-	vec4 color;
 
 	vec4 totalLight = vec4(uAmbientLight, 1.0);
-	totalLight += dirLightCellShading(uDirectionalLights[0], uCameraPos, vVertexNormal);
+	totalLight += dirLightCellShading(uDirectionalLights[0], vVertexPos, vVertexNormal);
 	totalLight += pointLightCellShading(uPointLights[0], vVertexPos, vVertexNormal); 
 
     // fFragColor =  totalLight;
 
 	// Add white outlines
-	// if (dot(vVertexNormal, normalize(uCameraPos)) <= 0.2) //  Threshold
-	// 	fFragColor = vec4(1,1,1,1);
-	// else
-    fFragColor = tex + (baseColour * totalLight); 
+	if (dot(vVertexNormalViewSpace, -vVertexPosViewSpace) <= 0.2) //  Threshold
+		fFragColor = vec4(1,1,1,1);
+	else
+        fFragColor = quantizeColor( (baseColour * totalLight));
 
     if (uIsGlass){
         fFragColor = tex; 
     }
+
 }
