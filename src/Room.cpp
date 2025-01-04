@@ -20,6 +20,9 @@ void Room::initProgram(const glimac::FilePath &vsFile, const glimac::FilePath &f
     uniformVariable.uSpotlightCutoff = glGetUniformLocation(_mProgram.getGLId(), "uSpotlightCutoff");
     uniformVariable.uSpotLight = glGetUniformLocation(_mProgram.getGLId(), "uSpotLight");
     uniformVariable.uActiveLight = glGetUniformLocation(_mProgram.getGLId(), "uActiveLight");
+    uniformVariable.uHasTexture = glGetUniformLocation(_mProgram.getGLId(), "uHasTexture");
+    uniformVariable.uCurrentSpotLightIdx = glGetUniformLocation(_mProgram.getGLId(), "uCurrentSpotLightIdx");
+    uniformVariable.uUsePerlinNoise = glGetUniformLocation(_mProgram.getGLId(), "uUsePerlinNoise");
 }
 
 void Room::addGroundAndFront(const glm::vec3 &cameraPos, std::vector<glimac::BBox3f> &bboxVector)

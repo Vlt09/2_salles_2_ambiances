@@ -17,6 +17,43 @@ namespace Utils
         GLuint m_Ka;
         GLuint cutoff;
         GLuint exponent;
+        GLuint idx;
+    };
+
+    struct PointLightUniformVarLoc
+    {
+        GLuint color;
+        GLuint position;
+        GLuint intensity;
+
+        GLuint constant;
+        GLuint linear;
+        GLuint exponent;
+    };
+
+    struct DirectionalLightUniformVarLoc
+    {
+        GLuint colour;
+        GLuint direction;
+        GLuint intensity;
+    };
+
+    struct PointLight
+    {
+        glm::vec3 _colour;
+        glm::vec3 _position;
+        float _intensity;
+
+        float _constant;
+        float _linear;
+        float _exponent;
+    };
+
+    struct DirectionalLight
+    {
+        glm::vec3 _colour;
+        glm::vec3 _direction;
+        float _intensity;
     };
 
     struct SpotLight
@@ -105,4 +142,55 @@ namespace Utils
             material.m_pNormalMap = nullptr;
         }
     }
+
+    inline void setDirectionalLightUniformLocations(GLuint programID, DirectionalLightUniformVarLoc *directionalLightUniformVarLoc, int maxDirectionalLights)
+    {
+        for (int i = 0; i < maxDirectionalLights; ++i)
+        {
+            std::cout << "Setting DirectionalLight uniform locations for light " << i << std::endl;
+            std::string baseName = "uDirectionalLights[" + std::to_string(i) + "]";
+
+            directionalLightUniformVarLoc[i].colour = glGetUniformLocation(programID, (baseName + ".colour").c_str());
+            directionalLightUniformVarLoc[i].direction = glGetUniformLocation(programID, (baseName + ".direction").c_str());
+            directionalLightUniformVarLoc[i].intensity = glGetUniformLocation(programID, (baseName + ".intensity").c_str());
+
+            if (directionalLightUniformVarLoc[i].colour == -1)
+                std::cerr << "Error: Could not find " << baseName << ".colour" << std::endl;
+            if (directionalLightUniformVarLoc[i].direction == -1)
+                std::cerr << "Error: Could not find " << baseName << ".direction" << std::endl;
+            if (directionalLightUniformVarLoc[i].intensity == -1)
+                std::cerr << "Error: Could not find " << baseName << ".intensity" << std::endl;
+        }
+    }
+
+    inline void setPointLightUniformLocations(GLuint programID, PointLightUniformVarLoc *pointLightUniformVarLoc, int maxPointLights)
+    {
+        for (int i = 0; i < maxPointLights; ++i)
+        {
+            std::cout << "Setting PointLight uniform locations for light " << i << std::endl;
+            std::string baseName = "uPointLights[" + std::to_string(i) + "]";
+
+            pointLightUniformVarLoc[i].color = glGetUniformLocation(programID, (baseName + ".color").c_str());
+            pointLightUniformVarLoc[i].position = glGetUniformLocation(programID, (baseName + ".position").c_str());
+            pointLightUniformVarLoc[i].intensity = glGetUniformLocation(programID, (baseName + ".intensity").c_str());
+            pointLightUniformVarLoc[i].constant = glGetUniformLocation(programID, (baseName + ".constant").c_str());
+            pointLightUniformVarLoc[i].linear = glGetUniformLocation(programID, (baseName + ".linear").c_str());
+            pointLightUniformVarLoc[i].exponent = glGetUniformLocation(programID, (baseName + ".exponent").c_str());
+
+            // Gestion des erreurs
+            if (pointLightUniformVarLoc[i].color == -1)
+                std::cerr << "Error: Could not find " << baseName << ".color" << std::endl;
+            if (pointLightUniformVarLoc[i].position == -1)
+                std::cerr << "Error: Could not find " << baseName << ".position" << std::endl;
+            if (pointLightUniformVarLoc[i].intensity == -1)
+                std::cerr << "Error: Could not find " << baseName << ".intensity" << std::endl;
+            if (pointLightUniformVarLoc[i].constant == -1)
+                std::cerr << "Error: Could not find " << baseName << ".constant" << std::endl;
+            if (pointLightUniformVarLoc[i].linear == -1)
+                std::cerr << "Error: Could not find " << baseName << ".linear" << std::endl;
+            if (pointLightUniformVarLoc[i].exponent == -1)
+                std::cerr << "Error: Could not find " << baseName << ".exponent" << std::endl;
+        }
+    }
+
 };

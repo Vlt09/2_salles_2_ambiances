@@ -16,6 +16,28 @@ class FirstRoom
 public:
     static const unsigned int MAX_SPOT_LIGHT = 15;
 
+    struct SecondRoomComposent
+    {
+        static const unsigned int MAX_DIR_LIGHT = 1;
+        static const unsigned int MAX_POINT_LIGHT = 1;
+
+        std::vector<Utils::DirectionalLightUniformVarLoc> _direcLightLoc;
+        std::vector<Utils::DirectionalLight> _dirLight;
+
+        std::vector<Utils::PointLightUniformVarLoc> _pointLightLoc;
+        std::vector<Utils::PointLight> _pointLight;
+
+        Ring _ring;
+        WeirdTube _tube;
+
+        SecondRoomComposent(GLuint progID) : _ring(1.0f, 1.0f, 32, 32),
+                                             _tube(1.0f, 7.0f, 16, 16)
+        {
+            Utils::setDirectionalLightUniformLocations(progID, _direcLightLoc.data(), MAX_DIR_LIGHT);
+            Utils::setPointLightUniformLocations(progID, _pointLightLoc.data(), MAX_POINT_LIGHT);
+        }
+    };
+
 private:
     unsigned short _lightFlag = 1; // Enable or Disable light process
 
@@ -83,18 +105,6 @@ public:
                   _ring(1.0f, 1.0f, 32, 32),
                   _tube(1.0f, 7.0f, 16, 16)
     {
-        // _spotMaterial[0].m_Ka = glm::vec3(0.0f, 0.0f, 0.5f);
-        // _spotMaterial[0].m_Kd = glm::vec3(0.0f, 0.0f, 0.5f);
-        // _spotMaterial[0].m_Ks = glm::vec3(0.0f, 0.0f, 0.5f);
-        // _spotMaterial[1].m_Ka = glm::vec3(0.5f, 0.0f, 0.0f);
-        // _spotMaterial[1].m_Kd = glm::vec3(0.5f, 0.0f, 0.1f);
-        // _spotMaterial[1].m_Ks = glm::vec3(0.5f, 0.0f, 0.1f);
-
-        // _spotMaterial[0].m_Tr = glm::vec3(0.0f, 0.0f, 0.0f);
-        // _spotMaterial[0].m_Le = glm::vec3(1.0f, 1.0f, 0.0f);
-        // _spotMaterial[0].m_Shininess = 128.f;
-        // _spotMaterial[0].m_RefractionIndex = 1.f;
-        // _spotMaterial[0].m_Dissolve = 1.0f;
 
         _boxMaterial.m_Kd = glm::vec3(0.3f, 0.3f, 0.4f);
         _boxMaterial.m_Ks = glm::vec3(0.2f, 0.2f, 0.1f);
@@ -102,19 +112,8 @@ public:
 
         _boxLightIntensity = glm::vec3(1.5f, 1.5f, 1.5f);
 
-        // _spotLights[0]._spot.initSphere(1, 32, 16, _spotMaterial[0]);
-        // _spotLights[1]._spot.initSphere(1, 32, 16, _spotMaterial[1]);
-
         _spotLight.intensity = glm::vec3(1.0f, 1.0f, 1.0f);
         _spotLight.cutoff = 2.f;
-        // _spotLights[0].intensity = glm::vec3(1.0f, 1.0f, 1.0f);
-        // _spotLights[0].cutoff = 25.f;
-
-        // _spotLights[1].intensity = glm::vec3(1.0f, 1.0f, 1.0f);
-        // _spotLights[1].cutoff = 25.f;
-
-        initSpotLight();
-        _cy.initCylinder(1, 3, 16, 8, _boxMaterial);
     }
 
     Sphere &getSpot()
@@ -283,13 +282,17 @@ public:
     }
 
     void initFirstRoom(const glimac::FilePath &vsFilePath, const glimac::FilePath &fsFilePath,
-                       glm::vec3 cameraPos, std::vector<glimac::BBox3f> &bboxVector)
+                       glm::vec3 cameraPos, std::vector<glimac::BBox3f> &bboxVector, glimac::FilePath &applicationFilePath)
     {
         _box.initProgram(vsFilePath,
                          fsFilePath);
 
         _box.constructRoom(cameraPos, 1, _boxMaterial, bboxVector);
 
+        initSpotLight();
+        _tCube._cube.initTexture(applicationFilePath.dirPath() + "../src/assets/fract_perlin_noise.jpg");
+
+        _cy.initCylinder(1, 3, 16, 8, _boxMaterial);
         _cy.translateModel(glm::vec3(cameraPos.x - 3.f, cameraPos.y + 2.f, cameraPos.z));
 
         _tCube._cube.translateModel(glm::vec3(cameraPos.x + 3.f, cameraPos.y + 2.f, cameraPos.z + 2.f));

@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
     /* Init first Room*/
     fr.initFirstRoom(applicationPath.dirPath() + "src/shaders/3D.vs.glsl",
                      applicationPath.dirPath() + "src/shaders/directionallight.fs.glsl",
-                     camera.cameraPosition(), bboxVector);
+                     camera.cameraPosition(), bboxVector, applicationPath);
 
     fr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z), 0);
     fr.setSpotLightDirection(camera.cameraPosition(), 0);

@@ -40,13 +40,21 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom, const glm::vec3 &cameraPos,
 
     for (int i = 0; i < FirstRoom::MAX_SPOT_LIGHT; i++)
     {
+        glUniform1i(uv.uHasTexture, 0);
+        glUniform1i(uv.uCurrentSpotLightIdx, i);
         glUniform3f(uv.uLightIntensity, spots[i].intensity.x, spots[i].intensity.y, spots[i].intensity.z);
         renderObject(spots[i]._spot, uv);
     }
 
     float twistAmount = 0.0005f;
 
+    glUniform1i(uv.uHasTexture, 1);
+    glUniform1i(uv.uUsePerlinNoise, 1);
+
     renderObject(tCube._cube, uv);
+
+    glUniform1i(uv.uUsePerlinNoise, 0);
+
     renderObject(cy, uv);
 
     glBindVertexArray(0);
@@ -70,7 +78,6 @@ void Renderer::renderSecondRoom(FirstRoom &sr, const glm::vec3 &cameraPos, const
     auto &prog = box.getProgram();
 
     auto &sortedGlass = sr.getSortedGlass();
-    auto &cy = sr.getCylinder();
     Quad *glass = sr.getGlassData();
 
     // Sort Glass using distance of an object from the viewer's perspective
@@ -101,7 +108,6 @@ void Renderer::renderSecondRoom(FirstRoom &sr, const glm::vec3 &cameraPos, const
     }
 
     glBindTexture(GL_TEXTURE_2D, 0);
-    cy.applyVortexEffect(0.003f);
 }
 
 void Renderer::renderSkybox(Skybox &skybox)

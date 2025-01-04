@@ -27,6 +27,9 @@ public:
         GLint uSpotlightExponent;
         GLint uSpotLight;
         GLint uActiveLight;
+        GLint uHasTexture;
+        GLint uCurrentSpotLightIdx;
+        GLint uUsePerlinNoise;
     };
 
     const Geometry &getBounds() const
