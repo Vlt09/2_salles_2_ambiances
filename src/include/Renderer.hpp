@@ -54,5 +54,7 @@ public:
 
     void setSpotLightsUniform(FirstRoom &firstRoom);
 
+    void setLightUniforms(FirstRoom::SecondRoomComposent &secondRoom);
+
     void renderObject(const Geometry &geometry, const Room::UniformVariable &uniformVar);
 };

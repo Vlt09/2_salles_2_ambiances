@@ -34,13 +34,17 @@ uniform PointLight uPointLights[1];
 uniform vec3 uAmbientLight;
 uniform float uSpecularPower;
 
+uniform vec3 uCameraPos;
+
+uniform bool uIsGlass;
+
 out vec4 fFragColor;
 
 
-vec4 calcLightColour(vec3 light_colour, float light_intensity, vec3 position, vec3 to_light_dir, vec3 normal)
+vec4 calcLightColour(vec3 light_color, float light_intensity, vec3 position, vec3 to_light_dir, vec3 normal)
 {
-	vec4 diffuseColour = vec4(0, 0, 0, 0);
-	vec4 specColour = vec4(0, 0, 0, 0);
+	vec4 diffuseColor = vec4(0, 0, 0, 0);
+	vec4 specColor = vec4(0, 0, 0, 0);
 
 	// Diffuse Light
 	float diffuseFactor = max(dot(normal, to_light_dir), 0.0);
@@ -55,7 +59,7 @@ vec4 calcLightColour(vec3 light_colour, float light_intensity, vec3 position, ve
 	else
 		diffuseFactor = 0.4;
 
-	diffuseColour = vec4(light_colour, 1.0) * light_intensity * diffuseFactor;
+	diffuseColor = vec4(light_color, 1.0) * light_intensity * diffuseFactor;
 
 	// Specular Light
 	vec3 camera_direction = normalize(-position);
@@ -63,9 +67,9 @@ vec4 calcLightColour(vec3 light_colour, float light_intensity, vec3 position, ve
 	vec3 reflected_light = normalize(reflect(from_light_dir , normal));
 	float specularFactor = max( dot(camera_direction, reflected_light), 0.0);
 	specularFactor = pow(specularFactor, uSpecularPower);
-	specColour = light_intensity  * specularFactor * uReflectance * vec4(light_colour, 1.0);
+	specColor = light_intensity  * specularFactor * uReflectance * vec4(light_color, 1.0);
 
-	return (diffuseColour + specColour);
+	return (diffuseColor + specColor);
 }
 
 vec4 dirLightCellShading(DirectionalLight light, vec3 position, vec3 normal){
@@ -84,9 +88,6 @@ vec4 pointLightCellShading(PointLight pointLight, vec3 position, vec3 normal) {
 	return light_colour / attenuationInv;
 }
 
-
-
-
 void main() {
     vec4 tex = texture(uTexture, vVertexTex);
     vec3 normalColor = normalize(vVertexNormal);
@@ -96,12 +97,18 @@ void main() {
 	vec4 color;
 
 	vec4 totalLight = vec4(uAmbientLight, 1.0);
-	totalLight += dirLightCellShading(uDirectionalLights[0], vVertexPos, vVertexNormal);
+	totalLight += dirLightCellShading(uDirectionalLights[0], uCameraPos, vVertexNormal);
 	totalLight += pointLightCellShading(uPointLights[0], vVertexPos, vVertexNormal); 
 
+    // fFragColor =  totalLight;
+
 	// Add white outlines
-	if (dot(vVertexNormal, -vVertexPos) <= 0.2)
-		fFragColor = vec4(1,1,1,1);
-	else
-		fFragColor = baseColour * totalLight; 
+	// if (dot(vVertexNormal, normalize(uCameraPos)) <= 0.2) //  Threshold
+	// 	fFragColor = vec4(1,1,1,1);
+	// else
+    fFragColor = tex + (baseColour * totalLight); 
+
+    if (uIsGlass){
+        fFragColor = tex; 
+    }
 }

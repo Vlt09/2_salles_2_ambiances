@@ -179,18 +179,18 @@ int main(int argc, char *argv[])
     FirstRoom fr, sr;
 
     /* Init first Room*/
-    // fr.initFirstRoom(applicationPath.dirPath() + "src/shaders/3D.vs.glsl",
-    //                  applicationPath.dirPath() + "src/shaders/directionallight.fs.glsl",
-    //                  camera.cameraPosition(), bboxVector, applicationPath);
+    fr.initFirstRoom(applicationPath.dirPath() + "src/shaders/3D.vs.glsl",
+                     applicationPath.dirPath() + "src/shaders/directionallight.fs.glsl",
+                     camera.cameraPosition(), bboxVector, applicationPath);
 
-    // fr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z), 0);
-    // fr.setSpotLightDirection(camera.cameraPosition(), 0);
-    // fr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY + 5.f, camera.cameraPosition().z), 1);
+    fr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z), 0);
+    fr.setSpotLightDirection(camera.cameraPosition(), 0);
+    fr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY + 5.f, camera.cameraPosition().z), 1);
 
-    // fr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z - 5.f), 1);
-    // fr.setSpotLightDirection(glm::vec3(camera.cameraPosition().x, 0., camera.cameraPosition().z - 5.f), 1);
+    fr.translateSpotLight(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z - 5.f), 1);
+    fr.setSpotLightDirection(glm::vec3(camera.cameraPosition().x, 0., camera.cameraPosition().z - 5.f), 1);
 
-    // fr.setGlobalLightPos(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z));
+    fr.setGlobalLightPos(glm::vec3(camera.cameraPosition().x, firstRoom_light_posY, camera.cameraPosition().z));
 
     /* Init second Room */
     auto cPos = camera.cameraPosition();
@@ -211,7 +211,7 @@ int main(int argc, char *argv[])
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         renderer.renderSkybox(skybox);
-        // renderer.renderFirstRoom(fr, camera.cameraPosition(), border);
+        renderer.renderFirstRoom(fr, camera.cameraPosition(), border);
         renderer.renderSecondRoom(sr, camera.cameraPosition(), border);
 
         /* Swap front and back buffers */

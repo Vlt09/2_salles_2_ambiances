@@ -29,9 +29,18 @@ public:
 
         Ring _ring;
         WeirdTube _tube;
+        Sphere _sphere;
+
+        glm::vec3 _ambientLight = glm::vec3(0.3f, 0.3f, 0.3f);
+        float _specularPower = 8.f;
+
+        // Material value
+        glm::vec3 _matColor = glm::vec3(0.2f, 0.5f, 0.5f);
+        float _reflectance = 1.f;
 
         SecondRoomComposent() : _ring(1.0f, 1.0f, 32, 32),
                                 _tube(1.0f, 7.0f, 16, 16),
+                                _sphere(1.0f, 32, 16),
                                 _direcLightLoc(MAX_DIR_LIGHT),
                                 _pointLightLoc(MAX_POINT_LIGHT)
         {
@@ -50,12 +59,12 @@ public:
             Utils::setPointLightUniformLocations(progID, _pointLightLoc.data(), MAX_POINT_LIGHT);
 
             _pointLight.emplace_back(Utils::PointLight(
-                Utils::randomVec3(0.3f, 0.8f),
+                glm::vec3(1.f, 1.f, 1.f),
                 pointLightPos,
-                Utils::randomFloat(0.5f, 1.5f),
-                Utils::randomFloat(0.2f, 0.9f),
-                Utils::randomFloat(0.2f, 0.9f),
-                Utils::randomFloat(0.2f, 0.9f)));
+                1.f,
+                0.f,
+                0.f,
+                1.f));
 
             _dirLight.emplace_back(Utils::DirectionalLight(
                 glm::vec3(1),
@@ -242,6 +251,11 @@ public:
         return &_spotLightUniformVarLoc[0];
     }
 
+    SecondRoomComposent &getSecondRoom()
+    {
+        return _secondRoom;
+    }
+
     void setSpotLightUniformLocations()
     {
         auto programID = _box.getProgramId();
@@ -346,7 +360,9 @@ public:
         _box.constructRoom(cameraPos, -1, _boxMaterial, bboxVector);
 
         auto id = _box.getProgramId();
+        auto &uv = _box.getUniformVariable();
         std::cout << "prog id = " << id << std::endl;
+
         _secondRoom.initComponent(id, glm::vec3(0, -1, 0), glm::vec3(cameraPos.x, cameraPos.y + 5.f, cameraPos.z));
 
         // Init glasses
@@ -367,8 +383,9 @@ public:
         }
 
         // Place other object
-        _ring.translateModel(glm::vec3(cameraPos.x, cameraPos.y + 1.5f, cameraPos.z - 10.f));
-        _tube.translateModel(glm::vec3(cameraPos.x - 5.f, cameraPos.y + 3.f, cameraPos.z));
+        _secondRoom._ring.translateModel(glm::vec3(cameraPos.x, cameraPos.y + 1.5f, cameraPos.z - 10.f));
+        _secondRoom._tube.translateModel(glm::vec3(cameraPos.x - 5.f, cameraPos.y + 3.f, cameraPos.z));
+        _secondRoom._sphere.translateModel(glm::vec3(cameraPos.x, cameraPos.y + 3.f, cameraPos.z));
     }
 
     void printDebugBuff()

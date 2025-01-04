@@ -76,6 +76,7 @@ void Renderer::renderSecondRoom(FirstRoom &sr, const glm::vec3 &cameraPos, const
     auto &uv = sr.getBoxUniformVariable();
     auto size = sr.glassSize();
     auto &prog = box.getProgram();
+    auto src = sr.getSecondRoom();
 
     auto &sortedGlass = sr.getSortedGlass();
     Quad *glass = sr.getGlassData();
@@ -91,21 +92,33 @@ void Renderer::renderSecondRoom(FirstRoom &sr, const glm::vec3 &cameraPos, const
     if (cameraPos.x <= border.x)
     {
         prog.use();
+
+        glUniform3fv(uv.uCamerapos, 1, glm::value_ptr(cameraPos));
+        glUniform3fv(uv.uColor, 1, glm::value_ptr(src._matColor));
+        std::cout << "ambient light = " << src._ambientLight << std::endl;
+        glUniform3fv(uv.uAmbientLight, 1, glm::value_ptr(src._ambientLight));
+        glUniform1f(uv.uReflectance, src._reflectance);
+        glUniform1f(uv.uSpecularPower, src._specularPower);
+
+        setLightUniforms(src);
     }
 
     glUniform1i(uv.uTexLoc, 0);
 
     renderObject(box.getBounds(), uv);
-    renderObject(sr.getTube(), uv);
-    renderObject(sr.getRing(), uv);
+    renderObject(src._tube, uv);
+    renderObject(src._ring, uv);
+    renderObject(src._sphere, uv);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    glUniform1i(uv.uIsGlass, 1);
     for (std::map<float, Quad *>::reverse_iterator it = sortedGlass.rbegin(); it != sortedGlass.rend(); ++it)
     {
         renderObject(*it->second, uv);
     }
+    glUniform1i(uv.uIsGlass, 0);
 
     glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -252,4 +265,50 @@ void Renderer::renderObject(const Geometry &geometry, const Room::UniformVariabl
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void Renderer::setLightUniforms(FirstRoom::SecondRoomComposent &secondRoom)
+{
+    auto dirLights = secondRoom._dirLight;
+    auto pointLights = secondRoom._pointLight;
+    auto dirLightVarLoc = secondRoom._direcLightLoc;
+    auto pointLightVarLoc = secondRoom._pointLightLoc;
+
+    for (int i = 0; i < FirstRoom::SecondRoomComposent::MAX_DIR_LIGHT; i++)
+    {
+        glUniform3fv(dirLightVarLoc[i].color, 1, glm::value_ptr(dirLights[i]._color));
+        glUniform3fv(dirLightVarLoc[i].direction, 1, glm::value_ptr(dirLights[i]._direction));
+        glUniform1f(dirLightVarLoc[i].intensity, dirLights[i]._intensity);
+
+        if (dirLightVarLoc[i].color == -1)
+            std::cerr << "Error: Could not find Directional Light color" << std::endl;
+        if (dirLightVarLoc[i].direction == -1)
+            std::cerr << "Error: Could not find Directional Light direction" << std::endl;
+        if (dirLightVarLoc[i].intensity == -1)
+            std::cerr << "Error: Could not find Directional Light intensity" << std::endl;
+    }
+
+    for (int i = 0; i < FirstRoom::SecondRoomComposent::MAX_POINT_LIGHT; i++)
+    {
+        glUniform3fv(pointLightVarLoc[i].color, 1, glm::value_ptr(pointLights[i]._color));
+        glUniform3fv(pointLightVarLoc[i].position, 1, glm::value_ptr(pointLights[i]._position));
+        glUniform1f(pointLightVarLoc[i].intensity, pointLights[i]._intensity);
+
+        glUniform1f(pointLightVarLoc[i].constant, pointLights[i]._constant);
+        glUniform1f(pointLightVarLoc[i].linear, pointLights[i]._linear);
+        glUniform1f(pointLightVarLoc[i].exponent, pointLights[i]._exponent);
+
+        if (pointLightVarLoc[i].color == -1)
+            std::cerr << "Error: Could not find Point Light color" << std::endl;
+        if (pointLightVarLoc[i].position == -1)
+            std::cerr << "Error: Could not find Point Light position" << std::endl;
+        if (pointLightVarLoc[i].intensity == -1)
+            std::cerr << "Error: Could not find Point Light intensity" << std::endl;
+        if (pointLightVarLoc[i].constant == -1)
+            std::cerr << "Error: Could not find Point Light constant" << std::endl;
+        if (pointLightVarLoc[i].linear == -1)
+            std::cerr << "Error: Could not find Point Light linear" << std::endl;
+        if (pointLightVarLoc[i].exponent == -1)
+            std::cerr << "Error: Could not find Point Light exponent" << std::endl;
+    }
 }

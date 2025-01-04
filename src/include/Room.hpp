@@ -31,9 +31,11 @@ public:
         GLint uCurrentSpotLightIdx;
         GLint uUsePerlinNoise;
         GLint uSpecularPower;
-        GLint uAmbiantLight;
+        GLint uAmbientLight;
         GLint uColor;
         GLint uReflectance;
+        GLint uCamerapos;
+        GLint uIsGlass;
     };
 
     const Geometry &getBounds() const
