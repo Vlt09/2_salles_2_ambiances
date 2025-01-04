@@ -19,7 +19,7 @@ public:
     struct SecondRoomComposent
     {
         static const unsigned int MAX_DIR_LIGHT = 1;
-        static const unsigned int MAX_POINT_LIGHT = 1;
+        static const unsigned int MAX_POINT_LIGHT = 50;
 
         std::vector<Utils::DirectionalLightUniformVarLoc> _direcLightLoc;
         std::vector<Utils::DirectionalLight> _dirLight;
@@ -29,7 +29,7 @@ public:
 
         Ring _ring;
         WeirdTube _tube;
-        Sphere _sphere;
+        Sphere _disco;
 
         glm::vec3 _ambientLight = glm::vec3(0.3f, 0.3f, 0.3f);
         float _specularPower = 8.f;
@@ -40,7 +40,7 @@ public:
 
         SecondRoomComposent() : _ring(1.0f, 1.0f, 32, 32),
                                 _tube(1.0f, 7.0f, 16, 16),
-                                _sphere(1.0f, 32, 16),
+                                _disco(1.0f, 32, 16),
                                 _direcLightLoc(MAX_DIR_LIGHT),
                                 _pointLightLoc(MAX_POINT_LIGHT)
         {
@@ -57,18 +57,46 @@ public:
         {
             Utils::setDirectionalLightUniformLocations(progID, _direcLightLoc.data(), MAX_DIR_LIGHT);
             Utils::setPointLightUniformLocations(progID, _pointLightLoc.data(), MAX_POINT_LIGHT);
-
-            _pointLight.emplace_back(Utils::PointLight(
-                glm::vec3(1.f, 1.f, 1.f),
-                pointLightPos,
-                1.f,
-                0.f,
-                0.f,
-                1.f));
+            auto &transform = _disco.getMeshBuffer()[0]._transform;
 
             _dirLight.emplace_back(Utils::DirectionalLight(
                 glm::vec3(1),
                 dirLightDir));
+
+            for (size_t i = 0; i < MAX_POINT_LIGHT; i++)
+            {
+                glm::vec3 position = _disco.getPointOnSphere(i, MAX_POINT_LIGHT);
+                auto posWS = glm::vec3(transform * glm::vec4(position, 1.0));
+
+                _pointLight.emplace_back(Utils::PointLight(
+                    Utils::randomVec3(0.2, 0.5),
+                    posWS,
+                    1.f,
+                    0.f,
+                    0.f,
+                    0.5f));
+            }
+        }
+
+        void rotateDiscoAndLight()
+        {
+            auto time = glimac::getTime();
+            float speed = 2.0f;
+
+            float angle = glm::radians(speed * time);
+            _disco.rotateMesh(angle, glm::vec3(0., 1., 0.), 0);
+
+            auto transform = _disco.getMeshBuffer()[0]._transform;
+            for (size_t i = 0; i < MAX_POINT_LIGHT; i++)
+            {
+                _pointLight[i]._position = glm::vec3(transform * glm::vec4(_pointLight[i]._position, 1.0));
+
+                _pointLight[i]._intensity = 0.5f + 0.5f * sin(time + glm::linearRand(0.0f, 0.8f));
+                _pointLight[i]._color = glm::vec3(
+                    0.5f + 0.5f * sin(time + glm::length(_pointLight[i]._position) * 0.1f),
+                    0.5f + 0.5f * cos(time + _pointLight[i]._position.x * 0.1f),
+                    0.5f + 0.5f * sin(time + _pointLight[i]._position.y * 0.1f));
+            }
         }
     };
 
@@ -361,7 +389,11 @@ public:
 
         auto id = _box.getProgramId();
         auto &uv = _box.getUniformVariable();
-        std::cout << "prog id = " << id << std::endl;
+
+        // Place object
+        _secondRoom._ring.translateModel(glm::vec3(cameraPos.x, cameraPos.y + 1.5f, cameraPos.z - 10.f));
+        _secondRoom._tube.translateModel(glm::vec3(cameraPos.x - 5.f, cameraPos.y + 3.f, cameraPos.z));
+        _secondRoom._disco.translateModel(glm::vec3(cameraPos.x, cameraPos.y + 3.f, cameraPos.z));
 
         _secondRoom.initComponent(id, glm::vec3(0, -1, 0), glm::vec3(cameraPos.x, cameraPos.y + 5.f, cameraPos.z));
 
@@ -381,11 +413,6 @@ public:
             float distance = glm::length(cameraPos - glassPos);
             _sortedGlass[distance] = &_glass[i];
         }
-
-        // Place other object
-        _secondRoom._ring.translateModel(glm::vec3(cameraPos.x, cameraPos.y + 1.5f, cameraPos.z - 10.f));
-        _secondRoom._tube.translateModel(glm::vec3(cameraPos.x - 5.f, cameraPos.y + 3.f, cameraPos.z));
-        _secondRoom._sphere.translateModel(glm::vec3(cameraPos.x, cameraPos.y + 3.f, cameraPos.z));
     }
 
     void printDebugBuff()

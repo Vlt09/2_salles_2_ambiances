@@ -46,7 +46,7 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom, const glm::vec3 &cameraPos,
         renderObject(spots[i]._spot, uv);
     }
 
-    float twistAmount = 0.0005f;
+    float twistAmount = 0.005f;
 
     glUniform1i(uv.uHasTexture, 1);
     glUniform1i(uv.uUsePerlinNoise, 1);
@@ -95,12 +95,12 @@ void Renderer::renderSecondRoom(FirstRoom &sr, const glm::vec3 &cameraPos, const
 
         glUniform3fv(uv.uCamerapos, 1, glm::value_ptr(glm::vec3(glm::mat3(_viewMatrix) * cameraPos)));
         glUniform3fv(uv.uColor, 1, glm::value_ptr(src._matColor));
-        std::cout << "ambient light = " << src._ambientLight << std::endl;
         glUniform3fv(uv.uAmbientLight, 1, glm::value_ptr(src._ambientLight));
         glUniform1f(uv.uReflectance, src._reflectance);
         glUniform1f(uv.uSpecularPower, src._specularPower);
 
         setLightUniforms(src);
+        // src.rotateDiscoAndLight();
     }
 
     glUniform1i(uv.uTexLoc, 0);
@@ -108,7 +108,7 @@ void Renderer::renderSecondRoom(FirstRoom &sr, const glm::vec3 &cameraPos, const
     renderObject(box.getBounds(), uv);
     renderObject(src._tube, uv);
     renderObject(src._ring, uv);
-    renderObject(src._sphere, uv);
+    renderObject(src._disco, uv);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

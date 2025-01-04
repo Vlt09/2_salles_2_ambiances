@@ -171,7 +171,7 @@ namespace Utils
 
     inline void setDirectionalLightUniformLocations(GLuint programID, DirectionalLightUniformVarLoc *directionalLightUniformVarLoc, int maxDirectionalLights)
     {
-        for (int i = 0; i < maxDirectionalLights; ++i)
+        for (int i = 0; i < maxDirectionalLights; i++)
         {
             std::cout << "Setting DirectionalLight uniform locations for light " << i << std::endl;
             std::string baseName = "uDirectionalLights[" + std::to_string(i) + "]";
@@ -191,7 +191,7 @@ namespace Utils
 
     inline void setPointLightUniformLocations(GLuint programID, PointLightUniformVarLoc *pointLightUniformVarLoc, int maxPointLights)
     {
-        for (int i = 0; i < maxPointLights; ++i)
+        for (int i = 0; i < maxPointLights; i++)
         {
             std::cout << "Setting PointLight uniform locations for light " << i << std::endl;
             std::string baseName = "uPointLights[" + std::to_string(i) + "]";

@@ -122,14 +122,17 @@ public:
     }
 
     // Constructeur: alloue le tableau de données et construit les attributs des vertex
-    Sphere(GLfloat radius, GLsizei discLat, GLsizei discLong) : m_nVertexCount(0)
+    Sphere(GLfloat radius, GLsizei discLat, GLsizei discLong) : m_nVertexCount(0), _discLat(discLat), _discLong(discLong), _radius(radius)
     {
         build(radius, discLat, discLong); // Construction (voir le .cpp)
         initMesh();
         // translateModel(0.f, 0.f, -5.f);
     }
 
-    Sphere(GLfloat radius, GLsizei discLat, GLsizei discLong, Geometry::Material material) : m_nVertexCount(0)
+    Sphere(GLfloat radius, GLsizei discLat, GLsizei discLong, Geometry::Material material) : m_nVertexCount(0),
+                                                                                             _discLat(discLat),
+                                                                                             _discLong(discLong),
+                                                                                             _radius(radius)
     {
         m_Materials.push_back(material);
         build(radius, discLat, discLong); // Construction (voir le .cpp)
@@ -142,6 +145,43 @@ public:
         m_Materials.push_back(sphereMat);
         build(radius, discLat, discLong);
         initMesh();
+        _discLat = discLat;
+        _discLong = discLong;
+        _radius = radius;
+    }
+
+    /**
+     * @brief Computes the position of a point on the surface of a sphere, uniformly distributed using the Fibonacci spiral method.
+     *
+     * This method ensures an even distribution of points on the sphere's surface, avoiding clustering at the poles.
+     *
+     * @param index The index of the current point (must be in the range [0, total - 1]).
+     * @param total The total number of points to distribute on the sphere.
+     *
+     * @return glm::vec3 The 3D position of the point on the sphere's surface.
+     *
+     * @details
+     * - The Fibonacci spiral uses a "golden angle" to distribute points:
+     *   - `phi = π * (3 - sqrt(5))`
+     * - The `y` coordinate is spaced evenly between -1 (South Pole) and 1 (North Pole), ensuring uniform vertical distribution.
+     * - The horizontal radius `r` is calculated as:
+     *   - `r = sqrt(1 - y^2)`
+     * - The horizontal angle `theta` determines the spiral rotation:
+     *   - `theta = phi * index`
+     * - The final position is computed in Cartesian coordinates as:
+     *   - `x = r * cos(theta)`
+     *   - `z = r * sin(theta)`
+     */
+    glm::vec3 getPointOnSphere(int index, int total)
+    {
+        float y = 1.f - (index / float(total - 1)) * 2.f; // Uniform y distribution
+        float r = sqrt(1.f - y * y);
+        float theta = _phi * index;
+
+        float x = r * cos(theta);
+        float z = r * sin(theta);
+
+        return glm::vec3(x, y, z) * _radius; // Scale by radius
     }
 
     // Renvoit le pointeur vers les données
@@ -157,5 +197,7 @@ public:
     }
 
 private:
-    GLsizei m_nVertexCount; // Nombre de sommets
+    GLsizei m_nVertexCount, _discLat, _discLong; // Nombre de sommets
+    GLfloat _radius;
+    float _phi = glm::pi<float>() * (3.f - sqrt(5.f)); // Golden angle
 };
