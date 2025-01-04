@@ -2,6 +2,8 @@
 
 in vec2 vVertexTex;
 in vec3 vVertexNormal;
+in vec3 vVertexPos; // World space
+
 
 uniform sampler2D uTexture;
 
@@ -23,35 +25,64 @@ struct PointLight
 	float exponent;
 };
 
+// Material for cell shading
+uniform	vec3 uColor;
+uniform	float uReflectance;
+
 uniform DirectionalLight uDirectionalLights[1];
 uniform PointLight uPointLights[1];
-
+uniform vec3 uAmbientLight;
+uniform float uSpecularPower;
 
 out vec4 fFragColor;
 
-// vec3 pointLightblinnPhong(vec3 normal, SpotLight spotLight) {
-//     vec3 vFrag_vs = spotLight._position;
 
-//     vec3 N = normalize(normal);
-//     vec3 L = normalize(vFrag_vs - vVertexPos);
-//     vec3 V = normalize(-vFrag_vs);
+vec4 calcLightColour(vec3 light_colour, float light_intensity, vec3 position, vec3 to_light_dir, vec3 normal)
+{
+	vec4 diffuseColour = vec4(0, 0, 0, 0);
+	vec4 specColour = vec4(0, 0, 0, 0);
 
-//     vec3 H = normalize(L + V);
+	// Diffuse Light
+	float diffuseFactor = max(dot(normal, to_light_dir), 0.0);
 
-//     float dist = distance(vFrag_vs, vVertexPos);
-//     vec3 attenuation = uLightIntensity / (dist * dist);
-    
-//     float diff = max(dot(N, L), 0.0);
-//     vec3 diffuse = spotLight.m_Kd * diff * uLightIntensity;
+	// Threshold diffuse factor for cartoon effect
+	if (diffuseFactor > 0.85)
+		diffuseFactor = 1.6;
+	else if (diffuseFactor > 0.5)
+		diffuseFactor = 1.2;
+	else if (diffuseFactor > 0.25)
+		diffuseFactor = 0.9;
+	else
+		diffuseFactor = 0.4;
 
-//     float spec = 0.0;
-//     if (diff > 0.0) {
-//         spec = pow(max(dot(N, H), 0.0), uShininess);
-//     }
-//     vec3 specular = spotLight.m_Ks * spec * uLightIntensity;
+	diffuseColour = vec4(light_colour, 1.0) * light_intensity * diffuseFactor;
 
-//     return diffuse + specular;
-// }
+	// Specular Light
+	vec3 camera_direction = normalize(-position);
+	vec3 from_light_dir = -to_light_dir;
+	vec3 reflected_light = normalize(reflect(from_light_dir , normal));
+	float specularFactor = max( dot(camera_direction, reflected_light), 0.0);
+	specularFactor = pow(specularFactor, uSpecularPower);
+	specColour = light_intensity  * specularFactor * uReflectance * vec4(light_colour, 1.0);
+
+	return (diffuseColour + specColour);
+}
+
+vec4 dirLightCellShading(DirectionalLight light, vec3 position, vec3 normal){
+    return calcLightColour(light.color, light.intensity, position, normalize(light.direction), normal);
+}
+
+vec4 pointLightCellShading(PointLight pointLight, vec3 position, vec3 normal) {
+	vec3 light_direction = pointLight.position - position;
+	vec3 to_light_dir  = normalize(light_direction);
+	vec4 light_colour = calcLightColour(pointLight.color, pointLight.intensity, position, to_light_dir, normal);
+
+	// Apply Attenuation
+	float distance = length(light_direction);
+	float attenuationInv = pointLight.constant + pointLight.linear * distance +
+		pointLight.exponent * distance * distance;
+	return light_colour / attenuationInv;
+}
 
 
 
@@ -60,5 +91,17 @@ void main() {
     vec4 tex = texture(uTexture, vVertexTex);
     vec3 normalColor = normalize(vVertexNormal);
 
-    fFragColor = tex;
+    // fFragColor = tex;
+	vec4 baseColour = vec4(uColor, 1);
+	vec4 color;
+
+	vec4 totalLight = vec4(uAmbientLight, 1.0);
+	totalLight += dirLightCellShading(uDirectionalLights[0], vVertexPos, vVertexNormal);
+	totalLight += pointLightCellShading(uPointLights[0], vVertexPos, vVertexNormal); 
+
+	// Add white outlines
+	if (dot(vVertexNormal, -vVertexPos) <= 0.2)
+		fFragColor = vec4(1,1,1,1);
+	else
+		fFragColor = baseColour * totalLight; 
 }

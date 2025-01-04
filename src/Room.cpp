@@ -23,6 +23,12 @@ void Room::initProgram(const glimac::FilePath &vsFile, const glimac::FilePath &f
     uniformVariable.uHasTexture = glGetUniformLocation(_mProgram.getGLId(), "uHasTexture");
     uniformVariable.uCurrentSpotLightIdx = glGetUniformLocation(_mProgram.getGLId(), "uCurrentSpotLightIdx");
     uniformVariable.uUsePerlinNoise = glGetUniformLocation(_mProgram.getGLId(), "uUsePerlinNoise");
+
+    // For the second room
+    uniformVariable.uColor = glGetUniformLocation(_mProgram.getGLId(), "uColor");
+    uniformVariable.uReflectance = glGetUniformLocation(_mProgram.getGLId(), "uReflectance");
+    uniformVariable.uSpecularPower = glGetUniformLocation(_mProgram.getGLId(), "uSpecularPower");
+    uniformVariable.uAmbiantLight = glGetUniformLocation(_mProgram.getGLId(), "uAmbiantLight");
 }
 
 void Room::addGroundAndFront(const glm::vec3 &cameraPos, std::vector<glimac::BBox3f> &bboxVector)

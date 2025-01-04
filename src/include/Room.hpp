@@ -30,6 +30,10 @@ public:
         GLint uHasTexture;
         GLint uCurrentSpotLightIdx;
         GLint uUsePerlinNoise;
+        GLint uSpecularPower;
+        GLint uAmbiantLight;
+        GLint uColor;
+        GLint uReflectance;
     };
 
     const Geometry &getBounds() const
