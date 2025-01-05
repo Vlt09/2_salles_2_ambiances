@@ -332,3 +332,43 @@ glimac::BBox3f Geometry::bBoxFromMesh(size_t begin, size_t size, const glm::mat4
 
     return glimac::BBox3f(min, max);
 }
+
+void Geometry::clearBuffers()
+{
+    if (_vbo != static_cast<GLuint>(-1))
+    {
+        glDeleteBuffers(1, &_vbo);
+        _vbo = -1;
+    }
+
+    if (_ibo != static_cast<GLuint>(-1))
+    {
+        glDeleteBuffers(1, &_ibo);
+        _ibo = -1;
+    }
+
+    if (_tex != static_cast<GLuint>(-1))
+    {
+        glDeleteTextures(1, &_tex);
+        _tex = -1;
+    }
+
+    for (auto &mesh : m_MeshBuffer)
+    {
+        if (mesh.vao != 0)
+        {
+            glDeleteVertexArrays(1, &mesh.vao);
+            mesh.vao = 0;
+        }
+        if (mesh.vbo != 0)
+        {
+            glDeleteBuffers(1, &mesh.vbo);
+            mesh.vbo = 0;
+        }
+    }
+
+    m_VertexBuffer.clear();
+    m_IndexBuffer.clear();
+    m_MeshBuffer.clear();
+    m_Materials.clear();
+}

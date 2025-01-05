@@ -106,8 +106,10 @@ public:
     {
         glimac::BBox3f tempBBox = _bbox;
 
-        tempBBox.lower += (nextPos - m_Position);
-        tempBBox.upper += (nextPos - m_Position);
+        tempBBox.lower = (nextPos - m_Position);
+        tempBBox.upper = (nextPos + m_Position);
+
+        std::cout << "tempBBox " << tempBBox << " box = " << bbox << std::endl;
 
         return glimac::conjoint(tempBBox, bbox);
     }

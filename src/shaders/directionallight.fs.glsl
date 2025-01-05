@@ -183,8 +183,6 @@ void main()
 
     vec3 lighting = blinnPhong(uKd, normalColor);
 
-    // fFragColor = lighting; 
-
     vec3 attenuation = vec3(0, 0, 0);
     if (uActiveLight == 1){
         for (int i = 0; i < 15 ;i++) {
@@ -193,7 +191,7 @@ void main()
     }
 
     if (uHasTexture){
-        fFragColor = tex + lighting + attenuation;
+        fFragColor = tex + (lighting + attenuation);
     }
     else{
         fFragColor = uSpotLights[uCurrentSpotLightIdx].m_Ka + lighting + attenuation;

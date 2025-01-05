@@ -1,8 +1,8 @@
 #pragma once
 #include "Geometry.hpp"
 #include "Scene.hpp"
+#include "Box.hpp"
 #include "Room.hpp"
-#include "FirstRoom.hpp"
 #include "Skybox.hpp"
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
@@ -25,19 +25,19 @@ public:
 
     Renderer(glm::highp_mat4 &projMatrix, glm::mat4 &viewMatrix);
 
-    void renderFirstRoom(FirstRoom &firstRoom, const glm::vec3 &cameraPos, const glm::vec3 &border);
+    void renderFirstRoom(Room &firstRoom, const glm::vec3 &cameraPos, const glm::vec3 &border);
 
-    void renderSecondRoom(FirstRoom &sr, const glm::vec3 &cameraPos, const glm::vec3 &border);
+    void renderSecondRoom(Room &sr, const glm::vec3 &cameraPos, const glm::vec3 &border);
 
     void renderSkybox(Skybox &skybox);
 
-    void setMaterialAndLightingUniforms(const Room::UniformVariable &uniformVariable,
+    void setMaterialAndLightingUniforms(const Box::UniformVariable &uniformVariable,
                                         const glm::vec3 &light_dir_vs,
                                         const glm::vec3 &light_pos_vs,
                                         const glm::vec3 &lightIntensity,
                                         const Geometry::Material &mat);
 
-    void setMatricesToShader(const Room::UniformVariable &uniformVariable,
+    void setMatricesToShader(const Box::UniformVariable &uniformVariable,
                              const glm::mat4 &projectionMatrix,
                              const glm::mat4 &mvMatrix,
                              const glm::mat4 &normalMatrix,
@@ -50,11 +50,11 @@ public:
         _viewMatrix = viewMatrix;
     }
 
-    void setSpotLightUniform(const Room::UniformVariable &uniformVariable, const glm::vec3 &spotLight, float spotlightCutoff, float spotlightExponent);
+    void setSpotLightUniform(const Box::UniformVariable &uniformVariable, const glm::vec3 &spotLight, float spotlightCutoff, float spotlightExponent);
 
-    void setSpotLightsUniform(FirstRoom &firstRoom);
+    void setSpotLightsUniform(Room &firstRoom);
 
-    void setLightUniforms(FirstRoom::SecondRoomComposent &secondRoom);
+    void setLightUniforms(Room::SecondRoomComposent &secondRoom);
 
-    void renderObject(const Geometry &geometry, const Room::UniformVariable &uniformVar);
+    void renderObject(const Geometry &geometry, const Box::UniformVariable &uniformVar);
 };

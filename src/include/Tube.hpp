@@ -1,6 +1,6 @@
 #pragma once
 #include "Geometry.hpp"
-#include "Room.hpp"
+#include "Box.hpp"
 
 class WeirdTube : public Geometry
 {

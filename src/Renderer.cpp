@@ -10,16 +10,14 @@ Renderer::Renderer(glm::mat4 &projMatrix, glm::mat4 &viewMatrix) : _projectionMa
 {
 }
 
-void Renderer::renderFirstRoom(FirstRoom &firstRoom, const glm::vec3 &cameraPos, const glm::vec3 &border)
+void Renderer::renderFirstRoom(Room &firstRoom, const glm::vec3 &cameraPos, const glm::vec3 &border)
 {
     auto &box = firstRoom.getBox();
     auto &uv = firstRoom.getBoxUniformVariable();
     auto spots = firstRoom.getSpotLightsData();
     auto &tCube = firstRoom.getTwistCube();
     auto &cy = firstRoom.getCylinder();
-
-    // glm::vec3 light_dir_world = glm::rotate(glm::mat4(1.f), glimac::getTime(), glm::vec3(0, 1, 0)) * glm::vec4(1, 1, 1, 0);
-    glm::vec3 light_dir_world = glm::normalize(glm::vec3(0.0f, -1.0f, 0.0f));
+    auto &tore = firstRoom.getTore();
 
     if (cameraPos.x >= border.x)
     {
@@ -38,7 +36,7 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom, const glm::vec3 &cameraPos,
     glEndTransformFeedback();
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    for (int i = 0; i < FirstRoom::MAX_SPOT_LIGHT; i++)
+    for (int i = 0; i < Room::MAX_SPOT_LIGHT; i++)
     {
         glUniform1i(uv.uHasTexture, 0);
         glUniform1i(uv.uCurrentSpotLightIdx, i);
@@ -56,6 +54,7 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom, const glm::vec3 &cameraPos,
     glUniform1i(uv.uUsePerlinNoise, 0);
 
     renderObject(cy, uv);
+    renderObject(tore, uv);
 
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -63,14 +62,14 @@ void Renderer::renderFirstRoom(FirstRoom &firstRoom, const glm::vec3 &cameraPos,
     tCube._cube.applyTwist(twistAmount);
 
     // firstRoom.printDebugBuff();
-    for (int i = 0; i < FirstRoom::MAX_SPOT_LIGHT; i++)
+    for (int i = 0; i < Room::MAX_SPOT_LIGHT; i++)
     {
         firstRoom.moveSpot(i);
     }
     glUniform1i(uv.uActiveLight, 0); // Desac spot light for other room
 }
 
-void Renderer::renderSecondRoom(FirstRoom &sr, const glm::vec3 &cameraPos, const glm::vec3 &border)
+void Renderer::renderSecondRoom(Room &sr, const glm::vec3 &cameraPos, const glm::vec3 &border)
 {
     auto &box = sr.getBox();
     auto &uv = sr.getBoxUniformVariable();
@@ -142,7 +141,7 @@ void Renderer::renderSkybox(Skybox &skybox)
     glBindVertexArray(0);
 }
 
-void Renderer::setMatricesToShader(const Room::UniformVariable &uniformVariable,
+void Renderer::setMatricesToShader(const Box::UniformVariable &uniformVariable,
                                    const glm::mat4 &projectionMatrix,
                                    const glm::mat4 &mvMatrix,
                                    const glm::mat4 &normalMatrix,
@@ -154,7 +153,7 @@ void Renderer::setMatricesToShader(const Room::UniformVariable &uniformVariable,
     glUniformMatrix4fv(uniformVariable.uModelMatrix, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 }
 
-void Renderer::setMaterialAndLightingUniforms(const Room::UniformVariable &uniformVariable,
+void Renderer::setMaterialAndLightingUniforms(const Box::UniformVariable &uniformVariable,
                                               const glm::vec3 &light_dir_vs,
                                               const glm::vec3 &light_pos_vs,
                                               const glm::vec3 &lightIntensity,
@@ -170,14 +169,14 @@ void Renderer::setMaterialAndLightingUniforms(const Room::UniformVariable &unifo
     glUniform1f(uniformVariable.uShininess, mat.m_Shininess);
 }
 
-void Renderer::setSpotLightUniform(const Room::UniformVariable &uniformVariable, const glm::vec3 &spotLight, float spotlightCutoff, float spotlightExponent)
+void Renderer::setSpotLightUniform(const Box::UniformVariable &uniformVariable, const glm::vec3 &spotLight, float spotlightCutoff, float spotlightExponent)
 {
     glUniform3fv(uniformVariable.uSpotLight, 1, glm::value_ptr(spotLight));
     glUniform1f(uniformVariable.uSpotlightCutoff, cosf(glm::radians(spotlightCutoff)));
     glUniform1f(uniformVariable.uSpotlightExponent, spotlightExponent);
 }
 
-void Renderer::setSpotLightsUniform(FirstRoom &firstRoom)
+void Renderer::setSpotLightsUniform(Room &firstRoom)
 {
 
     auto spotLight = firstRoom.getSpotLightsData();
@@ -185,7 +184,7 @@ void Renderer::setSpotLightsUniform(FirstRoom &firstRoom)
     auto &spotMaterials = firstRoom.getSpotLightMaterials();
 
     // std::cout << "cut off = " << cosf(glm::radians(spotLight[1].cutoff)) << std::endl;
-    for (int i = 0; i < FirstRoom::MAX_SPOT_LIGHT; i++)
+    for (int i = 0; i < Room::MAX_SPOT_LIGHT; i++)
     {
         glUniform3fv(spotLightVarLoc[i].position, 1, glm::value_ptr(spotLight[i].position));
         glUniform3fv(spotLightVarLoc[i].direction, 1, glm::value_ptr(spotLight[i].direction));
@@ -200,7 +199,7 @@ void Renderer::setSpotLightsUniform(FirstRoom &firstRoom)
     }
 }
 
-void Renderer::renderObject(const Geometry &geometry, const Room::UniformVariable &uniformVar)
+void Renderer::renderObject(const Geometry &geometry, const Box::UniformVariable &uniformVar)
 {
     auto texId = geometry.getTex();
     auto &matList = geometry.getMaterialList();
@@ -226,37 +225,6 @@ void Renderer::renderObject(const Geometry &geometry, const Room::UniformVariabl
             glUniform3fv(uniformVar.uKd, 1, glm::value_ptr(material.m_Kd));
             glUniform3fv(uniformVar.uKs, 1, glm::value_ptr(material.m_Ks));
             glUniform1f(uniformVar.uShininess, material.m_Shininess);
-            // if (material.m_pKaMap)
-            // {
-            //     GLuint texKaLoc = glGetUniformLocation(program.getGLId(), "uMaterial.KaMap");
-            //     glUniform1i(texKaLoc, 0);
-            //     glActiveTexture(GL_TEXTURE0);
-            //     glBindTexture(GL_TEXTURE_2D, material.m_pKaMap->getTextureID());
-            // }
-
-            // if (material.m_pKdMap)
-            // {
-            //     GLuint texKdLoc = glGetUniformLocation(program.getGLId(), "uMaterial.KdMap");
-            //     glUniform1i(texKdLoc, 1); // Texture unit 1
-            //     glActiveTexture(GL_TEXTURE1);
-            //     glBindTexture(GL_TEXTURE_2D, material.m_pKdMap->getTextureID());
-            // }
-
-            // if (material.m_pKsMap)
-            // {
-            //     GLuint texKsLoc = glGetUniformLocation(program.getGLId(), "uMaterial.KsMap");
-            //     glUniform1i(texKsLoc, 2); // Texture unit 2
-            //     glActiveTexture(GL_TEXTURE2);
-            //     glBindTexture(GL_TEXTURE_2D, material.m_pKsMap->getTextureID());
-            // }
-
-            // if (material.m_pNormalMap)
-            // {
-            //     GLuint texNormalLoc = glGetUniformLocation(program.getGLId(), "uMaterial.NormalMap");
-            //     glUniform1i(texNormalLoc, 3); // Texture unit 3
-            //     glActiveTexture(GL_TEXTURE3);
-            //     glBindTexture(GL_TEXTURE_2D, material.m_pNormalMap->getTextureID());
-            // }
         }
         glDrawArrays(GL_TRIANGLES, mesh.m_nIndexOffset, mesh.m_nIndexCount);
     }
@@ -267,14 +235,14 @@ void Renderer::renderObject(const Geometry &geometry, const Room::UniformVariabl
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void Renderer::setLightUniforms(FirstRoom::SecondRoomComposent &secondRoom)
+void Renderer::setLightUniforms(Room::SecondRoomComposent &secondRoom)
 {
     auto dirLights = secondRoom._dirLight;
     auto pointLights = secondRoom._pointLight;
     auto dirLightVarLoc = secondRoom._direcLightLoc;
     auto pointLightVarLoc = secondRoom._pointLightLoc;
 
-    for (int i = 0; i < FirstRoom::SecondRoomComposent::MAX_DIR_LIGHT; i++)
+    for (int i = 0; i < Room::SecondRoomComposent::MAX_DIR_LIGHT; i++)
     {
         glUniform3fv(dirLightVarLoc[i].color, 1, glm::value_ptr(dirLights[i]._color));
         glUniform3fv(dirLightVarLoc[i].direction, 1, glm::value_ptr(dirLights[i]._direction));
@@ -288,7 +256,7 @@ void Renderer::setLightUniforms(FirstRoom::SecondRoomComposent &secondRoom)
             std::cerr << "Error: Could not find Directional Light intensity" << std::endl;
     }
 
-    for (int i = 0; i < FirstRoom::SecondRoomComposent::MAX_POINT_LIGHT; i++)
+    for (int i = 0; i < Room::SecondRoomComposent::MAX_POINT_LIGHT; i++)
     {
         glUniform3fv(pointLightVarLoc[i].color, 1, glm::value_ptr(pointLights[i]._color));
         glUniform3fv(pointLightVarLoc[i].position, 1, glm::value_ptr(pointLights[i]._position));

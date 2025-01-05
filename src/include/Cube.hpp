@@ -1,12 +1,12 @@
 #pragma once
 #include "Geometry.hpp"
 #include "Cone.hpp"
-#include "Room.hpp"
+#include "Box.hpp"
 
 class Cube : public Geometry
 {
 private:
-    Room::UniformVariable _uniformVariable;
+    Box::UniformVariable _uniformVariable;
 
     void build(GLfloat size)
     {
@@ -56,7 +56,7 @@ public:
         initMesh();
     }
 
-    void setUniformVariable(const Room::UniformVariable &uniformVariable)
+    void setUniformVariable(const Box::UniformVariable &uniformVariable)
     {
         _uniformVariable = uniformVariable;
     }

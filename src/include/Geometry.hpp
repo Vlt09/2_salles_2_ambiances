@@ -193,4 +193,6 @@ public:
     void rotateModel(float angle, const glm::vec3 &axis);
 
     void rotateMesh(float angle, const glm::vec3 &axis, unsigned int idX);
+
+    void clearBuffers();
 };
