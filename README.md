@@ -16,16 +16,26 @@ and [Mac](https://code.visualstudio.com/docs/cpp/config-clang-mac).
 Alternatively you can just create a *build* folder at the root of this project, open a terminal and run `cmake ..` ; 
 chances are it will detect what compiler you have installed and generate the appropriate Makefile / Visual Studio solution / Xcode project.
 
-## TPs
+## Run projet
 
-In each TP* folder, each 'ex*.cpp' file will create an executable. To create another TP folder for a new TP, just duplicate and
-rename the TP folder. In each TP folder, you can also create several executable as mentionned earlier. Just rename your .cpp file 
-with a name starting with the letters 'e' and 'x'
+Just build and run the project via CMake
+
 
 ## User inputs
 
-To learn more about the parameters you receive in the callbacks, read [glfw's documentation](https://www.glfw.org/docs/latest/input_guide.html).
+Use ZQSD to move in room. To rotate camera use A or E or the mouse.
+
 
 ## assets
 
 The *assets* folder will be copied to the folder where your executable is created. You can put all the assets that your project needs in there, like textures, shaders, 3D models *etc.*
+
+
+# Reference
+
+OpenGL usage
+https://learnopengl.com/
+https://igm.univ-mlv.fr/~biri/Enseignement/OpenGL/
+
+For cel shading
+https://www.lighthouse3d.com/tutorials/glsl-12-tutorial/toon-shader-version-ii/
