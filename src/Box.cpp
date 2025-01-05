@@ -82,12 +82,12 @@ void Box::addRightAndLeft(const glm::vec3 &cameraPos, float order, std::vector<g
     bboxVector.emplace_back(_bounds.addFromVertices(vertices, 0, transformMat));
 }
 
-void Box::constructRoom(const glm::vec3 &cameraPos, float order, Geometry::Material &roomMat, std::vector<glimac::BBox3f> &bboxVector)
+void Box::constructRoom(const glm::vec3 &cameraPos, float order, Geometry::Material &roomMat, std::vector<glimac::BBox3f> &bboxVector, const glimac::FilePath &appPath)
 {
     addGroundAndFront(cameraPos, bboxVector);
     addRightAndLeft(cameraPos, order, bboxVector);
     _bounds.initMeshData();
     _bounds.addMaterial(roomMat);
 
-    _bounds.initTexture("/home/valentin/m2/opengl/2_salles_2_ambiances/src/assets/minecraft_stonewall.png");
+    _bounds.initTexture(appPath.dirPath() + "../src/assets/minecraft_stonewall.png");
 }

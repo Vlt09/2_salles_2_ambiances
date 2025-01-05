@@ -71,7 +71,7 @@ void Room::initFirstRoom(const glimac::FilePath &vsFilePath, const glimac::FileP
     _box.initProgram(vsFilePath,
                      fsFilePath);
 
-    _box.constructRoom(cameraPos, 1, _boxMaterial, bboxVector);
+    _box.constructRoom(cameraPos, 1, _boxMaterial, bboxVector, applicationFilePath);
 
     initSpotLight();
 
@@ -103,7 +103,7 @@ void Room::initSecondRoom(const glimac::FilePath &vsFilePath, const glimac::File
     _box.initProgram(vsFilePath,
                      fsFilePath);
 
-    _box.constructRoom(cameraPos, -1, _boxMaterial, bboxVector);
+    _box.constructRoom(cameraPos, -1, _boxMaterial, bboxVector, applicationPath);
 
     auto id = _box.getProgramId();
     auto &uv = _box.getUniformVariable();

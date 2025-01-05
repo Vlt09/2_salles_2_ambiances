@@ -156,8 +156,6 @@ namespace Utils
             material.m_Tr = randomVec3(minVal, maxVal);
             material.m_Le = randomVec3(minVal, maxVal);
 
-            std::cout << "Ambiant = " << material.m_Ka << " Diffuse = " << material.m_Kd << " Spec = " << material.m_Ks << std::endl;
-
             material.m_Shininess = randomFloat(0.0f, 128.0f);
             material.m_RefractionIndex = randomFloat(1.0f, 2.5f);
             material.m_Dissolve = randomFloat(0.0f, 1.0f);

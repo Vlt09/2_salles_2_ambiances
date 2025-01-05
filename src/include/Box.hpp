@@ -51,7 +51,7 @@ public:
 
     void addGroundAndFront(const glm::vec3 &cameraPos, std::vector<glimac::BBox3f> &bboxVector);
 
-    void constructRoom(const glm::vec3 &cameraPos, float order, Geometry::Material &roomMat, std::vector<glimac::BBox3f> &bboxVector);
+    void constructRoom(const glm::vec3 &cameraPos, float order, Geometry::Material &roomMat, std::vector<glimac::BBox3f> &bboxVector, const glimac::FilePath &appPath);
 
     const UniformVariable &getUniformVariable()
     {
