@@ -42,6 +42,10 @@ void updateDeltaTime()
 
 bool checkCollision(const glm::vec3 &position)
 {
+    if (position.y > 1. || position.y < 0.){
+        return true;
+    }
+
 
     if ((position.x < -10.f && position.x > -12.f) && (position.z >= 2.f || position.z <= -2.f))
     {
@@ -68,6 +72,59 @@ bool checkCollision(const glm::vec3 &position)
     return false;
 }
 
+void processInput(GLFWwindow *window){
+    glm::vec3 nextPos;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
+        nextPos = camera.nextMoveUp(0.5);
+            if (!checkCollision(nextPos))
+            {
+                camera.moveUp(0.5);
+            }
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
+        nextPos = camera.nextMoveLeft(0.5f);
+        if (!checkCollision(nextPos))
+        {
+            camera.moveLeft(0.5);
+        }
+    } 
+
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
+        nextPos = camera.nextMoveUp(-0.5f);
+        if (!checkCollision(nextPos))
+        {
+            camera.moveUp(-0.5);
+        }
+    }    
+
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
+        nextPos = camera.nextMoveLeft(-0.5f);
+        if (!checkCollision(nextPos))
+        {
+            camera.moveLeft(-0.5);
+        }
+    }    
+
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS){
+        camera.rotateLeft(-5.);
+    }    
+
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS){
+        camera.rotateLeft(5.);
+    }    
+
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS){
+        camera.rotateUp(5.f);
+    }    
+
+    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS){
+        camera.rotateUp(-5.f);
+    }    
+
+
+}
+
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
     glm::vec3 nextPos;
@@ -75,40 +132,9 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
     {
         switch (key)
         {
-        case GLFW_KEY_W:
-            nextPos = camera.nextMoveUp(1.);
-            if (!checkCollision(nextPos))
-            {
-                camera.moveUp(1.);
-            }
-            break;
-        case GLFW_KEY_A:
-            nextPos = camera.nextMoveLeft(1.f);
-            if (!checkCollision(nextPos))
-            {
-                camera.moveLeft(1.);
-            }
-            break;
-        case GLFW_KEY_S:
-            nextPos = camera.nextMoveUp(-1.f);
-            if (!checkCollision(nextPos))
-            {
-                camera.moveUp(-1.);
-            }
-            break;
-        case GLFW_KEY_D:
-            nextPos = camera.nextMoveLeft(-1.f);
-            if (!checkCollision(nextPos))
-            {
-                camera.moveLeft(-1.);
-            }
-            break;
-        case GLFW_KEY_E:
-            camera.rotateLeft(-15.);
-            break;
-        case GLFW_KEY_Q:
-            camera.rotateLeft(15.f);
-            break;
+            case GLFW_KEY_ESCAPE:
+                glfwSetWindowShouldClose(window, true);
+                break;
         }
     }
 }
@@ -130,8 +156,8 @@ static void cursor_position_callback(GLFWwindow *window, double xpos, double ypo
         first_mouse = false;
     }
 
-    camera.rotateLeft(xpos - last_xpos);
-    camera.rotateUp(last_ypos - ypos);
+    /*camera.rotateLeft(xpos - last_xpos);
+    camera.rotateUp(last_ypos - ypos);*/
 
     last_xpos = xpos;
     last_ypos = ypos;
@@ -221,6 +247,7 @@ int main(int argc, char *argv[])
     while (!glfwWindowShouldClose(window))
     {
         renderer.setViewMatrix(camera.getViewMatrix());
+        processInput(window);
 
         glClearColor(1.f, 0.5f, 0.5f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -228,6 +255,7 @@ int main(int argc, char *argv[])
         renderer.renderSkybox(skybox);
         renderer.renderFirstRoom(fr, camera.cameraPosition(), border);
         renderer.renderSecondRoom(sr, camera.cameraPosition(), border);
+
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);

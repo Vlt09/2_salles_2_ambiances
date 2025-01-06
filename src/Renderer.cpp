@@ -19,7 +19,7 @@ void Renderer::renderFirstRoom(Room &firstRoom, const glm::vec3 &cameraPos, cons
     auto &cy = firstRoom.getCylinder();
     auto &tore = firstRoom.getTore();
 
-    if (cameraPos.x >= border.x)
+    if (cameraPos.x >= -10.f)
     {
         box.getProgram().use();
     }
@@ -27,13 +27,11 @@ void Renderer::renderFirstRoom(Room &firstRoom, const glm::vec3 &cameraPos, cons
     glUniform1i(uv.uActiveLight, 1);
     setSpotLightsUniform(firstRoom);
 
-    glBeginTransformFeedback(GL_TRIANGLES);
     glDisable(GL_BLEND);
 
     glUniform1i(uv.uTexLoc, 0);
     renderObject(box.getBounds(), uv);
 
-    glEndTransformFeedback();
     glBindTexture(GL_TEXTURE_2D, 0);
 
     for (int i = 0; i < Room::MAX_SPOT_LIGHT; i++)
@@ -99,7 +97,7 @@ void Renderer::renderSecondRoom(Room &sr, const glm::vec3 &cameraPos, const glm:
         glUniform1f(uv.uSpecularPower, src._specularPower);
 
         setLightUniforms(src);
-        // src.rotateDiscoAndLight();
+        src.rotateDiscoAndLight();
     }
 
     glUniform1i(uv.uTexLoc, 0);
@@ -124,15 +122,13 @@ void Renderer::renderSecondRoom(Room &sr, const glm::vec3 &cameraPos, const glm:
 
 void Renderer::renderSkybox(Skybox &skybox)
 {
-    // auto model = glm::scale(glm::mat4(1), glm::vec3(43.f));
 
-    // auto mv_matrix = glm::mat4(glm::mat3(_viewMatrix)) * model;
     glDepthFunc(GL_LEQUAL);
     glDepthMask(GL_FALSE);
     skybox.use(); // use shader
     glUniformMatrix4fv(skybox.getUMVPLoc(), 1, GL_FALSE, glm::value_ptr(_projectionMatrix * glm::mat4(glm::mat3(_viewMatrix))));
     glBindVertexArray(skybox.getVAO());
-    // glActiveTexture(GL_TEXTURE0);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, skybox.getCubemapTexture());
     glDrawArrays(GL_TRIANGLES, 0, 36);
     glDepthMask(GL_TRUE);
