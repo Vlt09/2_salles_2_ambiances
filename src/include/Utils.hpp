@@ -113,7 +113,7 @@ namespace Utils
     inline float linearMapping(float value, float minDomain, float maxDomain, float minCodomain, float maxCodomain)
     {
         return (value - minDomain) * (maxCodomain - minCodomain) / (maxDomain - minDomain) + minCodomain;
-    };
+    }
 
     inline float randomFloat(float min, float max)
     {
@@ -121,7 +121,7 @@ namespace Utils
         std::mt19937 gen(rd());
         std::uniform_real_distribution<float> dis(min, max);
         return dis(gen);
-    };
+    }
 
     inline void translateSpotLights(SpotLight *spotLights, size_t size, float xMin, float xMax, float yMin, float yMax, float zMin, float zMax)
     {
@@ -216,4 +216,4 @@ namespace Utils
         }
     }
 
-};
+}
